@@ -1185,7 +1185,7 @@ function exportChartToExcel(chartId){
    }).forEach(name=>{
      const commission=sumFieldSafe(grouped[name],COLUMNAS.pagoTotal);
      const target=sumFieldSafe(grouped[name],COLUMNAS.target);
-     rows.push([name,commission,target,target>0?commission/target*100:'']);
+     rows.push([name,commission,target,target>0?commission/target*100:'Sin Target']);
    });
    const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
