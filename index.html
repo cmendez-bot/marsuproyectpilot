@@ -1043,7 +1043,7 @@ function exportChartToExcel(chartId){
  if(chartId==='trend'){
    // Exportación mensual: sin desglose semanal. Respeta los años y filtros
    // organizacionales activos, e ignora mes e intervalo de semanas.
-   const metric=$('trendMetric').value || COLUMNAS.ccv;
+   const metric=($('trendMetric') && $('trendMetric').value) || COLUMNAS.ccv;
    const trendExportRows=DATA.filter(r=>matchesFilters(r,['month'],true));
    const selectedBranches=selectedFilterValues('branch');
    const selectedRegions=selectedFilterValues('region');
