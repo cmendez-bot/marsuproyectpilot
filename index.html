@@ -872,7 +872,13 @@ function update(){
    const commission=sumFieldSafe(rows,COLUMNAS.pagoTotal);
    const target=sumFieldSafe(rows,COLUMNAS.target);
    return {name,commission,target,pct:target>0?commission/target*100:null};
- }).sort((a,b)=>(b.pct??-Infinity)-(a.pct??-Infinity)).slice(0,15);
+ }).sort((a,b)=>(b.pct??-Infinity)-(a.pct??-Infinity));
+ // La gráfica muestra todas las categorías y crece según el número de barras para evitar compresión.
+ const targetChartHeight=Math.max(270,targetCategories.length*34+100);
+ const targetChartEl=$('commissionVsTargetByLevel');
+ const targetPanel=targetChartEl&&targetChartEl.closest('.panel');
+ if(targetChartEl) targetChartEl.style.setProperty('height',targetChartHeight+'px','important');
+ if(targetPanel) targetPanel.style.setProperty('height',(targetChartHeight+80)+'px','important');
  const targetLabels=targetCategories.map(item=>item.name);
  const targetPercents=targetCategories.map(item=>item.pct);
  plot('commissionVsTargetByLevel',[{
