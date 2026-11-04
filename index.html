@@ -204,6 +204,73 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
     margin-top: 5px !important;
 }
 
+
+/* PARTE 2 — Distribución simétrica de las secciones del dashboard.
+   Escrita al final de la cascada para prevalecer sobre reglas antiguas contradictorias.
+   No modifica alturas de gráficas, márgenes Plotly, títulos, controles ni JavaScript. */
+
+/* Filas de tres gráficas: columnas iguales y paneles estirados a la misma altura. */
+#analisis-regional,
+#analisis-sucursales {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+#analisis-regional > .panel,
+#analisis-sucursales > .panel {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Desempeño: una sola gráfica que ocupa todo el ancho, sin columnas vacías. */
+#analisis-desempeno {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+#analisis-desempeno > .panel {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Categorías: dos gráficas con el mismo ancho. */
+#graficas-categoria {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+#graficas-categoria > .panel {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Laptop: dos columnas para las filas de tres gráficas. */
+@media (min-width: 901px) and (max-width: 1499px) {
+  #analisis-regional,
+  #analisis-sucursales {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Pantallas compactas: una columna para evitar tarjetas estrechas y desbordamientos. */
+@media (max-width: 900px) {
+  #analisis-regional,
+  #analisis-sucursales,
+  #analisis-desempeno,
+  #graficas-categoria {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
 </style>
 </head>
 <body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="resumen" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Análisis regional</button><button class="navitem" data-target="analisis-sucursales" type="button">▤ &nbsp; Sucursales</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button><div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
