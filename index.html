@@ -886,7 +886,7 @@ function update(){
    y:targetLabels,
    type:'bar',
    orientation:'h',
-   marker:{color:targetCategories.map((item,i)=>['#087f73','#0b8f86','#129b91','#168c9b','#197f91','#216f86'][i%6]),line:{color:'#075e59',width:0}},
+   marker:{color:targetCategories.map(item=>item.pct===null?'#94a3b8':item.pct>=100?'#087f73':item.pct>=80?'#3b8f91':'#8ab7b0'),line:{color:'#075e59',width:0}},
    text:targetPercents.map(v=>v===null?'Sin Target':num(v,1)+'%'),
    textposition:'outside',
    textfont:{color:'#20344b',size:11},
