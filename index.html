@@ -882,7 +882,8 @@ function update(){
  const targetLabels=targetCategories.map(item=>item.name);
  const targetPercents=targetCategories.map(item=>item.pct);
  plot('commissionVsTargetByLevel',[{
-   x:targetPercents,
+   // Los registros sin target se dibujan en cero para conservar su categoría y etiqueta.
+   x:targetPercents.map(value=>value===null?0:value),
    y:targetLabels,
    type:'bar',
    orientation:'h',
@@ -892,7 +893,7 @@ function update(){
    textfont:{color:'#20344b',size:11},
    cliponaxis:false,
    customdata:targetCategories.map(item=>[item.commission,item.target]),
-   hovertemplate:'%{y}<br>Comisión: %{customdata[0]:$,.2f}<br>Target: %{customdata[1]:$,.2f}<br>Comisión vs Target: %{x:.2f}%<extra></extra>'
+   hovertemplate:'%{y}<br>Comisión: %{customdata[0]:$,.2f}<br>Target: %{customdata[1]:$,.2f}<br>Comisión vs Target: %{text}<extra></extra>'
  }],execLayout({
    margin:{l:115,r:72,t:12,b:38},
    xaxis:execX({ticksuffix:'%',title:{text:'Comisión / Target (%)',font:{size:10,color:'#34465b'},standoff:8},rangemode:'tozero'}),
