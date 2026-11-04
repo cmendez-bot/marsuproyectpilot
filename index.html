@@ -325,6 +325,149 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
     max-height: 260px !important;
   }
 }
+
+/* PARTE 4 — Encabezados y controles: posiciones consistentes y sin empalmes. */
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel,
+#analisis-preventistas,
+#resumen-colaboradores,
+#resumen-rutas {
+  position: relative;
+  min-width: 0;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > h2 {
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .chartExport {
+  z-index: 3;
+  min-height: 30px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .chartMetric {
+  z-index: 4;
+  box-sizing: border-box;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .viewToggle {
+  z-index: 4;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .chart {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Laptop: título en su propia línea y controles alineados en una sola franja. */
+@media (min-width: 901px) and (max-width: 1499px) {
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > h2 {
+    padding-right: 0 !important;
+    min-height: 0 !important;
+    white-space: normal !important;
+    margin-bottom: 48px !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartMetric {
+    top: 48px !important;
+    left: 10px !important;
+    right: auto !important;
+    width: 42% !important;
+    max-width: 42% !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .viewToggle {
+    top: 48px !important;
+    left: calc(42% + 18px) !important;
+    right: auto !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartExport {
+    top: 48px !important;
+    right: 10px !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:not(:has(> .chartMetric)) > .viewToggle {
+    top: 48px !important;
+    right: 122px !important;
+    left: auto !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:not(:has(> .chartMetric)) > .chartExport {
+    top: 48px !important;
+    right: 10px !important;
+  }
+}
+
+/* Móvil/tablet estrecha: selector en una fila; periodo y exportación debajo. */
+@media (max-width: 900px) {
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel {
+    padding-top: 12px !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > h2 {
+    padding-right: 0 !important;
+    min-height: 0 !important;
+    white-space: normal !important;
+    margin: 0 0 84px !important;
+    line-height: 1.35 !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartMetric {
+    top: 54px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100% - 20px) !important;
+    max-width: none !important;
+    height: 30px !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .viewToggle {
+    top: 90px !important;
+    left: 10px !important;
+    right: auto !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartExport {
+    top: 90px !important;
+    right: 10px !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:not(:has(> .chartMetric)) > .viewToggle {
+    top: 54px !important;
+    left: 10px !important;
+    right: auto !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:not(:has(> .chartMetric)) > .chartExport {
+    top: 54px !important;
+    right: 10px !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .chart {
+    margin-top: 4px !important;
+  }
+}
+
+/* Encabezados de tablas y botones de descarga: sin invadir el contenido. */
+#analisis-preventistas > h2,
+#resumen-colaboradores > h2,
+#resumen-rutas > h2 {
+  padding-right: 150px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+#analisis-preventistas > .chartExport,
+#resumen-colaboradores > .chartExport,
+#resumen-rutas > .chartExport {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin: 0;
+  z-index: 2;
+}
+@media (max-width: 600px) {
+  #analisis-preventistas > h2,
+  #resumen-colaboradores > h2,
+  #resumen-rutas > h2 {
+    padding-right: 0;
+    margin-bottom: 42px;
+  }
+  #analisis-preventistas > .chartExport,
+  #resumen-colaboradores > .chartExport,
+  #resumen-rutas > .chartExport {
+    top: 48px;
+    left: 10px;
+    right: auto;
+  }
+}
 </style>
 </head>
 <body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="resumen" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Análisis regional</button><button class="navitem" data-target="analisis-sucursales" type="button">▤ &nbsp; Sucursales</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button><div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
