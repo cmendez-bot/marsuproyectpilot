@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tablero PV | Editable</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+window.execFont={family:'Inter, Segoe UI, Arial',color:'#34465b',size:10};
+window.execHover={bgcolor:'#102b4c',bordercolor:'#102b4c',font:{family:'Inter, Segoe UI, Arial',size:11,color:'#ffffff'},align:'left',namelength:-1};
+window.execX=function(o){return Object.assign({showgrid:false,showline:false,zeroline:false,tickfont:{color:'#34465b',size:10},automargin:true},o||{});};
+window.execY=function(o){return Object.assign({showgrid:false,showline:false,zeroline:false,tickfont:{color:'#34465b',size:10},automargin:true},o||{});};
+window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',font:window.execFont,hoverlabel:window.execHover,hovermode:'closest',showlegend:false},o||{});};
+</script>
+<style>#trendTip{position:fixed;z-index:9999;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;background:#0f2747;color:#fff;border-radius:10px;padding:9px 14px 10px;box-shadow:0 8px 20px rgba(11,36,71,.28);font-family:Inter,Segoe UI,Arial,sans-serif;white-space:nowrap;}#trendTip.on{opacity:1;transform:none;}#trendTip:after{content:"";position:absolute;left:var(--ax,24px);bottom:-5px;width:10px;height:10px;background:#0f2747;transform:rotate(45deg);border-radius:2px;}#trendTip.below:after{bottom:auto;top:-5px;}#trendTip .tt-h{font-size:11px;color:#c7d9ee;letter-spacing:.02em;}#trendTip .tt-v{font-size:22px;font-weight:700;line-height:1.15;margin-top:2px;}#trendTip .tt-d{font-size:12px;font-weight:600;margin-top:2px;}#trendTip.simple .tt-d{display:none;}#trendTip.simple{border-radius:12px;padding:8px 16px 9px;}#trendTip .up{color:#3ddc97;}#trendTip .down{color:#ff8a8a;}#trendTip .flat{color:#c7d9ee;}#trendHalo{position:fixed;z-index:9998;width:20px;height:20px;border-radius:50%;background:rgba(47,125,246,.28);pointer-events:none;opacity:0;transition:opacity .12s;}#trendHalo.on{opacity:1;}</style>
+<script>
+(function(){
+ var tip,halo,guide;
+ function ensure(){
+  if(tip)return;
+  tip=document.createElement('div');tip.id='trendTip';
+  tip.innerHTML='<div class="tt-h"></div><div class="tt-v"></div><div class="tt-d"></div><div class="tt-rows"></div>';
+  halo=document.createElement('div');halo.id='trendHalo';
+  guide=document.createElement('div');guide.id='trendGuide';
+  document.body.appendChild(guide);document.body.appendChild(halo);document.body.appendChild(tip);
+  window.addEventListener('scroll',hide,true);
+ }
+ function hide(){if(tip){tip.classList.remove('on');halo.classList.remove('on');guide.classList.remove('on');}}
+ window.bindTrendTooltip=function(el,metricName){
+  if(!el||!el.on)return;
+  ensure();
+  if(el.removeAllListeners){el.removeAllListeners('plotly_hover');el.removeAllListeners('plotly_unhover');}
+  el.on('plotly_hover',function(ev){
+   var p=ev.points&&ev.points[0];if(!p)return;
+   var cd=p.customdata||[],xs=String(p.x),parts=xs.split(' \u00b7 '),head;
+   if(/^\d{4}-\d{1,2}$/.test(xs)){var wp=xs.split('-');head='SEM '+Number(wp[1])+' '+wp[0];}
+   else{head=String(parts[1]||'').slice(0,3).toUpperCase()+' '+(parts[0]||'');}
+   tip.querySelector('.tt-h').textContent=head+' \u00b7 '+metricName;
+   tip.classList.remove('simple');tip.classList.remove('multi');
+   tip.querySelector('.tt-v').textContent=cd[0]!=null?cd[0]:'';
+   var d=cd[2],dEl=tip.querySelector('.tt-d');
+   if(d==null){dEl.className='tt-d flat';dEl.textContent='Sin periodo previo';}
+   else if(d>0){dEl.className='tt-d up';dEl.textContent='\u25B2 '+cd[1]+' vs. anterior';}
+   else if(d<0){dEl.className='tt-d down';dEl.textContent='\u25BC '+cd[1]+' vs. anterior';}
+   else{dEl.className='tt-d flat';dEl.textContent='= sin cambio vs. anterior';}
+   var pos=null,b=p.bbox,r=3;
+   try{
+    var xa=p.xaxis,ya=p.yaxis,sv=el.querySelector('.main-svg')||el,sr=sv.getBoundingClientRect();
+    var px=xa._offset+xa.c2p(xa.d2c(p.x)),py=ya._offset+ya.c2p(ya.d2c(p.y));
+    if(isFinite(px)&&isFinite(py))pos={x:sr.left+px,y:sr.top+py};
+   }catch(e){}
+   if(!pos&&b)pos={x:(b.x0+b.x1)/2,y:(b.y0+b.y1)/2};
+   if(!pos&&ev.event)pos={x:ev.event.clientX,y:ev.event.clientY};
+   if(!pos)return;
+   var cx=pos.x,cy=pos.y;
+   tip.classList.add('on');
+   var w=tip.offsetWidth,h=tip.offsetHeight,left=cx-30,top=cy-r-h-10,below=false;
+   if(top<8){top=cy+r+10;below=true;}
+   left=Math.max(8,Math.min(left,window.innerWidth-w-8));
+   tip.style.left=left+'px';tip.style.top=top+'px';
+   tip.style.setProperty('--ax',Math.max(8,Math.min(w-18,cx-left-5))+'px');
+   tip.classList.toggle('below',below);
+   halo.style.left=(cx-10)+'px';halo.style.top=(cy-10)+'px';halo.classList.add('on');
+  });
+  el.on('plotly_unhover',hide);
+ };
+ window.bindSimpleTooltip=function(el,kind,fn){
+  if(!el||!el.on)return;
+  ensure();
+  if(el.removeAllListeners){el.removeAllListeners('plotly_hover');el.removeAllListeners('plotly_unhover');}
+  el.on('plotly_hover',function(ev){
+   var p=ev.points&&ev.points[0];if(!p)return;
+   var info=fn(p)||{};
+   tip.classList.add('simple');tip.classList.remove('multi');
+   tip.querySelector('.tt-h').textContent=info.head||'';
+   tip.querySelector('.tt-v').textContent=info.value||'';
+   var pos=null,r=(kind==='bar')?0:3;
+   try{
+    var xa=p.xaxis,ya=p.yaxis,sv=el.querySelector('.main-svg')||el,sr=sv.getBoundingClientRect();
+    var py=ya._offset+ya.c2p(ya.d2c(p.y));
+    var px=(kind==='bar'&&ev.event)?(ev.event.clientX-sr.left):(xa._offset+xa.c2p(xa.d2c(p.x)));
+    if(isFinite(px)&&isFinite(py))pos={x:sr.left+px,y:sr.top+py};
+   }catch(e){}
+   if(!pos&&ev.event)pos={x:ev.event.clientX,y:ev.event.clientY};
+   if(!pos)return;
+   var cx=pos.x,cy=pos.y;
+   tip.classList.add('on');
+   var w=tip.offsetWidth,h=tip.offsetHeight,left=(kind==='bar')?cx-w/2:cx-30,top=cy-r-h-10,below=false;
+   if(top<8){top=cy+r+10;below=true;}
+   left=Math.max(8,Math.min(left,window.innerWidth-w-8));
+   tip.style.left=left+'px';tip.style.top=top+'px';
+   tip.style.setProperty('--ax',Math.max(10,Math.min(w-20,cx-left-5))+'px');
+   tip.classList.toggle('below',below);
+   if(kind==='bar'){halo.classList.remove('on');}
+   else{halo.style.left=(cx-10)+'px';halo.style.top=(cy-10)+'px';halo.classList.add('on');}
+  });
+  el.on('plotly_unhover',hide);
+ };
+ // Etiqueta con el dato de todas las series (familias) en el punto del eje X donde está el cursor.
+ window.bindMultiTooltip=function(el,headFn,valFn){
+  if(!el||!el.on)return;
+  ensure();
+  if(el.removeAllListeners){el.removeAllListeners('plotly_hover');el.removeAllListeners('plotly_unhover');}
+  el.on('plotly_hover',function(ev){
+   var p=ev.points&&ev.points[0];if(!p)return;
+   var i=p.pointNumber,rows=[];
+   (el.data||[]).forEach(function(t){var y=t.y&&t.y[i];if(y==null||!isFinite(y))return;rows.push({name:t.name||'',color:(t.line&&t.line.color)||'#fff',y:y});});
+   if(!rows.length)return;
+   rows.sort(function(a,b){return b.y-a.y;});
+   tip.classList.remove('simple');tip.classList.add('multi');
+   tip.querySelector('.tt-h').textContent=headFn(p);
+   var box=tip.querySelector('.tt-rows');box.textContent='';
+   rows.forEach(function(r){
+    var row=document.createElement('div');row.className='tt-r';
+    var dot=document.createElement('i');dot.style.background=r.color;
+    var nm=document.createElement('span');nm.textContent=r.name;
+    var vl=document.createElement('b');vl.textContent=valFn(r.y);
+    row.appendChild(dot);row.appendChild(nm);row.appendChild(vl);box.appendChild(row);
+   });
+   var xa=p.xaxis,ya=p.yaxis,sv=el.querySelector('.main-svg')||el,sr=sv.getBoundingClientRect();
+   var cx=sr.left+xa._offset+xa.c2p(xa.d2c(p.x)),top0=sr.top+ya._offset,hPlot=ya._length;
+   if(!isFinite(cx))return;
+   guide.style.left=cx+'px';guide.style.top=top0+'px';guide.style.height=hPlot+'px';guide.classList.add('on');
+   halo.classList.remove('on');
+   tip.classList.add('on');
+   var w=tip.offsetWidth,h=tip.offsetHeight,left=cx+14;
+   if(left+w>window.innerWidth-8)left=cx-14-w;
+   left=Math.max(8,left);
+   var cy=ev.event?ev.event.clientY:top0+hPlot/2;
+   var top=Math.max(top0,Math.min(cy-h/2,top0+hPlot-h));
+   tip.style.left=left+'px';tip.style.top=top+'px';
+  });
+  el.on('plotly_unhover',hide);
+ };
+})();
+</script>
+<style>:root{--bg:#151515;--card:#1c1c1c;--ink:#f2eeee;--muted:#b9b3b5;--line:#353234;--navy:#eaf1f7;--blue:#2563a6;--teal:#3b82c4;--orange:#dca0aa;--purple:#1e4f82;}*{box-sizing:border-box;}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);}.app{display:grid;grid-template-columns:225px 1fr;min-height:100vh;}.side{background:var(--navy);color:#fff;padding:25px 17px;}.brand{font-size:18px;font-weight:800;}.brand span{display:block;color:#c9b8bf;font-size:10px;font-weight:500;margin-top:6px;letter-spacing:1.4px;}.nav{margin-top:35px;color:#d0c5ca;font-size:11px;letter-spacing:1.2px;}.navitem{display:block;width:100%;text-align:left;border:0;background:transparent;padding:12px;margin-top:7px;border-radius:9px;font-size:13px;color:#f5eef1;cursor:pointer;}.navitem:hover,.navitem.active{background:#dce8f3;}.sidefoot{margin-top:34px;color:#c0b3b9;font-size:11px;line-height:1.6;}main{padding:26px;min-width:0;}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:18px;}.eyebrow{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:1.5px;}.top h1{margin:7px 0;font-size:26px;letter-spacing:-.5px;}.sub{font-size:13px;color:var(--muted);}.tag{background:#e8f2ee;color:#397564;border-radius:20px;padding:9px 12px;font-size:11px;font-weight:700;white-space:nowrap;}.uploadbox{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1px dashed #cdbdc4;border-radius:13px;padding:13px 15px;margin-bottom:15px;}.uploadbox strong{font-size:13px;}.uploadbox small{display:block;color:var(--muted);font-size:11px;margin-top:4px;}.uploadbox input{max-width:240px;font-size:12px;}.filters{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:11px;background:#fff;padding:15px;border:1px solid var(--line);border-radius:14px;margin-bottom:15px;box-shadow:0 5px 18px #17243b08;}label{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;}select{width:100%;padding:9px;border:1px solid #e3d9de;border-radius:8px;background:#fff;color:var(--ink);font-size:12px;}select[multiple]{padding:5px;min-height:88px;}select[multiple] option{padding:4px;}.multiHint{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-top:4px;}.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:15px;}.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 5px 18px #17243b08;min-width:0;}.kpihead{color:var(--muted);font-size:10px;font-weight:700;}.kpi strong{display:block;font-size:23px;margin:12px 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.kpi small{font-size:10px;color:var(--muted);}.layout{display:grid;grid-template-columns:1.8fr 1fr;gap:15px;margin-bottom:15px;}#analisis-regional{grid-template-columns:1.5fr 1fr;gap:15px;}#analisis-sucursales{grid-template-columns:repeat(2,minmax(0,1fr));}#graficas-categoria{grid-template-columns:.9fr 1fr 1fr;gap:15px;}#analisis-sucursales>section{width:100%;min-width:0;}#analisis-sucursales #branchTrend{height:330px;width:100%;min-width:0;}#analisis-sucursales .js-plotly-plot,#analisis-sucursales .plot-container,#analisis-sucursales .svg-container{width:100%!important;max-width:100%;}.panel h2{font-size:14px;margin:0 0 5px;}.panel p{font-size:11px;color:var(--muted);margin:0;}.chartMetric{margin:0 0 8px;padding:7px;font-size:11px;}.chart{height:285px;}.chart.short{height:250px;}.tablewrap{overflow:auto;max-height:390px;margin-top:12px;}table{border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap;}th{position:sticky;top:0;background:#f6f2f4;text-align:left;color:#64748b;font-size:9px;text-transform:uppercase;}td,th{padding:10px;border-bottom:1px solid var(--line);}td.num{text-align:right;font-variant-numeric:tabular-nums;}.pill{padding:4px 7px;border-radius:20px;background:#e8f2ee;color:#397564;font-size:10px;}.pill.off{background:#f4eee5;color:#8b6d4d;}.drilldown{margin-top:12px;padding:12px;border:1px solid #e8dfe3;border-radius:10px;background:#faf7f8;}.drilldown h3{font-size:12px;margin:0 0 8px;}.drilldown .tablewrap{max-height:300px;margin-top:8px;}.drilldown .btn{margin-bottom:8px;}.note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px;}.chartExport{margin:0 0 8px 8px;padding:7px 10px;border:1px solid #e3d9de;border-radius:8px;background:#fff;color:#245b91;font-weight:700;cursor:pointer;font-size:11px;}.chartExport:hover{background:#f3e8ec;}.btn{padding:9px 12px;border:0;border-radius:8px;background:#f3e8ec;color:#245b91;font-weight:700;cursor:pointer;font-size:12px;}.status{font-size:11px;color:var(--muted);}footer{font-size:10px;color:#8793a7;padding:3px 2px 18px;}/* Tema ejecutivo azúl, inspirado en la referencia compartida */body{background:#151515;color:#f2eeee;}.side{background:#eaf1f7;color:#741a2b;padding:20px 12px;border-radius:0 14px 14px 0;}.brand{color:#741a2b;}.brand span{color:#8c5b65;}.nav{color:#8c2436;}.navitem{color:#1d4f7a;padding:10px;font-size:12px;border-radius:8px;}.navitem:hover,.navitem.active{background:#2563a6;color:#fff;}.sidefoot{color:#8c5b65;}main{padding:18px 22px;}.top{background:#244d73;color:#fff;padding:14px 18px;border-radius:12px;margin-bottom:10px;align-items:center;}.top h1{color:#fff;font-size:23px;margin:0;}.eyebrow{color:#bfdbf3;}.sub,.status,.note,footer{color:#b9b3b5;}.tag{background:#2a2929;color:#f0b1bb;border:1px solid #4b3036;}.uploadbox,.filters,.kpi,.panel{background:#1c1c1c;border-color:#373234;box-shadow:none;color:#f2eeee;}.uploadbox{border-style:solid;}.filters{padding:12px;border-radius:12px;gap:9px;}label,.kpihead{color:#b9b3b5;}select{background:#202020;color:#f2eeee;border-color:#4a4446;color-scheme:dark;}select[multiple] option{background:#202020;color:#f2eeee;}.kpis{gap:8px;}.kpi{border-top:3px solid #1d4f7a;border-radius:11px;padding:13px;}.kpi:nth-child(2){border-top-color:#1e4f82;}.kpi:nth-child(3){border-top-color:#2563a6;}.kpi:nth-child(4){border-top-color:#3b82c4;}.kpi:nth-child(5){border-top-color:#78a9d6;}.kpi:nth-child(6){border-top-color:#a9c8e5;}.kpi:nth-child(7){border-top-color:#bca0a5;}.kpi:nth-child(8){border-top-color:#71676a;}.kpi strong{color:#3b82c4;margin:8px 0 4px;}.panel{border-radius:12px;padding:13px;}.panel h2{color:#f2eeee;}.panel p{color:#b9b3b5;}.chartMetric{background:#202020;color:#f2eeee;border-color:#4a4446;}th{background:#e5edf5;color:#d7cdd0;}td,th{border-bottom-color:#383234;}.pill{background:#29332f;color:#a5c4b8;}.pill.off{background:#39302a;color:#d9b99b;}.drilldown{border-color:#d4e1ee;background:#202020;}.chartExport{background:#252323;border-color:#c7d7e7;color:#2563a6;}.chartExport:hover{background:#3a2429;}.btn{background:#2563a6;color:#fff;}.btn:hover{background:#1d4f7a;}#analisis-regional{grid-template-columns:1.5fr 1fr;gap:10px;}#graficas-categoria{gap:10px;}@media (max-width:1100px){.app{grid-template-columns:1fr;}.side{display:none;}main{padding:15px;}.filters{grid-template-columns:repeat(2,minmax(0,1fr));}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));}.layout,#analisis-regional{grid-template-columns:1fr;}.top h1{font-size:22px;}}/* Ajuste compacto del área principal para aprovechar mejor la pantalla */main{padding:12px 15px!important;min-width:0;}.top{padding:10px 14px!important;margin-bottom:8px!important;}.top h1{font-size:20px!important;}.uploadbox{padding:9px 12px!important;margin-bottom:10px!important;gap:9px!important;}.filters{padding:9px!important;gap:7px!important;margin-bottom:10px!important;}select{padding:7px!important;font-size:11px!important;}select[multiple]{min-height:68px!important;}.kpis{gap:6px!important;margin-bottom:10px!important;}.kpi{padding:10px!important;}.kpi strong{font-size:20px!important;margin:6px 0 3px!important;}.layout,#analisis-regional,#graficas-categoria{gap:8px!important;margin-bottom:10px!important;}.panel{padding:10px!important;}.panel h2{font-size:12px!important;}.panel p{font-size:10px!important;}.chart{height:245px!important;}.chart.short{height:215px!important;}#analisis-sucursales #branchTrend{height:285px!important;}.tablewrap{max-height:340px!important;margin-top:8px!important;}td,th{padding:7px!important;}@media (max-width:1100px){main{padding:10px!important;}.chart{height:230px!important;}}/* Ajuste final: contenido más cercano y legible sin alejar el zoom del navegador */main{padding:9px 11px!important;}.top{padding:8px 11px!important;margin-bottom:7px!important;gap:8px!important;}.top h1{font-size:22px!important;margin:3px 0!important;}.uploadbox{padding:8px 10px!important;margin-bottom:8px!important;gap:8px!important;}.uploadbox strong{font-size:12px!important;}.uploadbox small{font-size:10px!important;}.filters{padding:8px!important;gap:6px!important;margin-bottom:8px!important;}label{font-size:10px!important;margin-bottom:4px!important;}select{padding:6px 7px!important;font-size:12px!important;}select[multiple]{min-height:58px!important;}.multiHint{font-size:9px!important;}.kpis{gap:6px!important;margin-bottom:8px!important;}.kpi{padding:9px 10px!important;}.kpihead{font-size:10px!important;line-height:1.3!important;}.kpi strong{font-size:22px!important;margin:5px 0 2px!important;}.layout,#analisis-regional,#graficas-categoria{gap:7px!important;margin-bottom:8px!important;}.panel{padding:9px 10px!important;}.panel h2{font-size:14px!important;margin-bottom:4px!important;}.panel p,.note{font-size:11px!important;}.chartMetric{font-size:11px!important;padding:5px!important;margin-bottom:5px!important;}.chart.short{height:225px!important;}#analisis-sucursales #branchTrend{height:220px!important;}.tablewrap{max-height:290px!important;margin-top:7px!important;}table{font-size:11px!important;}td,th{padding:6px 7px!important;}.chartExport{font-size:11px!important;padding:5px 8px!important;}.btn{font-size:11px!important;padding:7px 9px!important;}@media (max-width:1100px){main{padding:8px!important;}.chart{height:235px!important;}.chart.short{height:215px!important;}}#analisis-sucursales{grid-template-columns:repeat(2,minmax(0,1fr))!important;}#analisis-sucursales .chart{height:195px!important;}@media (max-width:900px){#analisis-sucursales{grid-template-columns:1fr!important;}}/* Barra lateral fija, paleta guinda y control para ocultar/mostrar */.app{grid-template-columns:225px minmax(0,1fr);transition:grid-template-columns .22s ease;}.side{position:sticky;top:0;align-self:start;height:100vh;min-height:100vh;overflow-y:auto;z-index:20;background:linear-gradient(180deg,#dce7f1 0%,#241116 100%)!important;color:#edf3f8!important;border-right:1px solid #5b2633;border-radius:0 14px 14px 0;padding:58px 13px 20px!important;box-shadow:8px 0 24px #00000020;transition:transform .22s ease,background .22s ease;}.brand{color:#f5f9fc!important;}.brand span{color:#d9a0aa!important;}.nav{color:#3b82c4!important;}.navitem{color:#e7eff7!important;border:1px solid transparent!important;transition:background .15s ease,border-color .15s ease;}.navitem:hover,.navitem.active{background:#1d4f7a!important;color:#fff!important;border-color:#b94a5d!important;}.sidefoot{color:#cfa1a9!important;border-top:1px solid #5b2633;padding-top:12px;}.app.sidebar-hidden{grid-template-columns:0 minmax(0,1fr);}.app.sidebar-hidden .side{transform:translateX(-100%);padding-left:0!important;padding-right:0!important;overflow:hidden;border:0;width:0;}.side-toggle{position:fixed;z-index:50;top:12px;left:177px;width:36px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid #75404b;border-radius:9px;background:#dce7f1;color:#f5dce1;font-size:18px;cursor:pointer;box-shadow:0 3px 12px #0005;transition:left .22s ease,background .15s ease;}.side-toggle:hover{background:#1d4f7a;}.app.sidebar-hidden .side-toggle{left:12px;}.app:not(.sidebar-hidden) .side-toggle{left:177px;}html{scroll-behavior:smooth;scroll-padding-top:12px;}@media (max-width:1100px){.app{display:block;}.side{position:fixed;left:0;top:0;width:225px;height:100vh;min-height:100vh;transform:translateX(-105%);border-radius:0 14px 14px 0;}.app:not(.sidebar-hidden) .side{transform:translateX(0);}.app.sidebar-hidden .side{transform:translateX(-105%);width:225px;}.side-toggle{left:12px;}.app:not(.sidebar-hidden) .side-toggle{left:177px;}main{padding-top:55px!important;}}/* Distribución ejecutiva: 10 indicadores en 2 filas de 5 en pantallas amplias */@media (min-width:1101px){.kpis{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;align-items:stretch!important;}.kpi{padding:8px 9px!important;min-width:0!important;}.kpihead{font-size:9px!important;line-height:1.25!important;letter-spacing:.1px!important;}.kpi strong{font-size:18px!important;margin:7px 0 2px!important;line-height:1.15!important;}.kpi small{font-size:9px!important;line-height:1.25!important;display:block;}}/* Mantener la leyenda institucional pegada al fondo de la barra lateral */.side{display:flex!important;flex-direction:column!important;min-height:100vh!important;height:100vh!important;}.sidefoot{margin-top:auto!important;padding-top:14px!important;padding-bottom:8px!important;flex-shrink:0!important;}/* Etiqueta compacta y redondeada para Tendencia mensual */#trend .hoverlayer .hovertext rect{rx:9px;ry:9px;}#trend .hoverlayer .hovertext{filter:drop-shadow(0 3px 7px rgba(16,43,76,.16));}/* Etiqueta compacta y redondeada para Tendencia mensual */#trend .hoverlayer .hovertext{filter:drop-shadow(0 3px 7px rgba(16,43,76,.18));}#trend .hoverlayer .hovertext text{font-family:Inter,Segoe UI,Arial,sans-serif;}</style>
+<style>/* Limpieza visual: ocultar etiquetas y textos auxiliares solo en Tendencia y Desempeño */label[for="trendMetric"], #trendDescription, label[for="branchesMetric"], #branchesDesc, label[for="branchTrendMetric"], #branchTrendDesc, label[for="branchTrendMetric2"], #branchTrendDesc2, label[for="branchTrendMetric3"], #branchTrendDesc3, #commissionTargetDesc, #graficas-categoria section:has(> #volumeMix) > p, label[for="mixMetric"], #mixDesc, label[for="scatterMetric"], section:has(> #scatter) > p{display:none!important;}</style>
+<style id="ajuste-lateral-azul-fondo-claro">:root{--bg:#fbfcfe;--card:#ffffff;--ink:#263445;--muted:#687789;--line:#e3e9f0;--blue:#2563a6;--teal:#3b82c4;}html,body{background:#fbfcfe!important;color:#263445!important;}main{background:#fbfcfe!important;}.side{background:#245b91!important;color:#fff!important;border-right:1px solid #1d4b78!important;box-shadow:5px 0 18px rgba(31,65,100,.10)!important;}.brand,.brand span,.nav,.sidefoot{color:#fff!important;}.nav{opacity:.78;}.navitem{color:#eaf3fb!important;border:1px solid transparent!important;}.navitem:hover,.navitem.active{background:#397bb5!important;color:#fff!important;border-color:#78a9d6!important;}.side-toggle{background:#245b91!important;color:#fff!important;border-color:#1d4b78!important;}.side-toggle:hover{background:#397bb5!important;}.top{background:#fff!important;color:#263445!important;border:1px solid #e3e9f0!important;}.top h1{color:#263445!important;}.uploadbox,.filters,.kpi,.panel{background:#fff!important;border-color:#e3e9f0!important;}</style>
+<style id="ajuste-azul-metalico">/* Acabado azul metálico para la barra lateral y sus controles */.side{background:linear-gradient(135deg,#173f68 0%,#285b86 24%,#3d7199 48%,#28577f 72%,#153b62 100%)!important;color:#fff!important;border-right:1px solid #7898b4!important;box-shadow:inset -1px 0 0 rgba(255,255,255,.16),8px 0 22px rgba(25,55,82,.16)!important;}.brand,.brand span,.nav,.sidefoot{color:#fff!important;}.brand span{opacity:.9;}.nav{opacity:.82;}.navitem{color:#f4f8fc!important;border:1px solid rgba(255,255,255,.10)!important;}.navitem:hover,.navitem.active{background:linear-gradient(110deg,#5c89ae 0%,#3d7199 48%,#2d5d86 100%)!important;color:#fff!important;border-color:rgba(225,239,250,.55)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.20),0 3px 9px rgba(9,32,54,.18)!important;}.sidefoot{border-top:1px solid rgba(224,239,250,.28)!important;}.side-toggle{background:linear-gradient(135deg,#3d7199,#173f68)!important;color:#fff!important;border-color:#8ba9c1!important;box-shadow:0 3px 12px rgba(17,48,75,.22)!important;}.side-toggle:hover{background:linear-gradient(135deg,#5c89ae,#28577f)!important;}</style>
+</head>
+<body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="resumen" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Análisis regional</button><button class="navitem" data-target="analisis-sucursales" type="button">▤ &nbsp; Sucursales</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button><div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
+<button class="side-toggle" id="sideToggle" type="button" aria-label="Ocultar barra lateral" title="Ocultar o mostrar menú" aria-expanded="true">‹</button>
+<main id="resumen"><div class="top"><div><h1>Desempeño y pago variable</h1></div></div>
+<div class="uploadbox"><div><strong>Información conectada a Google Sheets</strong><small>Fuente: BD Preventas · Último corte semanal cerrado.</small></div><button class="btn" id="refreshNow" type="button">Actualizar ahora</button><span class="status" id="status">Conectando con Google Sheets…</span></div>
+<div class="filters">
+<div><label>AÑO</label><select id="year"></select></div><div><label>MES</label><select id="month"></select></div><div><label>PERIODO DESDE</label><select id="weekStart"></select></div><div><label>PERIODO HASTA</label><select id="weekEnd"></select></div><div><label>REGIÓN</label><select id="region"></select></div><div><label>SUCURSAL · puedes elegir varias</label><select id="branch" multiple size="4" aria-label="Seleccionar varias sucursales"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varias; sin selección = todas.</small></div><div><label>PREVENTISTA · puedes elegir varios</label><select id="preventista" multiple size="4" aria-label="Seleccionar varios preventistas"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varios; sin selección = todos.</small></div>
+<div><label>COMISIÓN</label><select id="people"><option value="all">Todos</option><option value="commission">Con comisión</option><option value="nocommission">Sin comisión</option></select></div><div><label>TIPO DE PAGO</label><select id="paidColleague"><option value="all">Todos</option><option value="guarantee">Con garantía</option><option value="noguarantee">Sin garantía</option></select></div><div style="display:flex;align-items:end"><button class="btn" id="reset" style="width:100%">Restablecer filtros</button></div>
+</div>
+<div class="kpis"><div class="kpi"><div class="kpihead">● CCV REAL PROMEDIO</div><strong id="kccv">—</strong></div><div class="kpi"><div class="kpihead">● DS PROMEDIO PONDERADO</div><strong id="kds">—</strong></div><div class="kpi"><div class="kpihead">● COMISIÓN TOTAL PROMEDIO</div><strong id="kpay">—</strong></div><div class="kpi"><div class="kpihead">● COBRO VOLUMEN PROMEDIO</div><strong id="kvolCommission">—</strong></div><div class="kpi"><div class="kpihead">● COMISIÓN PROMEDIO DE CCV</div><strong id="kccvCommission">—</strong></div><div class="kpi"><div class="kpihead">● PERSONAS CON COMISIÓN</div><strong id="kcommissionPeople">—</strong></div><div class="kpi"><div class="kpihead">● CUMPLIMIENTO VOLUMEN</div><strong id="kvol">—</strong></div><div class="kpi"><div class="kpihead">● COMISIÓN VS TARGET</div><strong id="kpeople">—</strong></div><div class="kpi"><div class="kpihead">● SEMANAS EVALUADAS</div><strong id="kweeksEvaluated">—</strong></div><div class="kpi"><div class="kpihead">● SEMANAS CON COMISIÓN</div><strong id="kweeksWithCommission">—</strong></div></div>
+<div class="layout" id="analisis-regional"><section class="panel"><h2 id="branchTrendTitle">Cumplimiento volumen</h2><p id="branchTrendDesc">Compara la evolución semanal de las regiones.</p><button class="chartExport" data-export="branchTrend" type="button">Exportar a Excel</button><div id="branchTrend" class="chart"></div><div id="trendDetail" class="drilldown" hidden></div></section><section class="panel"><h2 id="branchTrendTitle2">CCV</h2><label for="branchTrendMetric2">Métrica de este gráfico</label><select id="branchTrendMetric2" class="chartMetric"></select><p id="branchTrendDesc2">Compara la evolución semanal de las regiones.</p><button class="chartExport" data-export="branchTrend2" type="button">Exportar a Excel</button><div id="branchTrend2" class="chart"></div><div id="trendDetail2" class="drilldown" hidden></div></section><section class="panel familyTrendPanel"><h2>Tendencia por familia</h2><button class="chartExport" data-export="familyTrend" type="button">Exportar a Excel</button><div id="familyTrend" class="chart"></div></section></div><div class="layout" id="analisis-sucursales"><section class="panel"><h2>Comisión vs Target</h2><p id="commissionTargetDesc">Comisión total acumulada dividida entre Target acumulado por semana.</p><button class="chartExport" data-export="commissionTarget" type="button">Exportar a Excel</button><div id="commissionTarget" class="chart"></div><div id="commissionTargetDetail" class="drilldown" hidden></div></section><section class="panel familyTrendPanel"><h2>Cobro por familia</h2><button class="chartExport" data-export="familyTrendCopy" type="button">Exportar a Excel</button><div id="familyTrendCopy" class="chart"></div></section><section class="panel"><h2 id="branchTrendTitle3">Comisión total</h2><label for="branchTrendMetric3">Métrica de este gráfico</label><select id="branchTrendMetric3" class="chartMetric"></select><p id="branchTrendDesc3">Compara la evolución semanal de las regiones.</p><button class="chartExport" data-export="branchTrend3" type="button">Exportar a Excel</button><div id="branchTrend3" class="chart"></div><div id="trendDetail3" class="drilldown" hidden></div></section></div><div class="layout" id="analisis-desempeno"><section class="panel"><h2 id="branchesTitle">Desempeño</h2><label for="branchesMetric">Métrica de este gráfico</label><select id="branchesMetric" class="chartMetric"></select><p id="branchesDesc">Haz clic en una región o sucursal para abrir el detalle por preventista.</p><button class="chartExport" data-export="branches" type="button">Exportar a Excel</button><div id="branches" class="chart"></div><div id="branchesDetail" class="drilldown" hidden></div></section></div> <div class="layout" id="graficas-categoria"><section class="panel"><h2>Volumen real por categoría</h2><p>Suma del volumen real de VA, pollo, otros y resto dentro de los filtros seleccionados.</p><button class="chartExport" data-export="volumeMix" type="button">Exportar a Excel</button><div id="volumeMix" class="chart short"></div><div id="volumeDetail" class="drilldown" hidden></div></section><section class="panel"><h2 id="mixTitle">Comisiones promedio</h2><label for="mixMetric">Qué comisión comparar</label><select id="mixMetric" class="chartMetric"><option value="both">Comisión CCV y volumen</option><option value="$ CCV">Solo comisión CCV</option><option value="Cobro Volumen">Solo comisión volumen</option><option value="Total pago variable">Pago variable total</option></select><p id="mixDesc">Haz clic en una barra para ver el detalle por preventista.</p><button class="chartExport" data-export="mix" type="button">Exportar a Excel</button><div id="mix" class="chart short"></div><div id="mixDetail" class="drilldown" hidden></div></section></div>
+<section class="panel" id="analisis-preventistas"><h2>Detalle de preventistas</h2><button class="chartExport" id="exportPreventistas" type="button">Descargar Excel</button><div class="tablewrap"><table><thead><tr><th>Preventista</th><th>Región</th><th>Sucursal</th><th>Mes</th><th>Semana</th><th>CCV Real</th><th>DS Promedio</th><th>Objetivo volumen</th><th>Volumen real</th><th>Cumpl. volumen</th><th>Comisión CCV</th><th>Cobro volumen</th><th>Pago variable</th><th>% Comisión vs Target</th></tr></thead><tbody id="tbody"></tbody></table></div></section>
+<section class="panel" id="resumen-colaboradores"><h2>Resumen por indicador</h2><button class="chartExport" id="exportResumenColaboradores" type="button">Descargar Excel</button><div class="tablewrap" style="max-height:520px"><table><thead><tr><th>Región</th><th>Sucursal</th><th>Colaborador</th><th>Semanas en BD</th><th>Prom. CCV Real</th><th>DS promedio ponderado</th><th>% cumplimiento volumen</th><th>Comisión CCV promedio</th><th>Semanas con cobro CCV</th><th>Comisión volumen promedio</th><th>Semanas con cobro volumen</th><th>Comisión total promedio</th><th>% Comisión vs Target</th><th>Semanas con cobro total</th></tr></thead><tbody id="collaboratorSummary"></tbody></table></div></section>
+<section class="panel" id="resumen-rutas"><h2>Resumen por ruta</h2><button class="chartExport" id="exportResumenRutas" type="button">Descargar Excel</button><div class="tablewrap" style="max-height:520px"><table><thead><tr><th>Región</th><th>Sucursal</th><th>Ruta</th><th>Semanas en BD</th><th>Prom. CCV Real</th><th>DS promedio ponderado</th><th>% cumplimiento volumen</th><th>Comisión CCV promedio</th><th>Semanas con cobro CCV</th><th>Comisión volumen promedio</th><th>Semanas con cobro volumen</th><th>Comisión total promedio</th><th>% Comisión vs Target</th><th>Semanas con cobro total</th></tr></thead><tbody id="routeSummary"></tbody></table></div></section>
+<footer>Tablero PV · HTML, CSS y JavaScript · Puedes editar el diseño y los indicadores en Visual Studio Code.</footer></main></div>
+<script>
+// 1) MAPEO DE COLUMNAS: si cambian los encabezados de tu Excel, actualiza los nombres aquí.
+const COLUMNAS = {
+  anio: 'Año',
+  mes: 'Mes',
+  semana: 'Semana Comercial',
+  region: 'Región',
+  sucursal: 'Suc',
+  ruta: 'Ruta',
+  preventista: 'Nombre de preventista',
+  lineamientos: '¿Cumple lineamientos?',
+  ccv: 'CCV Real',
+  ds: 'DS Promedio $ Real',
+  comisionCCV: '$ CCV',
+  cobroVolumen: 'Cobro Volumen',
+  cobroVA: 'Cobro VA',
+  cobroPollo: 'Cobro Pollo',
+  cobroOtros: 'Cobro Otros',
+  cobroResto: 'Cobro Resto',
+  objetivoVolumen: 'Objetivo volumen total',
+  realVolumen: 'Real volumen total',
+  cumplimiento: 'Cumplimiento volumen total',
+  va: 'VA Real Sem',
+  pollo: 'Pollo Est Real Sem',
+  otros: 'Otros Real Sem',
+  resto: 'Resto Real Sem',
+  pagoTotal: 'Total pago variable',
+  target: 'Target',
+  antiguedad: 'Antigüedad (Semanas)',
+  colaboradorPago: 'Tipo de Pago'
+};
+let DATA = [];
+let scatterExportRows = [];
+const $ = id => document.getElementById(id);
+const money = v => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(Number(v)||0);
+const num = (v,d=1) => Number.isFinite(Number(v)) ? Number(v).toLocaleString('es-MX',{maximumFractionDigits:d,minimumFractionDigits:d}) : '—';
+const avg = (arr,key) => {const a=arr.map(r=>Number(r[key])).filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0};
+// DS ponderado por CCV: suma(CCV × DS) / suma(CCV).
+function dsPonderado(arr){
+ const totalCCV=arr.reduce((sum,r)=>sum+(Number(r[COLUMNAS.ccv])||0),0);
+ if(!totalCCV) return 0;
+ const sumaPonderada=arr.reduce((sum,r)=>sum+((Number(r[COLUMNAS.ccv])||0)*(Number(r[COLUMNAS.ds])||0)),0);
+ return sumaPonderada/totalCCV;
+}
+function avgMetric(arr,key){return key===COLUMNAS.ds?dsPonderado(arr):(key===COLUMNAS.cumplimiento?cumplimientoVolumen(arr):avg(arr,key))}
+const uniq = a => [...new Set(a.filter(v=>v!==null&&v!==undefined&&v!==''))];
+const sortVal=(a,b)=>String(a).localeCompare(String(b),'es',{numeric:true});
+const MULTI_FILTERS = new Set(['branch','preventista']);
+function selectedFilterValues(id){
+ const el=$(id);
+ if(MULTI_FILTERS.has(id)) return [...el.selectedOptions].map(o=>o.value);
+ return el.value && el.value!=='all' ? [el.value] : [];
+}
+function fillSelect(id, values, allLabel='Todos'){
+ const el=$(id), old=MULTI_FILTERS.has(id)?selectedFilterValues(id):[el.value];el.innerHTML='';
+ if(!MULTI_FILTERS.has(id)){const opt=document.createElement('option');opt.value='all';opt.textContent=allLabel;el.appendChild(opt);}
+ values.forEach(v=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(v);if(MULTI_FILTERS.has(id)&&old.includes(String(v)))o.selected=true;el.appendChild(o)});
+ if(!MULTI_FILTERS.has(id)&&[...el.options].some(o=>o.value===old[0]))el.value=old[0];
+}
+const FILTERS = [
+ ['year', COLUMNAS.anio], ['month', COLUMNAS.mes], ['region', COLUMNAS.region],
+ ['branch', COLUMNAS.sucursal], ['preventista', COLUMNAS.preventista]
+];
+let HAS_GUARANTEE_COLUMN = false;
+let CHART_METRICS_READY = false;
+function periodValue(row){
+ const year=String(row[COLUMNAS.anio]??'').trim();
+ const rawWeek=String(row[COLUMNAS.semana]??'').trim();
+ if(!year || !rawWeek) return '';
+ const weekNum=Number(rawWeek);
+ const week=Number.isFinite(weekNum) ? String(Math.trunc(weekNum)).padStart(2,'0') : rawWeek.padStart(2,'0');
+ return `${year}-${week}`;
+}
+const MONTH_ORDER = ['ENE','ENERO','FEB','FEBRERO','MAR','MARZO','ABR','ABRIL','MAY','MAYO','JUN','JUNIO','JUL','JULIO','AGO','AGOSTO','SEP','SEPTIEMBRE','OCT','OCTUBRE','NOV','NOVIEMBRE','DIC','DICIEMBRE'];
+function monthSort(a,b){
+ const ia=MONTH_ORDER.indexOf(String(a).toUpperCase()), ib=MONTH_ORDER.indexOf(String(b).toUpperCase());
+ if(ia>=0 && ib>=0) return ia-ib;
+ if(ia>=0) return -1; if(ib>=0) return 1; return sortVal(a,b);
+}
+function weekValues(rows){return uniq(rows.map(periodValue).filter(Boolean)).sort(sortVal)}
+function matchesFilters(row, exceptId=null, ignorePeriod=false){
+ for(const [id,col] of FILTERS){
+   if(id===exceptId || (Array.isArray(exceptId) && exceptId.includes(id))) continue;
+   const selected=selectedFilterValues(id);
+   if(selected.length && !selected.includes(String(row[col]??''))) return false;
+ }
+ if(!ignorePeriod){
+   const period=periodValue(row);
+   const start=$('weekStart').value, end=$('weekEnd').value;
+   if(exceptId!=='weekStart' && start!=='all' && sortVal(period,start)<0) return false;
+   if(exceptId!=='weekEnd' && end!=='all' && sortVal(period,end)>0) return false;
+ }
+ const pay=Number(row[COLUMNAS.pagoTotal])||0, p=$('people').value;
+ if(p==='commission' && pay<=0) return false;
+ if(p==='nocommission' && pay>0) return false;
+ if(HAS_GUARANTEE_COLUMN){
+   const guarantee=String(row[COLUMNAS.colaboradorPago]??'').trim().toLowerCase();
+   const paid=$('paidColleague').value;
+   if(paid!=='all' && String(row[COLUMNAS.colaboradorPago]??'')!==paid) return false;
+ }
+ return true;
+}
+function setupFilters(){
+ // Inicializa los filtros con todos los valores disponibles.
+ for(const [id,col] of FILTERS){
+   const vals=uniq(DATA.map(r=>r[col])).sort(id==='month'?monthSort:sortVal);
+   fillSelect(id,vals);
+ }
+ const paymentTypes=uniq(DATA.map(r=>r[COLUMNAS.colaboradorPago])).sort(sortVal);
+ fillSelect('paidColleague',paymentTypes,'Todos');
+ const weeks=weekValues(DATA);
+ fillSelect('weekStart',weeks,'Desde el inicio');
+ fillSelect('weekEnd',weeks,'Hasta el final');
+ refreshDependentFilters();
+}
+function refreshDependentFilters(){
+ // Cada lista se calcula con base en los demás filtros activos.
+ for(const [id,col] of FILTERS){
+   const current=MULTI_FILTERS.has(id)?selectedFilterValues(id):[$(id).value];
+   const rows=DATA.filter(r=>matchesFilters(r,id));
+   const vals=uniq(rows.map(r=>r[col])).sort(id==='month'?monthSort:sortVal);
+   fillSelect(id,vals);
+   if(MULTI_FILTERS.has(id)){
+     [...$(id).options].forEach(o=>{o.selected=current.includes(o.value)&&vals.some(v=>String(v)===o.value)});
+   } else if(current[0]!=='all' && vals.some(v=>String(v)===current[0])) $(id).value=current[0];
+   else if(current[0]!=='all') $(id).value='all';
+ }
+ const weeks=weekValues(DATA.filter(r=>matchesFilters(r,'weekStart')));
+ const start=$('weekStart').value, end=$('weekEnd').value;
+ fillSelect('weekStart',weeks,'Desde el inicio');
+ if(weeks.some(v=>String(v)===start)) $('weekStart').value=start;
+ fillSelect('weekEnd',weeks,'Hasta el final');
+ if(weeks.some(v=>String(v)===end)) $('weekEnd').value=end;
+ // Si el usuario elige los extremos al revés, se intercambian para mantener un rango válido.
+ if($('weekStart').value!=='all' && $('weekEnd').value!=='all' && sortVal($('weekStart').value,$('weekEnd').value)>0){
+   const tmp=$('weekStart').value; $('weekStart').value=$('weekEnd').value; $('weekEnd').value=tmp;
+ }
+}
+function filtered(){return DATA.filter(r=>matchesFilters(r));}
+function group(arr,key){return arr.reduce((o,r)=>{const k=r[key]===null||r[key]===undefined?'Sin dato':String(r[key]);(o[k]??=[]).push(r);return o},{})}
+function plot(id,data,layout={}){
+ if(!window.Plotly)return;
+ const base={
+   margin:{l:62,r:28,t:24,b:72},
+   paper_bgcolor:'#1c1c1c',plot_bgcolor:'#1c1c1c',
+   colorway:['#1d4f7a','#2563a6','#3b82c4','#2563a6','#3b82c4','#78a9d6','#c57b88','#f0b1bb'],
+   hovermode:'x unified',
+   spikedistance:-1,
+   hoverlabel:{bgcolor:'#242022',bordercolor:'#c7d7e7',font:{family:'Inter, Segoe UI, Arial',size:11,color:'#f2eeee'},align:'left',namelength:-1},
+   font:{family:'Inter, Segoe UI, Arial',size:10,color:'#c9c1c4'},
+   xaxis:{gridcolor:'#383234',zerolinecolor:'#cbd8e5',linecolor:'#cbd8e5',automargin:true,title:{standoff:18}},
+   yaxis:{gridcolor:'#383234',zerolinecolor:'#cbd8e5',linecolor:'#cbd8e5',automargin:true,title:{standoff:18}},
+   showlegend:false
+ };
+ const merged={...base,...layout};
+ merged.xaxis={...base.xaxis,...(layout.xaxis||{})};
+ merged.yaxis={...base.yaxis,...(layout.yaxis||{})};
+ merged.margin={...base.margin,...(layout.margin||{})};
+ // En gráficas con leyenda, ocultar el título del eje X para evitar empalmes visuales,
+ // excepto en Tendencia por familia, donde se reserva espacio para ambos elementos.
+ if(merged.showlegend && id!=='familyTrend'){ merged.xaxis.title={text:''}; }
+ // Garantiza espacio real para títulos, etiquetas y leyendas aun cuando cada gráfica defina márgenes propios.
+ merged.margin.l=Math.max(merged.margin.l||0, merged.yaxis.title?66:54);
+ merged.margin.r=Math.max(merged.margin.r||0, 24);
+ merged.margin.t=Math.max(merged.margin.t||0, 24);
+ merged.margin.b=Math.max(merged.margin.b||0, merged.xaxis.title?68:52);
+ if(merged.showlegend && merged.legend && merged.legend.orientation==='h' && Number(merged.legend.y)<0){
+   if(id==='familyTrend'){
+     // Separa la leyenda del título del eje X y reserva espacio para que no se encime.
+     merged.margin.b=Math.max(merged.margin.b,115);
+     merged.legend={...merged.legend,y:-0.45,yanchor:'top',x:0.5,xanchor:'center',tracegroupgap:12};
+   }else{
+     merged.margin.b=Math.max(merged.margin.b,100);
+     merged.legend={...merged.legend,y:-0.30,yanchor:'top',x:0.5,xanchor:'center',tracegroupgap:8};
+   }
+ }
+ merged.xaxis.automargin=true; merged.yaxis.automargin=true;
+ if(typeof merged.xaxis.title==='string') merged.xaxis.title={text:merged.xaxis.title,standoff:18};
+ else if(merged.xaxis.title) merged.xaxis.title={standoff:18,...merged.xaxis.title};
+ if(typeof merged.yaxis.title==='string') merged.yaxis.title={text:merged.yaxis.title,standoff:18};
+ else if(merged.yaxis.title) merged.yaxis.title={standoff:18,...merged.yaxis.title};
+ Plotly.react(id,data,merged,{responsive:true,displayModeBar:false});
+}
+function esc(s){return String(s??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const METRICS = [
+  {value:COLUMNAS.ccv,label:'CCV Real'},
+  {value:COLUMNAS.ds,label:'DS Promedio ponderado'},
+  {value:COLUMNAS.pagoTotal,label:'Comisión total (pago variable)'},
+  {value:COLUMNAS.cumplimiento,label:'Cumplimiento volumen'},
+  {value:COLUMNAS.cobroVolumen,label:'Cobro volumen promedio'},
+  {value:COLUMNAS.comisionCCV,label:'Comisión CCV'}
+];
+function setupChartMetricSelectors(){
+  ['branchesMetric','branchTrendMetric2','branchTrendMetric3'].forEach(id=>{
+    const el=$(id), current=el.value || COLUMNAS.ccv;
+    el.innerHTML='';
+    // Algunas gráficas solo ofrecen ciertas métricas: 1ª (cumplimiento), 2ª (CCV) y 3ª (comisiones).
+    const subsets={branchTrendMetric2:[COLUMNAS.ccv,COLUMNAS.ds],branchTrendMetric3:[COLUMNAS.comisionCCV,COLUMNAS.pagoTotal,COLUMNAS.cobroVolumen]};
+    const list=subsets[id]?subsets[id].map(v=>METRICS.find(m=>m.value===v)).filter(Boolean):METRICS;
+    list.forEach(m=>{const o=document.createElement('option');o.value=m.value;o.textContent=m.label;el.appendChild(o)});
+    el.value=list.some(m=>m.value===current)?current:list[0].value;
+    el.addEventListener('change',update);
+  });
+  $('mixMetric').addEventListener('change',update);
+  if(!$('mixMetric').value) $('mixMetric').value='both';
+}
+function metricLabel(key){const m=METRICS.find(x=>x.value===key);return m?m.label:key}
+function formatMetric(key,v){
+ const value=Number(v)||0;
+ if(key===COLUMNAS.cumplimiento)return num(value*100,1)+'%';
+ if(key===COLUMNAS.ccv)return num(value,0);
+ if([COLUMNAS.ds,COLUMNAS.pagoTotal,COLUMNAS.comisionCCV,COLUMNAS.cobroVolumen].includes(key))return money(value);
+ return num(value,1);
+}
+function activeBreakdownField(){
+  if($('branch').value!=='all') return {field:COLUMNAS.preventista,label:'preventista'};
+  if($('region').value!=='all') return {field:COLUMNAS.sucursal,label:'sucursal'};
+  return {field:COLUMNAS.region,label:'región'};
+}
+function renderDrilldown(containerId,title,headers,rows){
+ const box=$(containerId);
+ if(!box)return;
+ box.hidden=false;
+ box.innerHTML=`<button class="btn" type="button" data-close="${containerId}">Cerrar detalle ×</button><h3>${esc(title)}</h3><div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.join(''):`<tr><td colspan="${headers.length}">No hay información para mostrar con los filtros actuales.</td></tr>`}</tbody></table></div>`;
+ box.querySelector('[data-close]').addEventListener('click',()=>{box.hidden=true;box.innerHTML='';});
+}
+function bindChartClick(id,handler){
+ const el=$(id);
+ if(!el || !el.on)return;
+ if(el.removeAllListeners)el.removeAllListeners('plotly_click');
+ el.on('plotly_click',handler);
+}
+function drillCollaboratorsForGroup(groupName,field,containerId,title){
+ const d=filtered().filter(r=>String(r[field]??'Sin dato')===String(groupName));
+ const groups=group(d,COLUMNAS.preventista);
+ const rows=Object.keys(groups).sort(sortVal).map(name=>{
+   const a=groups[name],real=sumFieldSafe(a,COLUMNAS.realVolumen),goal=sumFieldSafe(a,COLUMNAS.objetivoVolumen);
+   const pct=goal?real/goal*100:0;
+   return `<tr><td>${esc(name)}</td><td class="num">${a.length}</td><td class="num">${num(avg(a,COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(a))}</td><td class="num">${num(pct)}%</td><td class="num">${money(avg(a,COLUMNAS.comisionCCV))}</td><td class="num">${money(avg(a,COLUMNAS.cobroVolumen))}</td><td class="num">${money(avg(a,COLUMNAS.pagoTotal))}</td></tr>`;
+ });
+ renderDrilldown(containerId,title,['Preventista','Registros','CCV Real prom.','DS ponderado','Cumpl. volumen','Comisión CCV prom.','Cobro volumen prom.','Comisión total prom.'],rows);
+}
+function sumFieldSafe(arr,key){return arr.reduce((s,r)=>s+(Number(r[key])||0),0)}
+function cumplimientoVolumen(arr){const real=sumFieldSafe(arr,COLUMNAS.realVolumen);const objetivo=sumFieldSafe(arr,COLUMNAS.objetivoVolumen);return objetivo>0?real/objetivo:0}
+const VIEW_MODE={branchTrend:'week',branchTrend2:'week',branchTrend3:'week',familyTrend:'week',familyTrendCopy:'week',commissionTarget:'week'};
+const TREND_PANELS=[{id:'branchTrend',metric:'branchTrendMetric',fixedMetric:COLUMNAS.cumplimiento,title:'branchTrendTitle',desc:'branchTrendDesc',detail:'trendDetail',fixedTitle:'Cumplimiento volumen'},{id:'branchTrend2',metric:'branchTrendMetric2',title:'branchTrendTitle2',desc:'branchTrendDesc2',detail:'trendDetail2',fixedTitle:'CCV'},{id:'branchTrend3',metric:'branchTrendMetric3',title:'branchTrendTitle3',desc:'branchTrendDesc3',detail:'trendDetail3',fixedTitle:'Comisión total'}];
+function pickTicks(arr,width,px,minT,maxT){const n=arr.length;if(!n)return [];const maxTicks=Math.max(minT,Math.min(maxT,Math.floor(width/px)));const step=Math.max(1,Math.ceil(n/maxTicks));return arr.filter((v,i)=>(n-1-i)%step===0);}
+function update(){
+ if(!DATA.length)return;
+ const d=filtered();
+ // Semanas evaluadas = combinaciones únicas de año + mes + semana, sin duplicar preventistas/registros.
+ const evaluatedPeriods=uniq(d.map(r=>{
+   const year=String(r[COLUMNAS.anio]??'').trim();
+   const month=String(r[COLUMNAS.mes]??'').trim().toLocaleUpperCase('es-MX');
+   const week=String(r[COLUMNAS.semana]??'').trim();
+   return year&&month&&week?`${year}|${month}|${week}`:'';
+ }).filter(Boolean));
+ $('kweeksEvaluated').textContent=num(evaluatedPeriods.length,0);
+ const commissionByWeek=new Map();d.forEach(r=>{const week=periodValue(r);if(!week)return;commissionByWeek.set(week,(commissionByWeek.get(week)||0)+(Number(r[COLUMNAS.pagoTotal])||0));});
+ $('kweeksWithCommission').textContent=num([...commissionByWeek.values()].filter(total=>total>0).length,0);
+ $('kccv').textContent=num(avg(d,COLUMNAS.ccv),0);$('kds').textContent=money(dsPonderado(d));$('kpay').textContent=money(avg(d,COLUMNAS.pagoTotal));$('kvolCommission').textContent=money(avg(d,COLUMNAS.cobroVolumen));$('kccvCommission').textContent=money(avg(d,COLUMNAS.comisionCCV));$('kvol').textContent=(cumplimientoVolumen(d)*100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';const totalCommission=sumFieldSafe(d,COLUMNAS.pagoTotal);const totalTarget=sumFieldSafe(d,COLUMNAS.target);$('kpeople').textContent=(totalTarget>0?((totalCommission/totalTarget)*100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—');
+ // Personas con comisión = promedio semanal de personas únicas con comisión / promedio semanal de personas únicas. Se considera con comisión a quien acumule pago variable > 0 en esa semana.
+ const peopleByWeek=new Map();d.forEach(r=>{const week=periodValue(r);const name=String(r[COLUMNAS.preventista]||'').trim();if(!week||!name)return;const key=name.toLocaleLowerCase('es-MX');if(!peopleByWeek.has(week))peopleByWeek.set(week,new Map());const byPerson=peopleByWeek.get(week);if(!byPerson.has(key))byPerson.set(key,{payment:0});byPerson.get(key).payment+=Number(r[COLUMNAS.pagoTotal])||0;});
+ let totalUniquePeopleAcrossWeeks=0,totalUniquePeopleWithCommissionAcrossWeeks=0;peopleByWeek.forEach(byPerson=>{totalUniquePeopleAcrossWeeks+=byPerson.size;totalUniquePeopleWithCommissionAcrossWeeks+=[...byPerson.values()].filter(p=>p.payment>0).length;});
+ const weekCount=peopleByWeek.size;const avgUniquePeople=weekCount?totalUniquePeopleAcrossWeeks/weekCount:0;const avgUniquePeopleWithCommission=weekCount?totalUniquePeopleWithCommissionAcrossWeeks/weekCount:0;const peoplePct=avgUniquePeople>0?avgUniquePeopleWithCommission/avgUniquePeople*100:0;$('kcommissionPeople').textContent=peoplePct.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+ const weeks=weekValues(d);
+ const hasRegion=$('region').value!=='all';
+ const hasBranch=selectedFilterValues('branch').length>0;
+ // Tendencia mensual: muestra el total general, el total de la región seleccionada
+ // o el total de la(s) sucursal(es) seleccionada(s), sin dividirlo en series adicionales.
+ const selectedRegions=selectedFilterValues('region');
+ const selectedBranches=selectedFilterValues('branch');
+ const trendField=selectedBranches.length?COLUMNAS.sucursal:(selectedRegions.length?COLUMNAS.region:null);
+ const trendLevel=selectedBranches.length
+   ? (selectedBranches.length===1?`sucursal ${selectedBranches[0]}`:'sucursales seleccionadas')
+   : (selectedRegions.length?`región ${selectedRegions[0]}`:'general');
+ // La tendencia mensual respeta el/los año(s) seleccionados, pero ignora el mes
+ // y el intervalo de semanas para conservar todos los meses de cada año elegido.
+ const monthlyRows=DATA.filter(r=>matchesFilters(r,['month'],true));
+ const monthPeriod=row=>`${String(row[COLUMNAS.anio]??'Sin año').trim()} · ${String(row[COLUMNAS.mes]??'Sin mes').trim()}`;
+ const monthPeriods=uniq(monthlyRows.map(monthPeriod)).sort((a,b)=>{
+   const [ya,ma]=a.split(' · '),[yb,mb]=b.split(' · ');
+   const yd=Number(ya)-Number(yb); if(Number.isFinite(yd)&&yd!==0)return yd;
+   const md=monthSort(ma,mb); return md!==0?md:sortVal(ma,mb);
+ });
+ const monthlyByPeriod=group(monthlyRows.map(r=>({...r,__monthPeriod:monthPeriod(r)})),'__monthPeriod');
+ const trendLabel=selectedBranches.length===1?selectedBranches[0]:(selectedRegions.length?selectedRegions[0]:'General');
+ const comparisonField=selectedBranches.length?COLUMNAS.preventista:(selectedRegions.length?COLUMNAS.sucursal:COLUMNAS.region);
+ const comparisonLabel=selectedBranches.length?'preventista':(selectedRegions.length?'sucursal':'región');
+ $('branchesTitle').textContent='Desempeño';
+ $('branchesDesc').textContent='Comparativo por '+comparisonLabel+' según la métrica seleccionada.';
+ const branchKey=$('branchesMetric').value || COLUMNAS.ccv;
+ const byB=group(d,comparisonField),branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],branchKey)-avgMetric(byB[a],branchKey)).slice(0,12);
+ const branchVals=branches.map(k=>avgMetric(byB[k],branchKey));
+ plot('branches',[{x:branchVals,y:branches,type:'bar',orientation:'h',marker:{color:'#1d4f7a',line:{color:'#1d4f7a',width:0}},text:branchVals.map(v=>formatMetric(branchKey,v)),textposition:'outside',textfont:{color:'#20344b',size:11},cliponaxis:false,hoverlabel:{bgcolor:'#ffffff',bordercolor:'#8ba9c5',font:{color:'#20344b'}},hovertemplate:'%{y}<br>'+metricLabel(branchKey)+': %{x:,.2f}<extra></extra>'}],{paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',margin:{l:95,r:65,t:8,b:35},yaxis:{autorange:'reversed',showgrid:false,showline:false,zeroline:false,tickfont:{color:'#34465b',size:11}},xaxis:{title:{text:metricLabel(branchKey),font:{color:'#24364b',size:11}},showgrid:false,showline:true,linecolor:'#b8c7d8',linewidth:1.2,zeroline:false,tickfont:{color:'#34465b',size:10}}});
+ bindChartClick('branches',ev=>{
+   if(!ev.points||!ev.points.length)return;
+   const name=ev.points[0].y;
+   drillCollaboratorsForGroup(name,comparisonField,'branchesDetail',`Detalle de ${comparisonLabel}: ${name}`);
+ });
+ const mixChoice=$('mixMetric').value || 'both';
+ const mixKeys=mixChoice==='both'?[COLUMNAS.comisionCCV,COLUMNAS.cobroVolumen]:[mixChoice];
+ const mixNames=mixKeys.map(k=>k===COLUMNAS.comisionCCV?'Comisión CCV':k===COLUMNAS.cobroVolumen?'Cobro volumen promedio':'Pago variable total');
+ $('mixTitle').textContent='Comisiones promedio';
+ $('mixDesc').textContent='Compara los importes promedio por '+comparisonLabel+'. El indicador de volumen corresponde al promedio de Cobro Volumen.';
+ const mixGroups=group(d,comparisonField);
+ const mixCategories=Object.keys(mixGroups).sort((a,b)=>avg(mixGroups[b],COLUMNAS.pagoTotal)-avg(mixGroups[a],COLUMNAS.pagoTotal)).slice(0,12);
+ const showMixLabels=mixCategories.length*mixKeys.length<=8;
+ const mixTraces=mixKeys.map((key,i)=>{
+   const label=key===COLUMNAS.comisionCCV?'Comisión CCV':key===COLUMNAS.cobroVolumen?'Cobro volumen promedio':'Pago variable total';
+   const vals=mixCategories.map(name=>key===COLUMNAS.cobroVolumen?(avg(mixGroups[name],COLUMNAS.cobroVolumen)):avg(mixGroups[name],key));
+   return {x:mixCategories,y:vals,name:label,type:'bar',marker:{color:['#0f2a4d','#2f7df6','#9cc4f0'][i],cornerradius:3},text:showMixLabels?vals.map(v=>money(v)):undefined,textposition:showMixLabels?'outside':'none',textfont:{size:10,color:'#102b4c'},cliponaxis:false,hoverinfo:'none'};
+ });
+ plot('mix',mixTraces,execLayout({barmode:'group',showlegend:mixTraces.length>1,legend:{orientation:'h',x:0,y:1.14,font:{size:10,color:'#34465b'}},bargap:0.3,bargroupgap:0.06,margin:{l:56,r:16,t:40,b:72},xaxis:execX({tickangle:-25,title:{text:comparisonLabel,font:{size:10,color:'#687789'},standoff:8}}),yaxis:execY({tickprefix:'$',tickformat:',.0f'})}));
+ if(window.bindSimpleTooltip)window.bindSimpleTooltip($('mix'),'bar',p=>({head:String(p.x)+' \u00b7 '+(p.data&&p.data.name||''),value:money(p.y)}));
+ bindChartClick('mix',ev=>{
+   if(!ev.points||!ev.points.length)return;
+   const name=ev.points[0].x, selected=mixGroups[name]||[];
+   const byPerson=group(selected,COLUMNAS.preventista);
+   const rows=Object.keys(byPerson).sort(sortVal).map(person=>{
+     const a=byPerson[person];
+     return `<tr><td>${esc(person)}</td><td class="num">${a.length}</td><td class="num">${money(avg(a,COLUMNAS.comisionCCV))}</td><td class="num">${money(avg(a,COLUMNAS.cobroVolumen))}</td><td class="num">${money(avg(a,COLUMNAS.pagoTotal))}</td></tr>`;
+   });
+   renderDrilldown('mixDetail',`Detalle de comisiones · ${comparisonLabel}: ${name}`,['Preventista','Registros','Comisión CCV prom.','Cobro volumen prom.','Comisión total prom.'],rows);
+ });
+ // Gráfico exclusivamente de volumen: se muestran sumas, no promedios ni comisiones.
+ const volumeKeys=[COLUMNAS.va,COLUMNAS.pollo,COLUMNAS.otros,COLUMNAS.resto];
+ const volumeNames=['VA Real','Pollo Real','Otros Real','Resto Real'];
+ const volumeTotals=volumeKeys.map(key=>d.reduce((sum,r)=>sum+(Number(r[key])||0),0));
+ plot('volumeMix',[{x:volumeNames,y:volumeTotals,type:'bar',marker:{color:['#0f2a4d','#1f6fd1','#6fa8e8','#b9d4f3'],cornerradius:4},text:volumeTotals.map(v=>num(v,0)),textposition:'outside',textfont:{size:11,color:'#102b4c'},cliponaxis:false,hoverinfo:'none'}],execLayout({margin:{l:56,r:16,t:30,b:40},bargap:0.38,xaxis:execX(),yaxis:execY({tickformat:',.0f'})}));
+ if(window.bindSimpleTooltip)window.bindSimpleTooltip($('volumeMix'),'bar',p=>({head:String(p.x),value:num(p.y,0)}));
+ bindChartClick('volumeMix',ev=>{
+   if(!ev.points||!ev.points.length)return;
+   const ix=volumeNames.indexOf(ev.points[0].x),key=volumeKeys[ix];
+   if(!key)return;
+   const breakdown=activeBreakdownField(), by=group(d,breakdown.field);
+   const rows=Object.keys(by).sort((a,b)=>sumFieldSafe(by[b],key)-sumFieldSafe(by[a],key)).map(name=>
+     `<tr><td>${esc(name)}</td><td class="num">${num(sumFieldSafe(by[name],key),0)}</td><td class="num">${money(avg(by[name],COLUMNAS.comisionCCV))}</td><td class="num">${money(avg(by[name],COLUMNAS.cobroVolumen))}</td></tr>`
+   );
+   renderDrilldown('volumeDetail',`${ev.points[0].x} · desglose por ${breakdown.label}`,[breakdown.label,'Volumen real','Comisión CCV prom.','Cobro volumen prom.'],rows);
+ });
+ const weekGroups=group(d.map(r=>({...r,__yearWeek:periodValue(r)})),'__yearWeek');
+ const monthLabelOf=m=>{const p=String(m).split(' · ');return String(p[1]||'').slice(0,3).toUpperCase()+' '+String(p[0]||'');};
+ const weekTickText=w=>{const p=String(w).split('-');return p.length===2?('SEM '+Number(p[1])+' '+p[0]):String(w);};
+ const renderTrendPanel=cfg=>{
+  const branchTrendKey=cfg.fixedMetric || $(cfg.metric).value || COLUMNAS.ccv;
+  const branchView=VIEW_MODE[cfg.id];
+  $(cfg.title).textContent=cfg.fixedTitle||(branchView==='month'?'Tendencia mensual':'Tendencia semanal');
+  $(cfg.desc).textContent='Haz clic en una serie o punto para consultar el detalle del periodo seleccionado.';
+  const btPeriods=branchView==='month'?monthPeriods:weeks;
+  const btGroups=branchView==='month'?monthlyByPeriod:weekGroups;
+  const weekVals=btPeriods.map(w=>btGroups[w]?avgMetric(btGroups[w],branchTrendKey):null);
+  const weekCustom=weekVals.map((v,i)=>{
+    const prev=i>0?weekVals[i-1]:null;
+    const delta=(v==null||prev==null)?'—':((v-prev)>0?'+':'')+formatMetric(branchTrendKey,v-prev);
+    return [formatMetric(branchTrendKey,v),delta,(v==null||prev==null)?null:(v-prev)];
+  });
+  const branchTraces=[{x:btPeriods,y:weekVals,customdata:weekCustom,name:trendLabel,type:'scatter',mode:'lines',connectgaps:false,line:{color:'#1d4f7a',width:3,shape:'spline',smoothing:1.05},marker:{color:'#ffffff',size:5,line:{color:'#1d4f7a',width:1.5}},hoverinfo:'none'}];
+  const weekAxisFormat=branchTrendKey===COLUMNAS.cumplimiento?'.0%':(branchTrendKey===COLUMNAS.ccv?',.0f':( [COLUMNAS.ds,COLUMNAS.pagoTotal,COLUMNAS.comisionCCV,COLUMNAS.cobroVolumen].includes(branchTrendKey)?'$,.0f':',.0f'));
+  // Mostrar solo algunas etiquetas del eje X para evitar saturarlo; todos los puntos siguen disponibles para hover y detalle.
+  const branchTrendTickWeeks=pickTicks(btPeriods,($(cfg.id)&&$(cfg.id).clientWidth)||580,branchView==='month'?85:95,4,10);
+  plot(cfg.id,branchTraces,{showlegend:false,paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',margin:{l:62,r:24,t:24,b:68},xaxis:{title:{text:branchView==='month'?'Mes':'Semana',standoff:12,font:{color:'#24364b',size:11}},type:'category',tickmode:'array',tickvals:branchTrendTickWeeks,ticktext:branchTrendTickWeeks.map(x=>branchView==='month'?monthLabelOf(x):weekTickText(x)),showgrid:false,showline:true,linecolor:'#b8c7d8',linewidth:1.2,zeroline:false,tickfont:{color:'#34465b',size:10},showspikes:false,tickangle:-25},yaxis:{title:{text:metricLabel(branchTrendKey),font:{color:'#24364b',size:11}},showgrid:false,showline:true,linecolor:'#b8c7d8',linewidth:1.2,zeroline:false,tickfont:{color:'#34465b',size:10},tickformat:weekAxisFormat},hovermode:'closest',hoverlabel:{bgcolor:'#102b4c',bordercolor:'#102b4c',font:{family:'Inter, Segoe UI, Arial',size:10,color:'#ffffff'},align:'left',namelength:-1}});
+  if(window.bindTrendTooltip)window.bindTrendTooltip($(cfg.id),metricLabel(branchTrendKey));
+   bindChartClick(cfg.id,ev=>{
+     if(!ev.points||!ev.points.length)return;
+     const pt=ev.points[0], week=pt.x, seriesName=pt.data.name;
+     const chosen=branchView==='month'?monthlyRows.filter(r=>monthPeriod(r)===String(week)):d.filter(r=>String(periodValue(r))===String(week));
+     const byPerson=group(chosen,COLUMNAS.preventista);
+     const rows=Object.keys(byPerson).sort(sortVal).map(person=>{
+       const a=byPerson[person],real=sumFieldSafe(a,COLUMNAS.realVolumen),goal=sumFieldSafe(a,COLUMNAS.objetivoVolumen);
+       return `<tr><td>${esc(person)}</td><td class="num">${num(avg(a,COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(a))}</td><td class="num">${num(goal?real/goal*100:0)}%</td><td class="num">${money(avg(a,COLUMNAS.comisionCCV))}</td><td class="num">${money(avg(a,COLUMNAS.cobroVolumen))}</td><td class="num">${money(avg(a,COLUMNAS.pagoTotal))}</td></tr>`;
+     });
+     renderDrilldown(cfg.detail,`Tendencia · ${seriesName} · Periodo ${branchView==='month'?monthLabelOf(week):week}`,['Preventista','CCV Real prom.','DS ponderado','Cumpl. volumen','Comisión CCV prom.','Cobro volumen prom.','Comisión total prom.'],rows);
+   });
+ };
+ TREND_PANELS.forEach(renderTrendPanel);
+ // Tendencia por familia: suma de kilos por familia y semana. Usa los filtros activos; sin filtros muestra el total general.
+ const familyDefs=[[COLUMNAS.va,'VA','#0f2a4d'],[COLUMNAS.pollo,'Pollo','#1f6fd1'],[COLUMNAS.otros,'Otros','#4db3e6'],[COLUMNAS.resto,'Resto','#8fa6c2']];
+ const familyView=VIEW_MODE.familyTrend;
+ const fPeriods=familyView==='month'?monthPeriods:weeks;
+ const fGroups=familyView==='month'?monthlyByPeriod:weekGroups;
+ const fLabel=x=>familyView==='month'?monthLabelOf(x):weekTickText(x);
+ const familyTraces=familyDefs.map(([key,label,color])=>({x:fPeriods,y:fPeriods.map(w=>fGroups[w]?sumFieldSafe(fGroups[w],key):null),name:label,type:'scatter',mode:'lines',connectgaps:false,line:{color:color,width:2.5,shape:'spline',smoothing:1.05},hoverinfo:'none'}));
+ const familyTickWeeks=pickTicks(fPeriods,($('familyTrend')&&$('familyTrend').clientWidth)||580,familyView==='month'?85:95,3,8);
+ const famMax=Math.max(0,...familyTraces.flatMap(t=>t.y.filter(v=>v!=null&&isFinite(v))));
+ const famRange=[0,famMax>0?famMax*1.18:1];
+ plot('familyTrend',familyTraces,execLayout({hovermode:'x',hoverdistance:-1,showlegend:false,margin:{l:66,r:24,t:24,b:75},xaxis:execX({type:'category',tickmode:'array',tickvals:familyTickWeeks,ticktext:familyTickWeeks.map(fLabel),tickangle:-25,title:{text:familyView==='month'?'Mes':'Semana',standoff:14,font:{size:11,color:'#24364b'}}}),yaxis:execY({tickformat:',.0f',range:famRange,title:{text:'Kilos (kg)',standoff:12,font:{size:11,color:'#24364b'}}})}));
+ if(window.bindMultiTooltip)window.bindMultiTooltip($('familyTrend'),p=>fLabel(p.x),v=>num(v,0)+' kg');
+ const familyCopyView=VIEW_MODE.familyTrendCopy;
+ // Esta gráfica usa exclusivamente los registros filtrados (d), tanto en semana como en mes.
+ // Así respeta año, mes, región, sucursal, preventista y rango de semanas.
+ const familyCopyMonthPeriod=row=>`${String(row[COLUMNAS.anio]??'Sin año').trim()} · ${String(row[COLUMNAS.mes]??'Sin mes').trim()}`;
+ const fcGroups=familyCopyView==='month'
+   ? group(d.map(r=>({...r,__cobroMonth:familyCopyMonthPeriod(r)})),'__cobroMonth')
+   : weekGroups;
+ const fcPeriods=familyCopyView==='month'
+   ? Object.keys(fcGroups).sort((a,b)=>{const [ya,ma]=a.split(' · '),[yb,mb]=b.split(' · ');const yd=Number(ya)-Number(yb);if(Number.isFinite(yd)&&yd!==0)return yd;const md=monthSort(ma,mb);return md!==0?md:sortVal(ma,mb);})
+   : weeks;
+ const fcLabel=x=>familyCopyView==='month'?monthLabelOf(x):weekTickText(x);
+ const cobroFamilyDefs=[[COLUMNAS.cobroVA,'Cobro VA','#0f2a4d'],[COLUMNAS.cobroPollo,'Cobro Pollo','#1f6fd1'],[COLUMNAS.cobroOtros,'Cobro Otros','#4db3e6'],[COLUMNAS.cobroResto,'Cobro Resto','#8fa6c2']];
+ const familyCopyTraces=cobroFamilyDefs.map(([key,label,color])=>({x:fcPeriods,y:fcPeriods.map(w=>fcGroups[w]?sumFieldSafe(fcGroups[w],key):0),name:label,type:'scatter',mode:'lines',connectgaps:false,line:{color:color,width:3,shape:'spline',smoothing:1.15},hoverinfo:'none'}));
+ const familyCopyTicks=pickTicks(fcPeriods,($('familyTrendCopy')&&$('familyTrendCopy').clientWidth)||580,familyCopyView==='month'?85:95,3,8);
+ const familyCopyMax=Math.max(0,...familyCopyTraces.flatMap(t=>t.y.filter(v=>Number.isFinite(v))));
+ plot('familyTrendCopy',familyCopyTraces,execLayout({hovermode:'x',hoverdistance:-1,showlegend:false,margin:{l:78,r:24,t:24,b:75},xaxis:execX({type:'category',tickmode:'array',tickvals:familyCopyTicks,ticktext:familyCopyTicks.map(fcLabel),tickangle:-25,title:{text:familyCopyView==='month'?'Mes':'Semana',standoff:14,font:{size:11,color:'#24364b'}}}),yaxis:execY({tickformat:',.0f',tickprefix:'$',range:[0,familyCopyMax>0?familyCopyMax*1.18:1],title:{text:'Cobro (MXN)',standoff:12,font:{size:11,color:'#24364b'}}})}));
+ if(window.bindMultiTooltip)window.bindMultiTooltip($('familyTrendCopy'),p=>fcLabel(p.x),v=>money(v));
+  // Comisión vs Target: suma de comisión total / suma de Target por semana.
+  const targetView=VIEW_MODE.commissionTarget;
+  const targetByWeek=targetView==='month'?monthlyByPeriod:group(d.map(r=>({...r,__yearWeek:periodValue(r)})),'__yearWeek');
+  const targetWeeks=targetView==='month'?monthPeriods:Object.keys(targetByWeek).sort(sortVal);
+  const tLabel=x=>targetView==='month'?monthLabelOf(x):weekTickText(x);
+  const commissionTargetValues=targetWeeks.map(week=>{
+    const rows=targetByWeek[week];
+    const totalTarget=sumFieldSafe(rows,COLUMNAS.target);
+    return totalTarget>0 ? sumFieldSafe(rows,COLUMNAS.pagoTotal)/totalTarget*100 : null;
+  });
+  // Mostrar solo algunas etiquetas del eje X para evitar que los periodos se encimen; todos los puntos siguen disponibles para hover y clic.
+  const targetTickWeeks=pickTicks(targetWeeks,($('commissionTarget')&&$('commissionTarget').clientWidth)||380,targetView==='month'?85:95,3,8);
+  plot('commissionTarget',[{x:targetWeeks,y:commissionTargetValues,name:'Comisión vs Target',type:'scatter',mode:'lines',line:{color:'#1f6fd1',width:3,shape:'spline',smoothing:1.1},connectgaps:false,customdata:commissionTargetValues.map((v,i)=>{const prev=i>0?commissionTargetValues[i-1]:null;const dlt=(v==null||prev==null)?null:(v-prev);return [v==null?'—':v.toFixed(2)+'%',dlt==null?'—':((dlt>0?'+':'')+dlt.toFixed(2)+'%'),dlt];}),hoverinfo:'none'}],execLayout({margin:{l:78,r:24,t:24,b:100},xaxis:execX({type:'category',tickmode:'array',tickvals:targetTickWeeks,ticktext:targetTickWeeks.map(tLabel),tickangle:-25,title:{text:targetView==='month'?'Mes':'Semana',standoff:20,font:{size:11,color:'#24364b'}}}),yaxis:execY({ticksuffix:'%',title:{text:'Comisión vs Target (%)',standoff:18,font:{size:11,color:'#24364b'}}})}));
+  if(window.bindTrendTooltip)window.bindTrendTooltip($('commissionTarget'),'Comisión vs Target');
+  bindChartClick('commissionTarget',ev=>{
+    if(!ev.points||!ev.points.length)return;
+    const week=String(ev.points[0].x);
+    const chosen=targetView==='month'?monthlyRows.filter(r=>monthPeriod(r)===week):d.filter(r=>String(periodValue(r))===week);
+    const groups=group(chosen,COLUMNAS.preventista);
+    const rows=Object.keys(groups).sort((a,b)=>sumFieldSafe(groups[b],COLUMNAS.pagoTotal)-sumFieldSafe(groups[a],COLUMNAS.pagoTotal)).map(person=>{
+      const personRows=groups[person];
+      const commission=sumFieldSafe(personRows,COLUMNAS.pagoTotal);
+      const target=sumFieldSafe(personRows,COLUMNAS.target);
+      return `<tr><td>${esc(person)}</td><td>${esc(personRows[0]?.[COLUMNAS.region]??'—')}</td><td>${esc(personRows[0]?.[COLUMNAS.sucursal]??'—')}</td><td class="num">${personRows.length}</td><td class="num">${money(commission)}</td><td class="num">${money(target)}</td><td class="num">${target>0?num(commission/target*100)+'%':'—'}</td></tr>`;
+    });
+    const totalCommission=sumFieldSafe(chosen,COLUMNAS.pagoTotal),totalTarget=sumFieldSafe(chosen,COLUMNAS.target);
+    renderDrilldown('commissionTargetDetail',`Comisión vs Target · Periodo ${targetView==='month'?monthLabelOf(week):week} · ${chosen.length} registros`,['Preventista','Región','Sucursal','Registros','Comisión total','Target total','Comisión vs Target'],rows);
+    const box=$('commissionTargetDetail');
+    const summary=document.createElement('p');
+    summary.className='note';
+    summary.textContent=`Total de la semana: ${money(totalCommission)} de comisión / ${money(totalTarget)} de target = ${totalTarget>0?num(totalCommission/totalTarget*100)+'%':'Sin target válido'}. El detalle respeta todos los filtros activos.`;
+    box.insertBefore(summary,box.querySelector('.tablewrap'));
+  });
+ $('tbody').innerHTML=[...d].sort((a,b)=>(Number(b[COLUMNAS.pagoTotal])||0)-(Number(a[COLUMNAS.pagoTotal])||0)).slice(0,500).map(r=>`<tr><td>${esc(r[COLUMNAS.preventista])}</td><td>${esc(r[COLUMNAS.region])}</td><td>${esc(r[COLUMNAS.sucursal])}</td><td>${esc(r[COLUMNAS.mes])}</td><td>${esc(periodValue(r))}</td><td class="num">${num(r[COLUMNAS.ccv])}</td><td class="num">${money(r[COLUMNAS.ds])}</td><td class="num">${num(r[COLUMNAS.objetivoVolumen],0)}</td><td class="num">${num(r[COLUMNAS.realVolumen],0)}</td><td class="num">${num((Number(r[COLUMNAS.cumplimiento])||0)*100)}%</td><td class="num">${money(r[COLUMNAS.comisionCCV])}</td><td class="num">${money((Number(r[COLUMNAS.cobroVolumen])||0))}</td><td class="num">${money(r[COLUMNAS.pagoTotal])}</td><td class="num">${(Number(r[COLUMNAS.target])||0)>0?num((Number(r[COLUMNAS.pagoTotal])||0)/(Number(r[COLUMNAS.target])||0)*100)+'%':'—'}</td></tr>`).join('');
+ // Las dos tablas resumen respetan todos los filtros excepto el rango de periodo.
+ const summaryData=DATA.filter(r=>matchesFilters(r,null,true));
+ // Agrupa por región y colaborador para conservar la región de cada registro.
+ const collaboratorGroups=new Map();
+ summaryData.forEach(row=>{
+   const regionName=String(row[COLUMNAS.region]??'Sin región').trim()||'Sin región';
+   const branchName=String(row[COLUMNAS.sucursal]??'Sin sucursal').trim()||'Sin sucursal';
+   const personName=String(row[COLUMNAS.preventista]??'Sin colaborador').trim()||'Sin colaborador';
+   const key=JSON.stringify([regionName,branchName,personName]);
+   if(!collaboratorGroups.has(key)) collaboratorGroups.set(key,{region:regionName,branch:branchName,person:personName,rows:[]});
+   collaboratorGroups.get(key).rows.push(row);
+ });
+ const sumField=(arr,key)=>arr.reduce((sum,r)=>sum+(Number(r[key])||0),0);
+ const weeksWithPayment=(arr,key)=>new Set(arr.filter(r=>(Number(r[key])||0)>0).map(periodValue).filter(Boolean)).size;
+ const summaryRows=[...collaboratorGroups.values()].sort((a,b)=>sortVal(a.region,b.region)||sortVal(a.branch,b.branch)||sortVal(a.person,b.person)).map(item=>{
+   const rows=item.rows;
+   const totalReal=sumField(rows,COLUMNAS.realVolumen), totalObjective=sumField(rows,COLUMNAS.objetivoVolumen);
+   const volumeCompliance=totalObjective!==0?totalReal/totalObjective:0;
+   const weeks=new Set(rows.map(periodValue).filter(Boolean)).size;
+   const totalCommission=sumField(rows,COLUMNAS.pagoTotal), totalTarget=sumField(rows,COLUMNAS.target);
+   const commissionVsTarget=totalTarget>0?(totalCommission/totalTarget*100):null;
+   return `<tr><td>${esc(item.region)}</td><td>${esc(item.branch)}</td><td>${esc(item.person)}</td><td class="num">${weeks}</td><td class="num">${num(avg(rows,COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(rows))}</td><td class="num">${num(volumeCompliance*100)}%</td><td class="num">${money(avg(rows,COLUMNAS.comisionCCV))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.comisionCCV)}</td><td class="num">${money(avg(rows,COLUMNAS.cobroVolumen))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.cobroVolumen)}</td><td class="num">${money(avg(rows,COLUMNAS.pagoTotal))}</td><td class="num">${commissionVsTarget===null?'—':num(commissionVsTarget)+'%'}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.pagoTotal)}</td></tr>`;
+ }).join('');
+ $('collaboratorSummary').innerHTML=summaryRows || '<tr><td colspan="14">No hay colaboradores para los filtros seleccionados.</td></tr>';
+ // Resumen por región, sucursal y ruta; ignora únicamente el rango de periodo.
+ const routeGroups = new Map();
+ summaryData.forEach(row => {
+   const regionName = String(row[COLUMNAS.region] ?? 'Sin región').trim() || 'Sin región';
+   const branchName = String(row[COLUMNAS.sucursal] ?? 'Sin sucursal').trim() || 'Sin sucursal';
+   const routeName = String(row[COLUMNAS.ruta] ?? 'Sin ruta').trim() || 'Sin ruta';
+   const key = JSON.stringify([regionName, branchName, routeName]);
+   if (!routeGroups.has(key)) routeGroups.set(key, {region: regionName, sucursal: branchName, ruta: routeName, rows: []});
+   routeGroups.get(key).rows.push(row);
+ });
+ const routeSummaryRows = [...routeGroups.values()].sort((a,b)=>sortVal(a.region,b.region)||sortVal(a.sucursal,b.sucursal)||sortVal(a.ruta,b.ruta)).map(item=>{
+   const rows=item.rows;
+   const totalReal=sumField(rows,COLUMNAS.realVolumen), totalObjective=sumField(rows,COLUMNAS.objetivoVolumen);
+   const volumeCompliance=totalObjective!==0?totalReal/totalObjective:0;
+   const weeks=new Set(rows.map(periodValue).filter(Boolean)).size;
+   const totalCommission=sumField(rows,COLUMNAS.pagoTotal), totalTarget=sumField(rows,COLUMNAS.target);
+   const commissionVsTarget=totalTarget>0?(totalCommission/totalTarget*100):null;
+   return `<tr><td>${esc(item.region)}</td><td>${esc(item.sucursal)}</td><td>${esc(item.ruta)}</td><td class="num">${weeks}</td><td class="num">${num(avg(rows,COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(rows))}</td><td class="num">${num(volumeCompliance*100)}%</td><td class="num">${money(avg(rows,COLUMNAS.comisionCCV))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.comisionCCV)}</td><td class="num">${money(avg(rows,COLUMNAS.cobroVolumen))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.cobroVolumen)}</td><td class="num">${money(avg(rows,COLUMNAS.pagoTotal))}</td><td class="num">${commissionVsTarget===null?'—':num(commissionVsTarget)+'%'}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.pagoTotal)}</td></tr>`;
+ }).join('');
+ $('routeSummary').innerHTML=routeSummaryRows || '<tr><td colspan="14">No hay rutas para los filtros seleccionados.</td></tr>';
+}
+function parseNumericValue(value){
+  if (value === null || value === undefined || value === '') return 0;
+  if (typeof value === 'number') return value;
+  let s = String(value).trim();
+  if (!s || s === '-' || s === '—') return 0;
+  const isPercent = s.includes('%');
+  s = s.replace(/[^\d,.\-]/g, '');
+  if (s.includes(',') && s.includes('.')) {
+    s = s.replace(/,/g, '');
+  } else if (s.includes(',') && !s.includes('.')) {
+    // Si solo hay coma, se interpreta como separador decimal cuando hay 1-2 cifras al final.
+    s = /,\d{1,2}$/.test(s) ? s.replace(',', '.') : s.replace(/,/g, '');
+  }
+  const n = Number(s);
+  return Number.isFinite(n) ? (isPercent ? n / 100 : n) : 0;
+}
+function normalizeHeader(value){
+  return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+}
+function loadRows(rows){
+  if(!Array.isArray(rows) || !rows.length){
+    $('status').textContent='La hoja no contiene registros para mostrar.';
+    DATA=[]; update(); return;
+  }
+  DATA=rows.map(r=>{
+    const o={};
+    Object.keys(r).forEach(k=>o[String(k).trim()]=r[k]);
+    // Reconoce el encabezado de antigüedad aunque tenga espacios extra, acentos o diferencias de mayúsculas.
+    const tenureHeader=Object.keys(o).find(k=>normalizeHeader(k)===normalizeHeader(COLUMNAS.antiguedad));
+    if(tenureHeader && tenureHeader!==COLUMNAS.antiguedad) o[COLUMNAS.antiguedad]=o[tenureHeader];
+    // Convertir las métricas numéricas para que los promedios y las gráficas funcionen.
+    [
+      COLUMNAS.ccv, COLUMNAS.ds, COLUMNAS.comisionCCV, COLUMNAS.cobroVolumen,
+      COLUMNAS.objetivoVolumen, COLUMNAS.realVolumen, COLUMNAS.cumplimiento,
+      COLUMNAS.va, COLUMNAS.pollo, COLUMNAS.otros, COLUMNAS.resto,
+      COLUMNAS.cobroVA, COLUMNAS.cobroPollo, COLUMNAS.cobroOtros, COLUMNAS.cobroResto,
+      COLUMNAS.pagoTotal, COLUMNAS.target, COLUMNAS.antiguedad
+    ].forEach(k=>{ if (k in o) o[k]=parseNumericValue(o[k]); });
+    if (COLUMNAS.antiguedad in o) o[COLUMNAS.antiguedad] = (o[COLUMNAS.antiguedad] === '' || o[COLUMNAS.antiguedad] === null || o[COLUMNAS.antiguedad] === undefined) ? null : parseNumericValue(o[COLUMNAS.antiguedad]);
+    return o;
+  });
+  HAS_GUARANTEE_COLUMN = Object.keys(DATA[0]).includes(COLUMNAS.colaboradorPago);
+  $('paidColleague').disabled = !HAS_GUARANTEE_COLUMN;
+  if($('guaranteeNote')) $('guaranteeNote').textContent = HAS_GUARANTEE_COLUMN ? 'El filtro “Tipo de Pago” usa la columna “Tipo de Pago” de Google Sheets. Los valores deben identificar claramente las opciones con y sin garantía.' : 'No se encontró la columna “Tipo de Pago” en la pestaña BD Preventas. Verifica que el encabezado coincida exactamente.';
+  const missing=Object.entries(COLUMNAS).filter(([key,c])=>!['lineamientos','colaboradorPago'].includes(key) && !Object.keys(DATA[0]).includes(c)).map(([,c])=>c);
+  if(missing.length){
+    $('status').textContent='Conectado, pero revisa encabezados: '+missing.join(', ');
+    console.warn('Columnas detectadas',Object.keys(DATA[0]));
+  } else {
+    $('status').textContent=`Conexión correcta · ${DATA.length.toLocaleString('es-MX')} registros · actualizado ${new Date().toLocaleTimeString('es-MX')}`;
+  }
+  setupFilters();
+  if(!CHART_METRICS_READY){setupChartMetricSelectors();CHART_METRICS_READY=true;}
+  update();
+}
+function cargarDatos(){
+  if (!(window.google && google.script && google.script.run)) {
+    $('status').textContent='Abre esta página desde la URL publicada de Google Apps Script (/exec).';
+    return;
+  }
+  $('status').textContent='Consultando BD Preventas…';
+  google.script.run
+    .withSuccessHandler(respuesta=>{
+      console.log('Respuesta del servidor:', respuesta);
+      loadRows(respuesta && respuesta.rows);
+    })
+    .withFailureHandler(err=>{
+      $('status').textContent='No se pudieron cargar los datos: '+(err && err.message ? err.message : err);
+    })
+    .getDashboardData();
+}
+function exportChartToExcel(chartId){
+ if(chartId==='trend'){
+   // Exportación mensual: sin desglose semanal. Respeta los años y filtros
+   // organizacionales activos, e ignora mes e intervalo de semanas.
+   const metric=$('trendMetric').value || COLUMNAS.ccv;
+   const trendExportRows=DATA.filter(r=>matchesFilters(r,['month'],true));
+   const selectedBranches=selectedFilterValues('branch');
+   const selectedRegions=selectedFilterValues('region');
+   const scopeLevel=selectedBranches.length?'Sucursal':(selectedRegions.length?'Región':'General');
+   const scopeName=selectedBranches.length?selectedBranches.join(' / '):(selectedRegions.length?selectedRegions.join(' / '):'General');
+   const byYearMonth=new Map();
+   trendExportRows.forEach(r=>{
+     const year=String(r[COLUMNAS.anio]??'').trim();
+     const month=String(r[COLUMNAS.mes]??'').trim();
+     if(!year || !month) return;
+     const key=year+'|'+month;
+     if(!byYearMonth.has(key)) byYearMonth.set(key,{year,month,rows:[]});
+     byYearMonth.get(key).rows.push(r);
+   });
+   const periods=[...byYearMonth.values()].sort((a,b)=>sortVal(a.year,b.year)||monthSort(a.month,b.month));
+   if(!periods.length){alert('No hay datos mensuales para exportar con los filtros actuales.');return;}
+   let rows;
+   if(metric===COLUMNAS.cumplimiento){
+     rows=[['Año','Mes','Nivel de información','Región / sucursal','Volumen objetivo','Volumen real','Cumplimiento volumen']];
+     periods.forEach(p=>{
+       const objetivo=sumFieldSafe(p.rows,COLUMNAS.objetivoVolumen);
+       const real=sumFieldSafe(p.rows,COLUMNAS.realVolumen);
+       rows.push([p.year,p.month,scopeLevel,scopeName,objetivo,real,objetivo>0?real/objetivo:0]);
+     });
+   } else {
+     rows=[['Año','Mes','Nivel de información','Región / sucursal','Indicador','Valor']];
+     periods.forEach(p=>rows.push([p.year,p.month,scopeLevel,scopeName,metricLabel(metric),avgMetric(p.rows,metric)]));
+   }
+   const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');
+   a.href=url;a.download='Tendencia_mensual_'+scopeLevel.toLowerCase()+'_'+new Date().toISOString().slice(0,10)+'.csv';
+   document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);return;
+ }
+ if(chartId==='branches'){
+   // Exporta Desempeño con la categoría primero y el indicador después.
+   // Mantiene el mismo nivel de desglose que utiliza la gráfica.
+   const rowsData=filtered();
+   const selectedBranches=selectedFilterValues('branch');
+   const selectedRegions=selectedFilterValues('region');
+   const categoryField=selectedBranches.length?COLUMNAS.preventista:(selectedRegions.length?COLUMNAS.sucursal:COLUMNAS.region);
+   const categoryLabel=selectedBranches.length?'Preventista':(selectedRegions.length?'Sucursal':'Región');
+   const metric=$('branchesMetric').value || COLUMNAS.ccv;
+   const grouped=group(rowsData,categoryField);
+   const categories=Object.keys(grouped).sort((a,b)=>{
+     if(metric===COLUMNAS.cumplimiento) return cumplimientoVolumen(grouped[b])-cumplimientoVolumen(grouped[a]);
+     return avgMetric(grouped[b],metric)-avgMetric(grouped[a],metric);
+   }).slice(0,12);
+   let rows;
+   if(metric===COLUMNAS.cumplimiento){
+     rows=[[categoryLabel,'Volumen objetivo','Volumen real','% Cumplimiento volumen']];
+     categories.forEach(name=>{
+       const items=grouped[name];
+       const objetivo=sumFieldSafe(items,COLUMNAS.objetivoVolumen);
+       const real=sumFieldSafe(items,COLUMNAS.realVolumen);
+       rows.push([name,objetivo,real,objetivo>0?real/objetivo:0]);
+     });
+   } else {
+     rows=[[categoryLabel,metricLabel(metric)]];
+     categories.forEach(name=>rows.push([name,avgMetric(grouped[name],metric)]));
+   }
+   if(categories.length===0){alert('No hay datos de desempeño para exportar con los filtros actuales.');return;}
+   const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');
+   a.href=url;a.download='Desempeno_'+categoryLabel.toLowerCase()+'_'+new Date().toISOString().slice(0,10)+'.csv';
+   document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);return;
+ }
+ if(chartId==='scatter'){
+   if(!scatterExportRows.length){alert('No hay puntos de antigüedad para exportar con los filtros actuales.');return;}
+   const detailRows=[['Nombre del preventa','Semanas de antigüedad','DS Promedio','Sucursal','Ruta'],...scatterExportRows.map(row=>[row.preventista,row.antiguedad,row.dsPromedio,row.sucursal,row.ruta])];
+   const csv='\ufeff'+detailRows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');
+   a.href=url;a.download='Relacion_con_antiguedad_detalle_'+new Date().toISOString().slice(0,10)+'.csv';
+   document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);return;
+ }
+ const chart=$(chartId);
+ if(!chart || !chart.data || !chart.data.length){alert('Este gráfico todavía no tiene datos para exportar.');return;}
+ const rows=[['Categoría / periodo','Serie','Valor']];
+ chart.data.forEach(trace=>{
+   const xs=trace.x||[], ys=trace.y||[];
+   const len=Math.max(xs.length,ys.length);
+   for(let i=0;i<len;i++){
+     const y=ys[i];
+     if(y===null || y===undefined || (typeof y==='number' && !Number.isFinite(y))) continue;
+     rows.push([xs[i]??'',trace.name||trace.type||'Serie',y]);
+   }
+ });
+ const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob);const a=document.createElement('a');
+ a.href=url;a.download='Dashboard_PV_'+chartId+'_'+new Date().toISOString().slice(0,10)+'.csv';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+document.querySelectorAll('[data-export]').forEach(btn=>btn.addEventListener('click',()=>exportChartToExcel(btn.dataset.export)));
+function exportTableToExcel(tableSelector, filename){
+ const table=document.querySelector(tableSelector);
+ if(!table){alert('No se encontró la tabla para exportar.');return;}
+ const rows=[...table.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('th,td')].map(cell=>cell.innerText.trim()));
+ const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob);const a=document.createElement('a');
+ a.href=url;a.download=filename+'_'+new Date().toISOString().slice(0,10)+'.csv';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+$('exportPreventistas').addEventListener('click',()=>exportTableToExcel('#analisis-preventistas table','Detalle_de_preventistas'));
+$('exportResumenColaboradores').addEventListener('click',()=>exportTableToExcel('#resumen-colaboradores table','Resumen_indicadores_por_colaborador'));
+$('exportResumenRutas').addEventListener('click',()=>exportTableToExcel('#resumen-rutas table','Resumen_indicadores_por_ruta'));
+$('refreshNow').addEventListener('click', cargarDatos);
+['year','month','weekStart','weekEnd','region','branch','preventista','people','paidColleague'].forEach(id=>$(id).addEventListener('change',()=>{refreshDependentFilters();update()}));
+$('reset').addEventListener('click',()=>{['year','month','weekStart','weekEnd','region','people','paidColleague'].forEach(id=>$(id).value='all');['branch','preventista'].forEach(id=>[...$(id).options].forEach(o=>o.selected=false));refreshDependentFilters();update()});
+const sideToggle=document.getElementById('sideToggle');
+const appShell=document.querySelector('.app');
+sideToggle.addEventListener('click',()=>{
+  const hidden=appShell.classList.toggle('sidebar-hidden');
+  sideToggle.textContent=hidden?'☰':'‹';
+  sideToggle.setAttribute('aria-expanded',String(!hidden));
+  sideToggle.setAttribute('aria-label',hidden?'Mostrar barra lateral':'Ocultar barra lateral');
+  sideToggle.title=hidden?'Mostrar menú':'Ocultar menú';
+});
+document.querySelectorAll('.navitem').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const target=$(btn.dataset.target);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});}));
+// ---- Selector Semanal / Mensual para Tendencia, Tendencia por familia y Comisión vs Target ----
+(function(){
+ Object.keys(VIEW_MODE).forEach(id=>{
+   const chart=$(id),panel=chart&&chart.closest('.panel');
+   if(!panel)return;
+   const box=document.createElement('div');
+   box.className='viewToggle';box.setAttribute('role','group');box.setAttribute('aria-label','Periodo de la gráfica');
+   box.innerHTML='<button type="button" data-view="week" class="on">Semanal</button><button type="button" data-view="month">Mensual</button>';
+   box.addEventListener('click',e=>{
+     const b=e.target.closest('button[data-view]');
+     if(!b||VIEW_MODE[id]===b.dataset.view)return;
+     VIEW_MODE[id]=b.dataset.view;
+     box.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+     update();
+   });
+   panel.appendChild(box);
+ });
+})();
+// ---- Ajuste automático de ancho: cada gráfica se redimensiona al tamaño real de su cuadro ----
+(function(){
+ const origUpdate=update;
+ let cooldown=false;
+ function fit(el){
+   if(!window.Plotly||!el||!el.classList.contains('js-plotly-plot'))return false;
+   const svg=el.querySelector('.main-svg');if(!svg)return false;
+   const r=svg.getBoundingClientRect();
+   if(Math.abs(r.width-el.clientWidth)>3||Math.abs(r.height-el.clientHeight)>3){Plotly.Plots.resize(el);return true;}
+   return false;
+ }
+ function fitAll(){
+   let resized=false;
+   document.querySelectorAll('.chart').forEach(el=>{if(fit(el))resized=true;});
+   // Si cambió el ancho, se vuelven a calcular las etiquetas del eje X con el ancho real.
+   if(resized&&!cooldown){cooldown=true;try{origUpdate();}catch(e){}setTimeout(()=>{cooldown=false;},600);}
+ }
+ let timer;const schedule=()=>{clearTimeout(timer);timer=setTimeout(fitAll,80);};
+ window.addEventListener('resize',schedule);
+ if(window.ResizeObserver){
+   const ro=new ResizeObserver(schedule);
+   document.querySelectorAll('.panel').forEach(p=>ro.observe(p));
+   const m=document.querySelector('main');if(m)ro.observe(m);
+ }
+ update=function(){const out=origUpdate.apply(this,arguments);setTimeout(fitAll,60);setTimeout(fitAll,500);return out;};
+})();
+// Consulta Google Sheets al abrir y después cada hora mientras la página siga abierta.
+cargarDatos();
+setInterval(cargarDatos, 3600000);
+</script>
+<style id="reorden-desempeno-y-copia-familia">
+#analisis-sucursales{grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch;}
+#analisis-desempeno{grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch;}
+#analisis-desempeno > .panel{grid-column:2;min-width:0;}
+#analisis-desempeno #branches{height:245px!important;margin-top:14px!important;}
+#analisis-sucursales #familyTrendCopy{height:245px!important;min-height:245px!important;max-height:245px!important;margin-top:5px!important;background:#fff;}
+@media(max-width:1100px){#analisis-sucursales,#analisis-desempeno{grid-template-columns:1fr!important;}#analisis-desempeno > .panel{grid-column:1;}}
+</style>
+</body></html>
+<style>/* Evita choques entre títulos, valores de ejes y leyendas en todas las gráficas. */.js-plotly-plot .xtitle,.js-plotly-plot .ytitle{font-size:10px!important;}.js-plotly-plot .legend text{font-size:10px!important;}.js-plotly-plot .g-xtitle,.js-plotly-plot .g-ytitle{pointer-events:none;}.panel .chart{min-width:0;overflow:visible;}@media (max-width:700px){.js-plotly-plot .legend text{font-size:9px!important;}}</style>
+<style>/* Ajuste de contraste y filtros claros */:root{--bg:#f5f7fa!important;--ink:#111827!important;--muted:#111827!important;--line:#d6dee8!important;}html,body{background:#f5f7fa!important;color:#111827!important;}main{background:#f5f7fa!important;color:#111827!important;}.side{background:linear-gradient(180deg,#15549a 0%,#0b3670 100%)!important;color:#fff!important;border-right:1px solid #0b3670!important;}.brand,.brand span,.nav,.navitem,.sidefoot{color:#fff!important;}.navitem:hover,.navitem.active{background:#2878c8!important;color:#fff!important;border-color:#8fc2f2!important;}.side-toggle{background:#15549a!important;color:#fff!important;border-color:#8fc2f2!important;}.top{background:#fff!important;color:#111827!important;border:1px solid #d6dee8!important;}.top h1,.top .sub,.top .status,.top p{color:#111827!important;}.sub,.status,.note,footer,.uploadbox small,.panel p,.kpi small,.kpihead,label,.multiHint{color:#111827!important;}.uploadbox,.filters,.kpi,.panel{background:#fff!important;color:#111827!important;border-color:#d6dee8!important;}.filters{background:#f8fafc!important;box-shadow:0 2px 8px #17243b0a!important;}.filters label{color:#111827!important;font-weight:700!important;}select,.chartMetric,.filters input,.filters select{background:#fff!important;color:#111827!important;border:1px solid #cbd5e1!important;color-scheme:light!important;}select:focus,.filters input:focus{outline:2px solid #93c5fd!important;border-color:#2563a6!important;}select option,select[multiple] option{background:#fff!important;color:#111827!important;}.kpihead,.kpi strong,.panel h2,.panel p,th,td{color:#111827!important;}th{background:#eaf1f8!important;color:#111827!important;}td,th{border-bottom-color:#dbe3ec!important;}.drilldown{background:#f8fafc!important;color:#111827!important;border-color:#d6dee8!important;}.chartExport{background:#eaf3fc!important;color:#123f70!important;border-color:#b9cde2!important;}.chartExport:hover{background:#d9eafa!important;}.btn{background:#2563a6!important;color:#fff!important;}/* Texto de ejes, leyendas y etiquetas de Plotly en negro para mejorar legibilidad */.js-plotly-plot .xtick text,.js-plotly-plot .ytick text,.js-plotly-plot .legend text, .js-plotly-plot .gtitle,.js-plotly-plot .g-xtitle,.js-plotly-plot .g-ytitle, .js-plotly-plot .annotation-text,.js-plotly-plot .textpoint text{fill:#111827!important;color:#111827!important;}</style>
+<style id="controles-grafica-en-una-linea">/* Título a la izquierda y selector/exportación alineados arriba a la derecha */.panel:has(> .chartMetric){position:relative;padding-top:12px!important;}.panel:has(> .chartMetric) > h2{min-height:30px;display:flex;align-items:center;padding-right:225px;margin:0 0 8px!important;white-space:nowrap;}.panel:has(> .chartMetric) > .chartMetric{position:absolute;top:10px;right:116px;width:112px!important;max-width:calc(100% - 230px);margin:0!important;padding:6px 7px!important;height:30px;}.panel:has(> .chartMetric) > .chartExport{position:absolute;top:10px;right:10px;margin:0!important;height:30px;white-space:nowrap;padding:6px 9px!important;}.panel:has(> .chartMetric) > .chart{margin-top:5px;}@media (max-width:600px){.panel:has(> .chartMetric) > h2{padding-right:0;white-space:normal;min-height:0;margin-bottom:42px!important;}.panel:has(> .chartMetric) > .chartMetric{top:43px;left:10px;right:auto;width:42%!important;max-width:none;}.panel:has(> .chartMetric) > .chartExport{top:43px;right:10px;}}</style>
+<style>/* Desempeño y Comisión vs Target ahora comparten fila: misma altura que las demás gráficas */#analisis-sucursales #branches,#analisis-sucursales #commissionTarget{height:245px!important;}</style>
+<style>/* Fila superior: Tendencia mensual y Tendencia semanal */#analisis-regional{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch;}/* Fila inferior: Desempeño y Comisión vs Target */#analisis-sucursales{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch;}/* Adaptación para pantallas pequeñas */@media (max-width:1100px){#analisis-regional, #analisis-sucursales{grid-template-columns:1fr!important;}}#analisis-regional .panel{position:relative;padding-top:12px!important;}#analisis-regional .panel > .chart{height:245px!important;margin-top:5px;}#analisis-regional .panel > h2{min-height:30px;display:flex;align-items:center;white-space:nowrap;margin:0 0 8px!important;padding-right:225px;}#analisis-regional .panel > .chartMetric{position:absolute;top:10px;right:116px;width:112px!important;max-width:calc(100% - 230px);margin:0!important;height:30px;padding:6px 7px!important;}#analisis-regional .panel > .chartExport{position:absolute;top:10px;right:10px;margin:0!important;height:30px;white-space:nowrap;padding:6px 9px!important;}@media (max-width:1499px){#analisis-regional .panel > h2{padding-right:0;white-space:normal;min-height:0;margin-bottom:42px!important;}#analisis-regional .panel > .chartMetric{top:43px;left:10px;right:auto;width:42%!important;max-width:none;}#analisis-regional .panel > .chartExport{top:43px;}}@media (max-width:1100px){#analisis-regional{grid-template-columns:1fr!important;}}</style>
+<style>/* Fila: Comisión vs Target, Volumen real por categoría y Comisiones promedio (mismo tamaño) */#graficas-categoria{grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch;}#graficas-categoria .panel{position:relative;padding-top:12px!important;}#graficas-categoria .panel > h2{min-height:30px;display:flex;align-items:center;white-space:nowrap;margin:0 0 8px!important;padding-right:125px;}#graficas-categoria .panel:has(> .chartMetric) > h2{padding-right:225px;}#graficas-categoria .panel > .chartExport{position:absolute;top:10px;right:10px;margin:0!important;height:30px;white-space:nowrap;padding:6px 9px!important;}#graficas-categoria .panel > .chart{height:245px!important;margin-top:5px;}/* Fila: Desempeño y Relación con antigüedad */#analisis-sucursales .chart{height:245px!important;}@media (max-width:1499px){#graficas-categoria .panel > h2{white-space:normal;}#graficas-categoria .panel:has(> .chartMetric) > h2{padding-right:0;min-height:0;margin-bottom:42px!important;}#graficas-categoria .panel > .chartMetric{top:43px;left:10px;right:auto;width:42%!important;max-width:none;}#graficas-categoria .panel:has(> .chartMetric) > .chartExport{top:43px;}}@media (max-width:1100px){#graficas-categoria{grid-template-columns:1fr!important;}}</style>
+<style>#commissionTarget,#volumeMix,#mix{background:#fff;}</style>
+<style>/* Fila: Tendencia por familia y Comisión vs Target (arriba de Desempeño) */#analisis-familia{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch;gap:8px!important;margin-bottom:10px!important;}#analisis-familia .panel{position:relative;padding-top:12px!important;}#analisis-familia .panel > h2{min-height:30px;display:flex;align-items:center;white-space:nowrap;margin:0 0 8px!important;padding-right:125px;}#analisis-familia .panel > .chartExport{position:absolute;top:10px;right:10px;margin:0!important;height:30px;white-space:nowrap;padding:6px 9px!important;}#analisis-familia .panel > .chart{height:245px!important;margin-top:5px;}#familyTrend{background:#fff;}/* Fila inferior: ahora solo Volumen real por categoría y Comisiones promedio */#graficas-categoria{grid-template-columns:repeat(2,minmax(0,1fr))!important;}@media (max-width:1100px){#analisis-familia,#graficas-categoria{grid-template-columns:1fr!important;}}</style>
+<style id="ampliar-y-separacion">/* 1) Más separación entre los controles (selector / exportar) y el área de la gráfica, y gráfica un poco más baja */#analisis-regional #branchTrend,#analisis-regional #branchTrend2,#analisis-regional #familyTrend,#analisis-sucursales #commissionTarget, #analisis-sucursales #branches,#analisis-sucursales #branchTrend3,#graficas-categoria #volumeMix,#graficas-categoria #mix{height:230px!important;margin-top:14px!important;}/* 2) Botón ampliar (esquina superior derecha); los demás controles se recorren a la izquierda */:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria) .panel > .chartExport{right:10px;}:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria) .panel > .chartMetric{right:116px;max-width:calc(100% - 230px);}:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria) .panel > h2{padding-right:125px;}:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria) .panel:has(> .chartMetric) > h2{padding-right:225px;}@media (max-width:1499px){:is(#analisis-regional,#analisis-sucursales,#graficas-categoria) .panel:has(> .chartMetric) > h2{padding-right:0;white-space:normal;min-height:0;margin-bottom:46px!important;}:is(#analisis-regional,#analisis-sucursales,#graficas-categoria) .panel:has(> .chartMetric) > .chartMetric{top:43px;left:10px;right:auto;width:42%!important;max-width:none;}:is(#analisis-regional,#analisis-sucursales,#graficas-categoria) .panel:has(> .chartMetric) > .chartExport{top:43px;right:10px;}:is(#analisis-regional,#analisis-sucursales,#graficas-categoria) .panel:not(:has(> .chartMetric)) > h2{white-space:normal;}}</style>
+<style id="selector-semanal-mensual">.viewToggle{position:absolute;top:10px;display:inline-flex;height:30px;border:1px solid #b9cde2;border-radius:8px;overflow:hidden;background:#fff;}.viewToggle button{border:0;background:transparent;padding:0 10px;font:700 11px Inter,Segoe UI,Arial,sans-serif;color:#245b91;cursor:pointer;}.viewToggle button.on{background:#245b91;color:#fff;}.viewToggle button:not(.on):hover{background:#eaf3fc;}.panel:has(> .chartMetric) > .viewToggle{right:236px;}.panel:not(:has(> .chartMetric)) > .viewToggle{right:122px;}:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria) .panel:has(> .viewToggle) > h2{padding-right:232px;}:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria) .panel:has(> .chartMetric):has(> .viewToggle) > h2{padding-right:337px;}@media (max-width:1499px){.panel:has(> .chartMetric) > .viewToggle{right:10px;}:is(#analisis-regional,#analisis-sucursales,#graficas-categoria) .panel:has(> .chartMetric):has(> .viewToggle) > h2{padding-right:112px;}}</style>
+<style id="tooltip-multiserie">#trendTip .tt-rows{display:none;}#trendTip.multi .tt-rows{display:block;margin-top:6px;}#trendTip.multi .tt-v,#trendTip.multi .tt-d{display:none;}#trendTip.multi:after{display:none;}#trendTip.multi{border-radius:12px;padding:9px 14px 10px;min-width:150px;}#trendTip .tt-r{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:5px;}#trendTip .tt-r i{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px #fff;}#trendTip .tt-r span{flex:1;color:#c7d9ee;}#trendTip .tt-r b{color:#fff;font-weight:700;font-variant-numeric:tabular-nums;}#trendGuide{position:fixed;z-index:9997;width:0;border-left:1px dashed #8fa6c2;pointer-events:none;opacity:0;transition:opacity .12s;}#trendGuide.on{opacity:1;}</style>
+<style id="nueva-distribucion">/* Fila 1: Tendencia (semanal/mensual) | Tendencia por familia */#analisis-regional .panel > .viewToggle{right:122px;}#analisis-regional .panel:has(> .chartMetric) > .viewToggle{right:236px;}/* Fila 2: Comisión vs Target | Desempeño | Relación con antigüedad */#analisis-sucursales{grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch;}#analisis-sucursales .panel{position:relative;padding-top:12px!important;}#analisis-sucursales .panel:not(:has(> .chartMetric)) > h2{min-height:30px;display:flex;align-items:center;white-space:nowrap;margin:0 0 8px!important;}#analisis-sucursales .panel:not(:has(> .chartMetric)) > .chartExport{position:absolute;top:10px;margin:0!important;height:30px;white-space:nowrap;padding:6px 9px!important;}@media (max-width:1799px){#analisis-sucursales .panel:has(> .chartMetric) > h2{padding-right:0;white-space:normal;min-height:0;margin-bottom:46px!important;}#analisis-sucursales .panel:has(> .chartMetric) > .chartMetric{top:43px;left:10px;right:auto;width:42%!important;max-width:none;}#analisis-sucursales .panel:has(> .chartMetric) > .chartExport{top:43px;right:10px;}#analisis-sucursales .panel:not(:has(> .chartMetric)) > h2{white-space:normal;min-height:0;margin-bottom:46px!important;}#analisis-sucursales .panel:not(:has(> .chartMetric)) > .chartExport{top:43px;right:10px;}#analisis-sucursales .panel > .viewToggle{right:10px;}#analisis-sucursales .panel:has(> .viewToggle) > h2{padding-right:112px;}}@media (max-width:1499px){#analisis-regional .panel > .viewToggle,#analisis-regional .panel:has(> .chartMetric) > .viewToggle{right:10px;}#analisis-regional .panel:has(> .viewToggle) > h2{padding-right:112px;}#analisis-regional .panel:not(:has(> .chartMetric)) > h2{min-height:0;margin-bottom:46px!important;}}@media (max-width:1100px){#analisis-sucursales{grid-template-columns:1fr!important;}}</style>
+<style id="fila-tres-tendencias">/* Fila 1: Tendencia | Tendencia (copia) | Tendencia por familia */#analisis-regional{grid-template-columns:repeat(3,minmax(0,1fr))!important;}@media (max-width:1799px){#analisis-regional .panel:has(> .chartMetric) > h2{padding-right:0;white-space:normal;min-height:0;margin-bottom:46px!important;}#analisis-regional .panel:has(> .chartMetric) > .chartMetric{top:43px;left:10px;right:auto;width:42%!important;max-width:none;}#analisis-regional .panel:has(> .chartMetric) > .chartExport{top:43px;right:10px;}#analisis-regional .panel:not(:has(> .chartMetric)) > h2{white-space:normal;min-height:0;margin-bottom:46px!important;}#analisis-regional .panel:not(:has(> .chartMetric)) > .chartExport{top:43px;right:10px;}#analisis-regional .panel > .viewToggle,#analisis-regional .panel:has(> .chartMetric) > .viewToggle{right:10px;}#analisis-regional .panel:has(> .viewToggle) > h2{padding-right:112px;}}@media (max-width:1100px){#analisis-regional{grid-template-columns:1fr!important;}}
+/* Tendencia por familia: aprovecha el espacio vertical disponible sin cambiar el panel exterior. */
+.familyTrendPanel{padding:8px 10px;}
+.familyTrendPanel h2{margin-bottom:2px;}
+.familyTrendPanel .chartExport{margin-bottom:0;}
+.familyTrendPanel #familyTrend{height:245px;min-height:245px;max-height:245px;}
+
+/* Igualar la altura exterior de las tarjetas de la primera fila con las demás tarjetas de gráficas. */
+#analisis-regional > .panel{
+  min-height:350px;
+  height:350px;
+  box-sizing:border-box;
+}
+#analisis-regional > .panel > .chart{
+  height:245px!important;
+  min-height:245px;
+}
+
+/* Igualar el área de las gráficas de la primera fila con las de la segunda fila. */
+#analisis-regional > .panel > .chart{
+  height:245px!important;
+  min-height:245px!important;
+  max-height:245px!important;
+}
+/* Aumentar altura de Tendencia por familia */
+#analisis-regional > .panel.familyTrendPanel {
+    height: 350px !important;
+    min-height: 350px !important;
+    box-sizing: border-box;
+}
+
+/* Aumentar únicamente el área de la gráfica */
+#analisis-regional > .panel.familyTrendPanel > #familyTrend {
+    height: 250px !important;
+    min-height: 250px !important;
+    max-height: 250px !important;
+    margin-top: 5px !important;
+}
+</style>
