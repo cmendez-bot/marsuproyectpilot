@@ -11,7 +11,7 @@ window.execX=function(o){return Object.assign({showgrid:false,showline:false,zer
 window.execY=function(o){return Object.assign({showgrid:false,showline:false,zeroline:false,tickfont:{color:'#34465b',size:10},automargin:true},o||{});};
 window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',font:window.execFont,hoverlabel:window.execHover,hovermode:'closest',showlegend:false},o||{});};
 </script>
-<style>#trendTip{position:fixed;z-index:9999;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;background:#0f2747;color:#fff;border-radius:10px;padding:9px 14px 10px;box-shadow:0 8px 20px rgba(11,36,71,.28);font-family:Inter,Segoe UI,Arial,sans-serif;white-space:nowrap;}#trendTip.on{opacity:1;transform:none;}#trendTip:after{content:"";position:absolute;left:var(--ax,24px);bottom:-5px;width:10px;height:10px;background:#0f2747;transform:rotate(45deg);border-radius:2px;}#trendTip.below:after{bottom:auto;top:-5px;}#trendTip .tt-h{font-size:11px;color:#c7d9ee;letter-spacing:.02em;}#trendTip .tt-v{font-size:22px;font-weight:700;line-height:1.15;margin-top:2px;}#trendTip .tt-d{font-size:12px;font-weight:600;margin-top:2px;}#trendTip.simple .tt-d{display:none;}#trendTip.simple{border-radius:12px;padding:8px 16px 9px;}#trendTip .up{color:#3ddc97;}#trendTip .down{color:#ff8a8a;}#trendTip .flat{color:#c7d9ee;}#trendHalo{position:fixed;z-index:9998;width:20px;height:20px;border-radius:50%;background:rgba(47,125,246,.28);pointer-events:none;opacity:0;transition:opacity .12s;}#trendHalo.on{opacity:1;}</style>
+<style>#trendTip{position:fixed;z-index:9999;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;background:#0f2747;color:#fff;border-radius:10px;padding:9px 14px 10px;box-shadow:0 8px 20px rgba(11,36,71,.28);font-family:Inter,Segoe UI,Arial,sans-serif;white-space:nowrap;}#trendTip.on{opacity:1;transform:none;}#trendTip:after{content:"";position:absolute;left:var(--ax,24px);bottom:-5px;width:10px;height:10px;background:#0f2747;transform:rotate(45deg);border-radius:2px;}#trendTip.below:after{bottom:auto;top:-5px;}#trendTip .tt-h{font-size:11px;color:#c7d9ee;letter-spacing:.02em;}#trendTip .tt-v{font-size:22px;font-weight:700;line-height:1.15;margin-top:2px;}#trendTip.simple .tt-v{font-size:13px;line-height:1.55;white-space:pre-line;font-weight:600;}#trendTip .tt-d{font-size:12px;font-weight:600;margin-top:2px;}#trendTip.simple .tt-d{display:none;}#trendTip.simple{border-radius:12px;padding:8px 16px 9px;}#trendTip .up{color:#3ddc97;}#trendTip .down{color:#ff8a8a;}#trendTip .flat{color:#c7d9ee;}#trendHalo{position:fixed;z-index:9998;width:20px;height:20px;border-radius:50%;background:rgba(47,125,246,.28);pointer-events:none;opacity:0;transition:opacity .12s;}#trendHalo.on{opacity:1;}</style>
 <script>
 (function(){
  var tip,halo,guide;
@@ -891,12 +891,12 @@ function update(){
    type:'bar',
    orientation:'h',
    marker:{color:targetCategories.map(item=>item.pct===null?'#94a3b8':item.pct>=100?'#087f73':item.pct>=80?'#3b8f91':'#8ab7b0'),cornerradius:8,line:{color:'#075e59',width:0}},
+   // Se conserva el porcentaje como dato interno, sin duplicar etiquetas junto a las barras.
    text:targetPercents.map(v=>v===null?'Sin Target':num(v,1)+'%'),
-   textposition:'outside',
-   textfont:{color:'#20344b',size:11},
+   textposition:'none',
    cliponaxis:false,
    customdata:targetCategories.map(item=>[item.commission,item.target]),
-   hovertemplate:'%{y}<br>Comisión: %{customdata[0]:$,.2f}<br>Target: %{customdata[1]:$,.2f}<br>Comisión vs Target: %{text}<extra></extra>'
+   hovertemplate:'<extra></extra>'
  }],execLayout({
    // Ajusta el margen izquierdo a los nombres largos sin desperdiciar espacio en etiquetas cortas.
    margin:{l:Math.min(220,Math.max(115,Math.max(0,...targetLabels.map(label=>String(label).length))*6.5+24)),r:72,t:12,b:38},
@@ -907,7 +907,10 @@ function update(){
    annotations:[{xref:'x',yref:'paper',x:100,y:1.02,text:'100% META',showarrow:false,xanchor:'center',yanchor:'bottom',font:{size:10,color:'#92400e'},bgcolor:'#fff7ed',bordercolor:'#fdba74',borderwidth:1,borderpad:3}],
    showlegend:false
  }));
- if(window.bindSimpleTooltip)window.bindSimpleTooltip($('commissionVsTargetByLevel'),'bar',p=>({head:String(p.y)+' · Comisión vs Target',value:p.text||'Sin Target'}));
+ if(window.bindSimpleTooltip)window.bindSimpleTooltip($('commissionVsTargetByLevel'),'bar',p=>({
+   head:String(p.y)+' · Comisión vs Target',
+   value:'Comisión: '+money(p.customdata[0])+'\nTarget: '+money(p.customdata[1])+'\nCumplimiento: '+(p.text||'Sin Target')
+ }));
  bindChartClick('commissionVsTargetByLevel',ev=>{
    if(!ev.points||!ev.points.length)return;
    const name=String(ev.points[0].y);
