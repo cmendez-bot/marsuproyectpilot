@@ -533,6 +533,10 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   min-height:270px !important;
   max-height:270px !important;
 }
+#analisis-desempeno #branches,
+#analisis-desempeno #commissionVsTargetByLevel {
+  background:#fff;
+}
 #commissionVsTargetByLevel { background:#fff; }
 @media (max-width:900px) {
   #analisis-desempeno { grid-template-columns:minmax(0,1fr) !important; }
@@ -853,9 +857,26 @@ function update(){
  $('branchesTitle').textContent='Desempeño';
  $('branchesDesc').textContent='Comparativo por '+comparisonLabel+' según la métrica seleccionada.';
  const branchKey=$('branchesMetric').value || COLUMNAS.ccv;
- const byB=group(d,comparisonField),branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],branchKey)-avgMetric(byB[a],branchKey)).slice(0,12);
+ const byB=group(d,comparisonField),branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],branchKey)-avgMetric(byB[a],branchKey)).slice(0,10);
  const branchVals=branches.map(k=>avgMetric(byB[k],branchKey));
- plot('branches',[{x:branchVals,y:branches,type:'bar',orientation:'h',marker:{color:branches.map((item,i)=>['#087f73','#0b8f86','#129b91','#168c9b','#197f91','#216f86'][i%6]),line:{color:'#075e59',width:0}},text:branchVals.map(v=>formatMetric(branchKey,v)),textposition:'outside',textfont:{color:'#20344b',size:11},cliponaxis:false,hoverlabel:{bgcolor:'#ffffff',bordercolor:'#8ba9c5',font:{color:'#20344b'}},hovertemplate:'%{y}<br>'+metricLabel(branchKey)+': %{x:,.2f}<extra></extra>'}],{paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',margin:{l:95,r:65,t:8,b:35},yaxis:{autorange:'reversed',showgrid:false,showline:false,zeroline:false,tickfont:{color:'#34465b',size:11}},xaxis:{title:{text:metricLabel(branchKey),font:{color:'#24364b',size:11}},showgrid:false,showline:true,linecolor:'#b8c7d8',linewidth:1.2,zeroline:false,tickfont:{color:'#34465b',size:10}}});
+ const performanceColors=branches.map((item,i)=>['#087f73','#0b8f86','#129b91','#168c9b','#197f91','#216f86'][i%6]);
+ plot('branches',[{
+   x:branchVals,
+   y:branches,
+   type:'bar',
+   orientation:'h',
+   marker:{color:performanceColors,cornerradius:8,line:{color:'#075e59',width:0}},
+   text:branchVals.map(v=>formatMetric(branchKey,v)),
+   textposition:'outside',
+   textfont:{color:'#34465b',size:10},
+   cliponaxis:false,
+   hoverinfo:'none'
+ }],execLayout({
+   margin:{l:Math.min(220,Math.max(115,Math.max(0,...branches.map(label=>String(label).length))*6.5+24)),r:72,t:12,b:38},
+   bargap:0.38,
+   yaxis:execY({autorange:'reversed',showgrid:false,tickfont:{color:'#34465b',size:10}}),
+   xaxis:execX({title:{text:metricLabel(branchKey),font:{size:10,color:'#34465b'},standoff:8}})
+ }));
  if(window.bindSimpleTooltip)window.bindSimpleTooltip($('branches'),'bar',p=>({head:String(p.y)+' · '+metricLabel(branchKey),value:formatMetric(branchKey,p.x)}));
  bindChartClick('branches',ev=>{
    if(!ev.points||!ev.points.length)return;
