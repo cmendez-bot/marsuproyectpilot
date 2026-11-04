@@ -271,6 +271,60 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* PARTE 3 — Proporción de gráficas, área útil y leyendas legibles.
+   Se aplica al final de la cascada para unificar las dimensiones sin cambiar paneles,
+   columnas, datos, fórmulas ni interacciones. */
+.layout > .panel > .chart {
+  height: 270px !important;
+  min-height: 270px !important;
+  max-height: 270px !important;
+  width: 100%;
+  min-width: 0;
+}
+#analisis-regional > .panel > .chart,
+#analisis-sucursales > .panel > .chart,
+#analisis-desempeno > .panel > .chart,
+#graficas-categoria > .panel > .chart {
+  height: 270px !important;
+  min-height: 270px !important;
+  max-height: 270px !important;
+}
+#analisis-regional > .panel,
+#analisis-sucursales > .panel,
+#analisis-desempeno > .panel,
+#graficas-categoria > .panel {
+  min-width: 0;
+  align-self: stretch;
+}
+#analisis-regional > .panel {
+  height: 350px !important;
+  min-height: 350px !important;
+  box-sizing: border-box !important;
+}
+/* Reservar espacio inferior para las leyendas horizontales de ambas gráficas por familia. */
+#familyTrend,
+#familyTrendCopy {
+  height: 270px !important;
+  min-height: 270px !important;
+  max-height: 270px !important;
+}
+.js-plotly-plot .legend text {
+  font-size: 10px !important;
+}
+@media (max-width: 700px) {
+  .layout > .panel > .chart,
+  #analisis-regional > .panel > .chart,
+  #analisis-sucursales > .panel > .chart,
+  #analisis-desempeno > .panel > .chart,
+  #graficas-categoria > .panel > .chart,
+  #familyTrend,
+  #familyTrendCopy {
+    height: 260px !important;
+    min-height: 260px !important;
+    max-height: 260px !important;
+  }
+}
 </style>
 </head>
 <body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="resumen" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Análisis regional</button><button class="navitem" data-target="analisis-sucursales" type="button">▤ &nbsp; Sucursales</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button><div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
@@ -673,7 +727,7 @@ function update(){
  const familyTickWeeks=pickTicks(fPeriods,($('familyTrend')&&$('familyTrend').clientWidth)||580,familyView==='month'?85:95,3,8);
  const famMax=Math.max(0,...familyTraces.flatMap(t=>t.y.filter(v=>v!=null&&isFinite(v))));
  const famRange=[0,famMax>0?famMax*1.18:1];
- plot('familyTrend',familyTraces,execLayout({hovermode:'x',hoverdistance:-1,showlegend:false,margin:{l:66,r:24,t:24,b:75},xaxis:execX({type:'category',tickmode:'array',tickvals:familyTickWeeks,ticktext:familyTickWeeks.map(fLabel),tickangle:-25,title:{text:familyView==='month'?'Mes':'Semana',standoff:14,font:{size:11,color:'#24364b'}}}),yaxis:execY({tickformat:',.0f',range:famRange,title:{text:'Kilos (kg)',standoff:12,font:{size:11,color:'#24364b'}}})}));
+ plot('familyTrend',familyTraces,execLayout({hovermode:'x',hoverdistance:-1,showlegend:true,legend:{orientation:'h',x:0.5,xanchor:'center',y:-0.30,yanchor:'top',font:{size:10},tracegroupgap:8},margin:{l:66,r:24,t:24,b:75},xaxis:execX({type:'category',tickmode:'array',tickvals:familyTickWeeks,ticktext:familyTickWeeks.map(fLabel),tickangle:-25,title:{text:familyView==='month'?'Mes':'Semana',standoff:14,font:{size:11,color:'#24364b'}}}),yaxis:execY({tickformat:',.0f',range:famRange,title:{text:'Kilos (kg)',standoff:12,font:{size:11,color:'#24364b'}}})}));
  if(window.bindMultiTooltip)window.bindMultiTooltip($('familyTrend'),p=>fLabel(p.x),v=>num(v,0)+' kg');
  const familyCopyView=VIEW_MODE.familyTrendCopy;
  // Esta gráfica usa exclusivamente los registros filtrados (d), tanto en semana como en mes.
@@ -690,7 +744,7 @@ function update(){
  const familyCopyTraces=cobroFamilyDefs.map(([key,label,color])=>({x:fcPeriods,y:fcPeriods.map(w=>fcGroups[w]?sumFieldSafe(fcGroups[w],key):0),name:label,type:'scatter',mode:'lines',connectgaps:false,line:{color:color,width:3,shape:'spline',smoothing:1.15},hoverinfo:'none'}));
  const familyCopyTicks=pickTicks(fcPeriods,($('familyTrendCopy')&&$('familyTrendCopy').clientWidth)||580,familyCopyView==='month'?85:95,3,8);
  const familyCopyMax=Math.max(0,...familyCopyTraces.flatMap(t=>t.y.filter(v=>Number.isFinite(v))));
- plot('familyTrendCopy',familyCopyTraces,execLayout({hovermode:'x',hoverdistance:-1,showlegend:false,margin:{l:78,r:24,t:24,b:75},xaxis:execX({type:'category',tickmode:'array',tickvals:familyCopyTicks,ticktext:familyCopyTicks.map(fcLabel),tickangle:-25,title:{text:familyCopyView==='month'?'Mes':'Semana',standoff:14,font:{size:11,color:'#24364b'}}}),yaxis:execY({tickformat:',.0f',tickprefix:'$',range:[0,familyCopyMax>0?familyCopyMax*1.18:1],title:{text:'Cobro (MXN)',standoff:12,font:{size:11,color:'#24364b'}}})}));
+ plot('familyTrendCopy',familyCopyTraces,execLayout({hovermode:'x',hoverdistance:-1,showlegend:true,legend:{orientation:'h',x:0.5,xanchor:'center',y:-0.30,yanchor:'top',font:{size:10},tracegroupgap:8},margin:{l:78,r:24,t:24,b:75},xaxis:execX({type:'category',tickmode:'array',tickvals:familyCopyTicks,ticktext:familyCopyTicks.map(fcLabel),tickangle:-25,title:{text:familyCopyView==='month'?'Mes':'Semana',standoff:14,font:{size:11,color:'#24364b'}}}),yaxis:execY({tickformat:',.0f',tickprefix:'$',range:[0,familyCopyMax>0?familyCopyMax*1.18:1],title:{text:'Cobro (MXN)',standoff:12,font:{size:11,color:'#24364b'}}})}));
  if(window.bindMultiTooltip)window.bindMultiTooltip($('familyTrendCopy'),p=>fcLabel(p.x),v=>money(v));
   // Comisión vs Target: suma de comisión total / suma de Target por semana.
   const targetView=VIEW_MODE.commissionTarget;
