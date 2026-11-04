@@ -897,6 +897,9 @@ function update(){
    margin:{l:115,r:72,t:12,b:38},
    xaxis:execX({ticksuffix:'%',title:{text:'Comisión / Target (%)',font:{size:10,color:'#34465b'},standoff:8},rangemode:'tozero'}),
    yaxis:execY({autorange:'reversed',showgrid:false,tickfont:{color:'#34465b',size:10}}),
+   // Referencia fija del 100%: permite identificar rápidamente quién alcanza o supera el target.
+   shapes:[{type:'line',xref:'x',yref:'paper',x0:100,x1:100,y0:0,y1:1,line:{color:'#d97706',width:2,dash:'dash'}}],
+   annotations:[{xref:'x',yref:'paper',x:100,y:1.02,text:'Meta 100%',showarrow:false,xanchor:'left',yanchor:'bottom',font:{size:10,color:'#92400e'},bgcolor:'#fff7ed',bordercolor:'#fdba74',borderwidth:1,borderpad:3}],
    showlegend:false
  }));
  bindChartClick('commissionVsTargetByLevel',ev=>{
