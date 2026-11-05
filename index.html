@@ -595,6 +595,9 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 #analisis-distribucion>.panel{background:#fff!important;border:1px solid #e7edf4!important;border-radius:14px!important;box-shadow:0 5px 18px rgba(18,45,75,.08)!important;padding:16px!important;color:#16324f!important;height:auto!important;min-height:370px!important;}
 #analisis-distribucion>.panel h2{color:#123b63!important;font-weight:750!important;margin:0 0 4px!important;}
 .distribution-subtitle{font-size:11px;color:#8795a5;margin:0 0 12px;}
+/* Etiquetas emergentes de las cuatro donas: tipografía limpia y esquinas redondeadas. */
+.distribution-panel .hoverlayer .hovertext rect{rx:10px;ry:10px;stroke-width:1.2px;}
+.distribution-panel .hoverlayer .hovertext text{font-family:Inter,'Segoe UI',Arial,sans-serif!important;font-size:12px!important;font-weight:600!important;}
 .distribution-main{display:grid;grid-template-columns:minmax(150px,.9fr) minmax(190px,1.1fr);gap:12px;align-items:center;min-height:205px;}
 .distribution-donut{width:100%;height:220px;min-width:0;}
 .distribution-legend{display:flex;flex-direction:column;gap:9px;min-width:0;}
@@ -825,8 +828,8 @@ function renderExecutiveDistribution(id,categories,palette,subtitle){
  }else{
    summary.innerHTML='<b>'+safeText(String(first.name))+'</b> concentra el <b>100%</b> de los registros.';
  }
- const trace={type:'pie',labels:categories.map(item=>item.name),values:categories.map(item=>item.count),hole:.58,sort:false,direction:'clockwise',rotation:270,textinfo:'percent',textposition:'inside',insidetextorientation:'horizontal',textfont:{color:'#fff',size:11,family:'Inter, Segoe UI, Arial, sans-serif'},marker:{colors,line:{color:'#fff',width:3}},hovertemplate:'<b>%{label}</b><br>%{percent} del total<br>%{value:,} registros<extra></extra>'};
- const layout={height:220,autosize:true,paper_bgcolor:'#fff',plot_bgcolor:'#fff',margin:{l:2,r:2,t:2,b:2},showlegend:false,hoverlabel:{bgcolor:'#fff',bordercolor:'#d9e4ef',font:{color:'#173b5e',size:11}},annotations:[{text:'<b>'+total.toLocaleString('es-MX')+'</b><br><span style="font-size:9px;color:#8795a5">TOTAL REGISTROS</span>',x:.5,y:.5,xref:'paper',yref:'paper',showarrow:false,font:{size:18,color:'#123b63',family:'Inter, Segoe UI, Arial, sans-serif'}}]};
+ const trace={type:'pie',labels:categories.map(item=>item.name),values:categories.map(item=>item.count),hole:.58,sort:false,direction:'clockwise',rotation:270,textinfo:'percent',textposition:'inside',insidetextorientation:'horizontal',textfont:{color:'#fff',size:12,family:'Inter, Segoe UI, Arial, sans-serif'},marker:{colors,line:{color:'#fff',width:3}},hovertemplate:'<b>%{label}</b><br>%{percent} del total<br>%{value:,} registros<extra></extra>'};
+ const layout={height:220,autosize:true,paper_bgcolor:'#fff',plot_bgcolor:'#fff',margin:{l:2,r:2,t:2,b:2},showlegend:false,hoverlabel:{bgcolor:'#ffffff',bordercolor:'#d9e4ef',font:{family:'Inter, Segoe UI, Arial, sans-serif',color:'#173b5e',size:12},align:'left'},annotations:[{text:'<b>'+total.toLocaleString('es-MX')+'</b><br><span style="font-size:9px;color:#8795a5">TOTAL REGISTROS</span>',x:.5,y:.5,xref:'paper',yref:'paper',showarrow:false,font:{size:18,color:'#123b63',family:'Inter, Segoe UI, Arial, sans-serif'}}]};
  Plotly.newPlot(chart,[trace],layout,{responsive:true,displayModeBar:false});
  const items=[...legend.querySelectorAll('.distribution-item')];
  const activate=index=>{items.forEach((el,i)=>el.classList.toggle('active',i===index));Plotly.restyle(chart,{ 'marker.opacity':categories.map((_,i)=>i===index?1:.28)});};
