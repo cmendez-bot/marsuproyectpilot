@@ -610,7 +610,7 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .distribution-count{font-size:10px;color:#8795a5;margin:2px 0 5px 16px;}
 .distribution-track{height:5px;background:#edf1f5;border-radius:99px;overflow:hidden;margin-left:16px;}
 .distribution-fill{height:100%;border-radius:99px;transition:width .2s;}
-.distribution-summary{margin-top:10px;padding:9px 11px;background:#eef6fd;border-left:3px solid #2878b9;border-radius:7px;color:#34536e;font-size:11px;line-height:1.45;}
+.distribution-summary{margin-top:10px;padding:9px 11px;background:color-mix(in srgb,var(--distribution-summary-accent,#2878b9) 10%,#fff);border:1px solid color-mix(in srgb,var(--distribution-summary-accent,#2878b9) 24%,#fff);border-left:4px solid var(--distribution-summary-accent,#2878b9);border-radius:9px;color:#34536e;font-size:11px;line-height:1.45;}
 .distribution-footnote{font-size:9px;color:#9aa6b2;margin:7px 1px 0;}
 @media(max-width:650px){#analisis-distribucion>.panel{min-height:0!important}.distribution-main{grid-template-columns:minmax(0,1fr);gap:4px}.distribution-donut{height:205px}.distribution-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}}
 
@@ -821,6 +821,8 @@ function renderExecutiveDistribution(id,categories,palette,subtitle){
  const legend=main.querySelector('.distribution-legend');
  legend.innerHTML=categories.map((item,index)=>'<div class="distribution-item" data-point="'+index+'"><div class="distribution-item-head"><span class="distribution-swatch" style="background:'+colors[index]+'"></span><span class="distribution-name">'+safeText(String(item.name))+'</span><span class="distribution-pct">'+(item.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</span></div><div class="distribution-count">'+item.count.toLocaleString('es-MX')+' registros</div><div class="distribution-track"><div class="distribution-fill" style="width:'+(item.count/total*100)+'%;background:'+colors[index]+'"></div></div></div>').join('');
  const summary=panel.querySelector('[data-summary="'+id+'"]');
+ const summaryColor=palette[Math.min(2,palette.length-1)]||'#2878b9';
+ summary.style.setProperty('--distribution-summary-accent',summaryColor);
  const normalizeCategory=value=>String(value??'').trim().toLowerCase().replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u');
  const priorityCategories=categories.filter(item=>{const name=normalizeCategory(item.name);return name==='critico'||name==='en desarrollo';});
  const priorityCount=priorityCategories.reduce((sum,item)=>sum+item.count,0);
