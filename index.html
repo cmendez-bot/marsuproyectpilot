@@ -594,12 +594,14 @@ let scatterExportRows = [];
 const $ = id => document.getElementById(id);
 const money = v => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(Number(v)||0);
 const num = (v,d=1) => Number.isFinite(Number(v)) ? Number(v).toLocaleString('es-MX',{maximumFractionDigits:d,minimumFractionDigits:d}) : '—';
-const avg = (arr,key) => {const a=arr.map(r=>Number(r[key])).filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0};
+const avg = (arr,key) => {const a=arr.map(r=>r[key]).filter(v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))).map(Number);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0};
 // DS ponderado por CCV: suma(CCV × DS) / suma(CCV).
 function dsPonderado(arr){
- const totalCCV=arr.reduce((sum,r)=>sum+(Number(r[COLUMNAS.ccv])||0),0);
+ // Solo pondera registros que tienen DS informado; un DS vacío no debe entrar como cero.
+ const validRows=arr.filter(r=>r[COLUMNAS.ds]!==null&&r[COLUMNAS.ds]!==undefined&&r[COLUMNAS.ds]!==''&&Number.isFinite(Number(r[COLUMNAS.ds]))&&r[COLUMNAS.ccv]!==null&&r[COLUMNAS.ccv]!==undefined&&r[COLUMNAS.ccv]!==''&&Number.isFinite(Number(r[COLUMNAS.ccv])));
+ const totalCCV=validRows.reduce((sum,r)=>sum+(Number(r[COLUMNAS.ccv])||0),0);
  if(!totalCCV) return 0;
- const sumaPonderada=arr.reduce((sum,r)=>sum+((Number(r[COLUMNAS.ccv])||0)*(Number(r[COLUMNAS.ds])||0)),0);
+ const sumaPonderada=validRows.reduce((sum,r)=>sum+((Number(r[COLUMNAS.ccv])||0)*Number(r[COLUMNAS.ds])),0);
  return sumaPonderada/totalCCV;
 }
 function avgMetric(arr,key){return key===COLUMNAS.ds?dsPonderado(arr):(key===COLUMNAS.cumplimiento?cumplimientoVolumen(arr):avg(arr,key))}
@@ -1210,10 +1212,10 @@ function update(){
  $('routeSummary').innerHTML=routeSummaryRows || '<tr><td colspan="14">No hay rutas para los filtros seleccionados.</td></tr>';
 }
 function parseNumericValue(value){
-  if (value === null || value === undefined || value === '') return 0;
+  if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) return null;
   if (typeof value === 'number') return value;
   let s = String(value).trim();
-  if (!s || s === '-' || s === '—') return 0;
+  if (!s || s === '-' || s === '—') return null;
   const isPercent = s.includes('%');
   s = s.replace(/[^\d,.\-]/g, '');
   if (s.includes(',') && s.includes('.')) {
