@@ -779,6 +779,15 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   }
 }
 
+
+
+/* Paso 3: separación uniforme entre la franja de controles y el área de dibujo.
+   Se conservan las alturas actuales de cada gráfica y no se muestran ejes ni cuadrículas. */
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria,#graficas-categoria2) > .panel > .chart,
+#analisis-familia .familyTrendPanel > .chart {
+  margin-top:10px!important;
+}
+
 </style>
 <script>
 (function(){
