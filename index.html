@@ -1074,7 +1074,13 @@ function update(){
   const weekCustom=weekVals.map((v,i)=>{
     const prev=i>0?weekVals[i-1]:null;
     const delta=(v==null||prev==null)?'—':((v-prev)>0?'+':'')+formatMetric(branchTrendKey,v-prev);
-    return [formatMetric(branchTrendKey,v),delta,(v==null||prev==null)?null:(v-prev)];
+    const periodRows=btGroups[btPeriods[i]]||[];
+    const volumeReal=sumFieldSafe(periodRows,COLUMNAS.realVolumen);
+    const volumeObjective=sumFieldSafe(periodRows,COLUMNAS.objetivoVolumen);
+    const valueLabel=branchTrendKey===COLUMNAS.cumplimiento
+      ? 'Cumplimiento: '+formatMetric(branchTrendKey,v)+' · Real: '+num(volumeReal,0)+' · Objetivo: '+num(volumeObjective,0)
+      : formatMetric(branchTrendKey,v);
+    return [valueLabel,delta,(v==null||prev==null)?null:(v-prev)];
   });
   const branchTraces=[{x:btPeriods,y:weekVals,customdata:weekCustom,name:trendLabel,type:'scatter',mode:'lines',connectgaps:false,line:{color:'#1d4f7a',width:3,shape:'spline',smoothing:1.05},marker:{color:'#ffffff',size:5,line:{color:'#1d4f7a',width:1.5}},hoverinfo:'none'}];
   const weekAxisFormat=branchTrendKey===COLUMNAS.cumplimiento?'.0%':(branchTrendKey===COLUMNAS.ccv?',.0f':( [COLUMNAS.ds,COLUMNAS.pagoTotal,COLUMNAS.comisionCCV,COLUMNAS.cobroVolumen].includes(branchTrendKey)?'$,.0f':',.0f'));
