@@ -867,9 +867,21 @@ function update(){
  const branchKey=$('branchesMetric').value || COLUMNAS.ccv;
  const byB=group(d,comparisonField),branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],branchKey)-avgMetric(byB[a],branchKey)).slice(0,10);
  const branchVals=branches.map(k=>avgMetric(byB[k],branchKey));
+ const barColorScale=(values)=>{
+   const nums=values.map(v=>Number(v)).filter(v=>Number.isFinite(v));
+   const min=nums.length?Math.min(...nums):0,max=nums.length?Math.max(...nums):1;
+   const low=[217,240,236],high=[8,127,115];
+   return values.map(value=>{
+     const n=Number(value);
+     if(value===null||value===undefined||!Number.isFinite(n))return '#cbd5e1';
+     const t=max===min?0.65:Math.max(0,Math.min(1,(n-min)/(max-min)));
+     const rgb=low.map((c,i)=>Math.round(c+(high[i]-c)*t));
+     return '#'+rgb.map(c=>c.toString(16).padStart(2,'0')).join('');
+   });
+ };
  const copy1Key=$('branchesCopy1Metric').value || COLUMNAS.ccv;
  const copy1Vals=branches.map(k=>avgMetric(byB[k],copy1Key));
- const performanceColors=branches.map((item,i)=>['#087f73','#0b8f86','#129b91','#168c9b','#197f91','#216f86'][i%6]);
+ const performanceColors=barColorScale(branchVals);
  plot('branches',[{
    x:branchVals,
    y:branches,
@@ -889,7 +901,7 @@ function update(){
  }));
  if(window.bindSimpleTooltip)window.bindSimpleTooltip($('branches'),'bar',p=>({head:String(p.y)+' · '+metricLabel(branchKey),value:formatMetric(branchKey,p.x)}));
  // La gráfica CCV tiene su propio selector, limitado a CCV Real y DS Promedio ponderado.
- const copy1Colors=branches.map((item,i)=>['#087f73','#0b8f86','#129b91','#168c9b','#197f91','#216f86'][i%6]);
+ const copy1Colors=barColorScale(copy1Vals);
  plot('branchesCopy1',[{
    x:copy1Vals,y:branches,type:'bar',orientation:'h',
    marker:{color:copy1Colors,cornerradius:8,line:{color:'#075e59',width:0}},
@@ -911,7 +923,7 @@ function update(){
  const copy2Key=COLUMNAS.cumplimiento;
  const copy2Branches=Object.keys(byB).sort((a,b)=>cumplimientoVolumen(byB[b])-cumplimientoVolumen(byB[a])).slice(0,10);
  const copy2Vals=copy2Branches.map(k=>cumplimientoVolumen(byB[k]));
- const copy2Colors=copy2Branches.map((item,i)=>['#087f73','#0b8f86','#129b91','#168c9b','#197f91','#216f86'][i%6]);
+ const copy2Colors=barColorScale(copy2Vals);
  const copy2Layout=execLayout({
    margin:{l:Math.min(220,Math.max(115,Math.max(0,...copy2Branches.map(label=>String(label).length))*6.5+24)),r:72,t:12,b:38},
    bargap:0.38,
@@ -954,7 +966,7 @@ function update(){
  // Cada barra tiene una base uniforme que representa el 100% de la meta.
  // El relleno muestra únicamente el porcentaje real de comisión vs target.
  const targetAxisMax=Math.max(110,Math.ceil(Math.max(0,...targetPercents.filter(value=>value!==null))*1.2/10)*10);
- const targetColors=targetCategories.map(item=>item.pct===null?'#94a3b8':item.pct>=100?'#087f73':item.pct>=80?'#3b8f91':'#8ab7b0');
+ const targetColors=barColorScale(targetPercents);
  plot('commissionVsTargetByLevel',[
    {
      x:targetLabels.map(()=>100),
