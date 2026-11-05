@@ -802,7 +802,7 @@ function renderExecutiveDistribution(id,categories,palette,subtitle){
    panel.insertBefore(main,chart);main.appendChild(chart);main.appendChild(legend);
    chart.classList.add('distribution-donut');
    const summary=document.createElement('div');summary.className='distribution-summary';summary.dataset.summary=id;panel.appendChild(summary);
-   const foot=document.createElement('div');foot.className='distribution-footnote';foot.textContent='Pasa el cursor sobre una categoría para consultar su participación y registros.';panel.appendChild(foot);
+
  }else{
    // Mantener una sola dona y una sola leyenda aunque el render se ejecute repetidamente.
    const extraMains=[...panel.querySelectorAll('.distribution-main')].filter(node=>node!==main);
