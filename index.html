@@ -825,13 +825,8 @@ function pickTicks(arr,width,px,minT,maxT){const n=arr.length;if(!n)return [];co
 function update(){
  if(!DATA.length)return;
  const d=filtered();
- // Semanas evaluadas = combinaciones únicas de año + mes + semana, sin duplicar preventistas/registros.
- const evaluatedPeriods=uniq(d.map(r=>{
-   const year=String(r[COLUMNAS.anio]??'').trim();
-   const month=String(r[COLUMNAS.mes]??'').trim().toLocaleUpperCase('es-MX');
-   const week=String(r[COLUMNAS.semana]??'').trim();
-   return year&&month&&week?`${year}|${month}|${week}`:'';
- }).filter(Boolean));
+ // Semanas evaluadas usan la misma llave año-semana que las semanas con comisión y las tendencias.
+ const evaluatedPeriods=weekValues(d);
  $('kweeksEvaluated').textContent=num(evaluatedPeriods.length,0);
  const commissionByWeek=new Map();d.forEach(r=>{const week=periodValue(r);if(!week)return;commissionByWeek.set(week,(commissionByWeek.get(week)||0)+(Number(r[COLUMNAS.pagoTotal])||0));});
  $('kweeksWithCommission').textContent=num([...commissionByWeek.values()].filter(total=>total>0).length,0);
