@@ -11,7 +11,7 @@ window.execX=function(o){return Object.assign({showgrid:false,showline:false,zer
 window.execY=function(o){return Object.assign({showgrid:false,showline:false,zeroline:false,tickfont:{color:'#34465b',size:10},automargin:true},o||{});};
 window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',font:window.execFont,hoverlabel:window.execHover,hovermode:'closest',showlegend:false},o||{});};
 </script>
-<style>#trendTip{position:fixed;z-index:9999;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;background:#0f2747;color:#fff;border-radius:10px;padding:9px 14px 10px;box-shadow:0 8px 20px rgba(11,36,71,.28);font-family:Inter,Segoe UI,Arial,sans-serif;white-space:nowrap;}#trendTip.multi{white-space:normal;max-width:260px;}#trendTip.multi .tt-v{font-size:13px;line-height:1.55;white-space:pre-line;font-weight:600;}#trendTip.on{opacity:1;transform:none;}#trendTip:after{content:"";position:absolute;left:var(--ax,24px);bottom:-5px;width:10px;height:10px;background:#0f2747;transform:rotate(45deg);border-radius:2px;}#trendTip.below:after{bottom:auto;top:-5px;}#trendTip .tt-h{font-size:11px;color:#c7d9ee;letter-spacing:.02em;}#trendTip .tt-v{font-size:22px;font-weight:700;line-height:1.15;margin-top:2px;}#trendTip.simple .tt-v{font-size:13px;line-height:1.55;white-space:pre-line;font-weight:600;}#trendTip .tt-d{font-size:12px;font-weight:600;margin-top:2px;}#trendTip.simple .tt-d{display:none;}#trendTip.simple{border-radius:12px;padding:8px 16px 9px;}#trendTip .up{color:#3ddc97;}#trendTip .down{color:#ff8a8a;}#trendTip .flat{color:#c7d9ee;}#trendHalo{position:fixed;z-index:9998;width:20px;height:20px;border-radius:50%;background:rgba(47,125,246,.28);pointer-events:none;opacity:0;transition:opacity .12s;}#trendHalo.on{opacity:1;}
+<style>#trendTip{position:fixed;z-index:9999;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;background:#0f2747;color:#fff;border-radius:10px;padding:9px 14px 10px;box-shadow:0 8px 20px rgba(11,36,71,.28);font-family:Inter,Segoe UI,Arial,sans-serif;white-space:nowrap;}#trendTip.multi{white-space:normal;max-width:260px;}#trendTip.multi .tt-v{font-size:13px;line-height:1.55;white-space:pre-line;font-weight:600;}#trendTip.on{opacity:1;transform:none;}#trendTip:after{content:"";position:absolute;left:var(--ax,24px);bottom:-5px;width:10px;height:10px;background:#0f2747;transform:rotate(45deg);border-radius:2px;}#trendTip.below:after{bottom:auto;top:-5px;}#trendTip .tt-h{font-size:11px;color:#c7d9ee;letter-spacing:.02em;}#trendTip .tt-v{font-size:22px;font-weight:700;line-height:1.15;margin-top:2px;}#trendTip.simple .tt-v{font-size:13px;line-height:1.55;white-space:pre-line;font-weight:600;}#trendTip .tt-d{font-size:12px;font-weight:600;margin-top:2px;}#trendTip .tt-rows{font-size:11px;line-height:1.5;color:#d8e5f2;white-space:pre-line;margin-top:5px;padding-top:5px;border-top:1px solid rgba(216,229,242,.22);}#trendTip.simple .tt-d{display:none;}#trendTip.simple{border-radius:12px;padding:8px 16px 9px;}#trendTip .up{color:#3ddc97;}#trendTip .down{color:#ff8a8a;}#trendTip .flat{color:#c7d9ee;}#trendHalo{position:fixed;z-index:9998;width:20px;height:20px;border-radius:50%;background:rgba(47,125,246,.28);pointer-events:none;opacity:0;transition:opacity .12s;}#trendHalo.on{opacity:1;}
 /* Copias de Desempeño: mismas dimensiones y distribución que las tarjetas principales. */
 #graficas-categoria{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch;}
 #graficas-categoria>.panel{min-width:0!important;width:100%!important;height:350px!important;min-height:350px!important;box-sizing:border-box!important;}
@@ -64,6 +64,9 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
    else if(d>0){dEl.className='tt-d up';dEl.textContent='\u25B2 '+cd[1]+' vs. anterior';}
    else if(d<0){dEl.className='tt-d down';dEl.textContent='\u25BC '+cd[1]+' vs. anterior';}
    else{dEl.className='tt-d flat';dEl.textContent='= sin cambio vs. anterior';}
+   var extra=tip.querySelector('.tt-rows');
+   extra.textContent=cd[3]!=null?cd[3]:'';
+   extra.style.display=cd[3]!=null?'block':'none';
    var pos=null,b=p.bbox,r=3;
    try{
     var xa=p.xaxis,ya=p.yaxis,sv=el.querySelector('.main-svg')||el,sr=sv.getBoundingClientRect();
@@ -1192,10 +1195,11 @@ function update(){
     const periodRows=btGroups[btPeriods[i]]||[];
     const volumeReal=sumFieldSafe(periodRows,COLUMNAS.realVolumen);
     const volumeObjective=sumFieldSafe(periodRows,COLUMNAS.objetivoVolumen);
-    const valueLabel=branchTrendKey===COLUMNAS.cumplimiento
-      ? 'Volumen real: '+num(volumeReal,0)+'\nVolumen objetivo: '+num(volumeObjective,0)+'\nCumplimiento volumen: '+formatMetric(branchTrendKey,v)
-      : formatMetric(branchTrendKey,v);
-    return [valueLabel,delta,(v==null||prev==null)?null:(v-prev)];
+    const valueLabel=formatMetric(branchTrendKey,v);
+    const extraLabel=branchTrendKey===COLUMNAS.cumplimiento
+      ? 'Volumen real: '+num(volumeReal,0)+'\nVolumen objetivo: '+num(volumeObjective,0)
+      : null;
+    return [valueLabel,delta,(v==null||prev==null)?null:(v-prev),extraLabel];
   });
   const branchTraces=[{x:btPeriods,y:weekVals,customdata:weekCustom,name:trendLabel,type:'scatter',mode:'lines',connectgaps:false,line:{color:'#1d4f7a',width:3,shape:'spline',smoothing:1.05},marker:{color:'#ffffff',size:5,line:{color:'#1d4f7a',width:1.5}},hoverinfo:'none'}];
   const weekAxisFormat=branchTrendKey===COLUMNAS.cumplimiento?'.0%':(branchTrendKey===COLUMNAS.ccv?',.0f':( [COLUMNAS.ds,COLUMNAS.pagoTotal,COLUMNAS.comisionCCV,COLUMNAS.cobroVolumen].includes(branchTrendKey)?'$,.0f':',.0f'));
