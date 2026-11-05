@@ -821,13 +821,12 @@ function renderExecutiveDistribution(id,categories,palette,subtitle){
  const legend=main.querySelector('.distribution-legend');
  legend.innerHTML=categories.map((item,index)=>'<div class="distribution-item" data-point="'+index+'"><div class="distribution-item-head"><span class="distribution-swatch" style="background:'+colors[index]+'"></span><span class="distribution-name">'+safeText(String(item.name))+'</span><span class="distribution-pct">'+(item.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</span></div><div class="distribution-count">'+item.count.toLocaleString('es-MX')+' registros</div><div class="distribution-track"><div class="distribution-fill" style="width:'+(item.count/total*100)+'%;background:'+colors[index]+'"></div></div></div>').join('');
  const summary=panel.querySelector('[data-summary="'+id+'"]');
- const first=categories[0],second=categories[1];
- if(second){
-   const combined=first.count+second.count;
-   summary.innerHTML='<b>'+safeText(String(first.name))+'</b> concentra el <b>'+ (first.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b> de los registros; junto con <b>'+safeText(String(second.name))+'</b> suman el <b>'+(combined/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b>.';
- }else{
-   summary.innerHTML='<b>'+safeText(String(first.name))+'</b> concentra el <b>100%</b> de los registros.';
- }
+ const normalizeCategory=value=>String(value??'').trim().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();
+ const criticalCount=categories.find(item=>normalizeCategory(item.name)==='critico')?.count||0;
+ const developingCount=categories.find(item=>normalizeCategory(item.name)==='en desarrollo')?.count||0;
+ const priorityCount=criticalCount+developingCount;
+ const priorityPct=(priorityCount/total*100).toLocaleString('es-MX',{maximumFractionDigits:1});
+ summary.innerHTML='<b>Crítico</b> y <b>En Desarrollo</b> representan en conjunto el <b>'+priorityPct+'%</b> de los registros ('+priorityCount.toLocaleString('es-MX')+' registros).';
  const trace={type:'pie',labels:categories.map(item=>item.name),values:categories.map(item=>item.count),hole:.58,sort:false,direction:'clockwise',rotation:270,textinfo:'percent',textposition:'inside',insidetextorientation:'horizontal',textfont:{color:'#fff',size:12,family:'Inter, Segoe UI, Arial, sans-serif'},marker:{colors,line:{color:'#fff',width:3}},hovertemplate:'<b>%{label}</b><br>%{percent} del total<br>%{value:,} registros<extra></extra>'};
  const layout={height:220,autosize:true,paper_bgcolor:'#fff',plot_bgcolor:'#fff',margin:{l:2,r:2,t:2,b:2},showlegend:false,hoverlabel:{bgcolor:'#ffffff',bordercolor:'#d9e4ef',font:{family:'Inter, Segoe UI, Arial, sans-serif',color:'#173b5e',size:12},align:'left'},annotations:[{text:'<b>'+total.toLocaleString('es-MX')+'</b><br><span style="font-size:9px;color:#8795a5">TOTAL REGISTROS</span>',x:.5,y:.5,xref:'paper',yref:'paper',showarrow:false,font:{size:18,color:'#123b63',family:'Inter, Segoe UI, Arial, sans-serif'}}]};
  Plotly.newPlot(chart,[trace],layout,{responsive:true,displayModeBar:false});
