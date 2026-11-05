@@ -1908,16 +1908,6 @@ setInterval(cargarDatos, 3600000);
         <button class="criteria-tab" type="button" role="tab" aria-selected="false" data-tab="weeks">Semanas con comisión</button>
       </nav>
       <section class="criteria-pane active" id="criteriaPane-general" role="tabpanel">
-        <div class="criteria-legend" aria-label="Leyenda de clasificaciones">
-          <span class="criteria-chip critical">Crítico</span>
-          <span class="criteria-chip development">En Desarrollo</span>
-          <span class="criteria-chip acceptable">Aceptable</span>
-          <span class="criteria-chip outstanding">Sobresaliente</span>
-        </div>
-        <div class="criteria-toolbar">
-          <div class="criteria-search-wrap"><span>⌕</span><input id="criteriaSearch" type="search" placeholder="Buscar clasificación o combinación..." autocomplete="off"></div>
-          <span class="criteria-count" id="criteriaCount">64 combinaciones</span>
-        </div>
         <div class="criteria-table-wrap">
           <table class="criteria-table">
             <thead><tr><th>Clasificación general</th><th>Desempeño CCV</th><th>Desempeño volumen</th><th>Semanas con comisión</th></tr></thead>
@@ -1927,7 +1917,6 @@ setInterval(cargarDatos, 3600000);
         <div class="criteria-note"><span>✦</span> La clasificación general corresponde a la combinación de los tres criterios mostrados.</div>
       </section>
       <section class="criteria-pane" id="criteriaPane-ccv" role="tabpanel" hidden>
-        <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
         <div class="criteria-table-wrap criteria-compact ccv">
           <table class="criteria-table criteria-compact-table">
             <thead><tr><th>Desempeño CCV</th><th>Rango</th></tr></thead>
@@ -1942,7 +1931,6 @@ setInterval(cargarDatos, 3600000);
         <div class="criteria-note"><span>✦</span> Cada nivel de desempeño CCV corresponde al rango indicado.</div>
       </section>
       <section class="criteria-pane" id="criteriaPane-volume" role="tabpanel" hidden>
-        <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
         <div class="criteria-table-wrap criteria-compact volume">
           <table class="criteria-table criteria-compact-table">
             <thead><tr><th>Desempeño Volúmen</th><th>% Cumplimiento Volúmen</th></tr></thead>
@@ -1957,7 +1945,6 @@ setInterval(cargarDatos, 3600000);
         <div class="criteria-note"><span>✦</span> Los niveles se determinan según el porcentaje de cumplimiento de volumen.</div>
       </section>
       <section class="criteria-pane" id="criteriaPane-weeks" role="tabpanel" hidden>
-        <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
         <div class="criteria-table-wrap criteria-compact weeks">
           <table class="criteria-table criteria-compact-table">
             <thead><tr><th>Desempeño semanas con comisión</th><th>% Semanas comisionadas</th></tr></thead>
@@ -1983,11 +1970,9 @@ setInterval(cargarDatos, 3600000);
  const openBtn=document.getElementById('openCriteria');
  const closeBtn=document.getElementById('closeCriteria');
  const tbody=document.getElementById('criteriaRows');
- const search=document.getElementById('criteriaSearch');
- const count=document.getElementById('criteriaCount');
  const tabs=[...modal.querySelectorAll('.criteria-tab')];
  const panes=[...modal.querySelectorAll('.criteria-pane')];
- if(!modal||!openBtn||!closeBtn||!tbody||!search)return;
+ if(!modal||!openBtn||!closeBtn||!tbody)return;
  const names={C:'Crítico',D:'En Desarrollo',A:'Aceptable',S:'Sobresaliente'};
  const cssNames={C:'critical',D:'development',A:'acceptable',S:'outstanding'};
  const matrix="C|C|C|C\nC|C|C|D\nC|C|C|A\nD|C|C|S\nC|C|D|C\nC|C|D|D\nD|C|D|A\nD|C|D|S\nC|C|A|C\nD|C|A|D\nD|C|A|A\nA|C|A|S\nD|C|S|C\nD|C|S|D\nA|C|S|A\nA|C|S|S\nC|D|C|C\nC|D|C|D\nD|D|C|A\nD|D|C|S\nC|D|D|C\nD|D|D|D\nD|D|D|A\nA|D|D|S\nD|D|A|C\nD|D|A|D\nA|D|A|A\nA|D|A|S\nD|D|S|C\nA|D|S|D\nA|D|S|A\nA|D|S|S\nC|A|C|C\nD|A|C|D\nD|A|C|A\nA|A|C|S\nD|A|D|C\nD|A|D|D\nA|A|D|A\nA|A|D|S\nD|A|A|C\nA|A|A|D\nA|A|A|A\nA|A|A|S\nA|A|S|C\nA|A|S|D\nA|A|S|A\nS|A|S|S\nD|S|C|C\nD|S|C|D\nA|S|C|A\nA|S|C|S\nD|S|D|C\nA|S|D|D\nA|S|D|A\nA|S|D|S\nA|S|A|C\nA|S|A|D\nA|S|A|A\nS|S|A|S\nA|S|S|C\nA|S|S|D\nS|S|S|A\nS|S|S|S".split('\n').map(line=>line.split('|'));
@@ -1995,23 +1980,18 @@ setInterval(cargarDatos, 3600000);
  // En cada columna: Crítico, En Desarrollo, Aceptable y Sobresaliente.
  const priority={C:0,D:1,A:2,S:3};
  matrix.sort((a,b)=>[0,1,2,3].reduce((result,index)=>result||priority[a[index]]-priority[b[index]],0));
- function render(query=''){
-   const q=query.trim().toLocaleLowerCase('es');
-   const filtered=matrix.filter(row=>row.map(v=>names[v]).join(' ').toLocaleLowerCase('es').includes(q));
-   tbody.innerHTML=filtered.map(row=>'<tr>'+row.map(v=>'<td><span class="criteria-value '+cssNames[v]+'">'+names[v]+'</span></td>').join('')+'</tr>').join('');
-   count.textContent=filtered.length+' de 64 combinaciones';
-   if(!filtered.length)tbody.innerHTML='<tr><td colspan="4" style="padding:24px;color:#8191a0">No se encontraron combinaciones con esa búsqueda.</td></tr>';
+ function render(){
+   tbody.innerHTML=matrix.map(row=>'<tr>'+row.map(v=>'<td><span class="criteria-value '+cssNames[v]+'">'+names[v]+'</span></td>').join('')+'</tr>').join('');
  }
  function activateTab(name){
    tabs.forEach(tab=>{const active=tab.dataset.tab===name;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));});
    panes.forEach(pane=>{const active=pane.id==='criteriaPane-'+name;pane.classList.toggle('active',active);pane.hidden=!active;});
  }
  tabs.forEach(tab=>tab.addEventListener('click',()=>activateTab(tab.dataset.tab)));
- function open(){activateTab('general');render(search.value);modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';search.focus();}
+ function open(){activateTab('general');render();modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
  function close(){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';openBtn.focus();}
  openBtn.addEventListener('click',open);
  closeBtn.addEventListener('click',close);
- search.addEventListener('input',()=>render(search.value));
  modal.addEventListener('click',ev=>{if(ev.target===modal)close();});
  document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&modal.classList.contains('is-open'))close();});
  render();
