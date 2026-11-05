@@ -590,6 +590,7 @@ const COLUMNAS = {
   colaboradorPago: 'Tipo de Pago'
 };
 let DATA = [];
+let DATA_REQUEST_ID = 0;
 let scatterExportRows = [];
 const $ = id => document.getElementById(id);
 const money = v => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(Number(v)||0);
@@ -1293,13 +1294,17 @@ function cargarDatos(){
     $('status').textContent='Abre esta página desde la URL publicada de Google Apps Script (/exec).';
     return;
   }
+  // Cada consulta recibe un identificador; solo la más reciente puede actualizar el tablero.
+  const requestId=++DATA_REQUEST_ID;
   $('status').textContent='Consultando BD Preventas…';
   google.script.run
     .withSuccessHandler(respuesta=>{
+      if(requestId!==DATA_REQUEST_ID)return;
       console.log('Respuesta del servidor:', respuesta);
       loadRows(respuesta && respuesta.rows);
     })
     .withFailureHandler(err=>{
+      if(requestId!==DATA_REQUEST_ID)return;
       $('status').textContent='No se pudieron cargar los datos: '+(err && err.message ? err.message : err);
     })
     .getDashboardData();
