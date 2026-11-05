@@ -1193,7 +1193,7 @@ function update(){
     const volumeReal=sumFieldSafe(periodRows,COLUMNAS.realVolumen);
     const volumeObjective=sumFieldSafe(periodRows,COLUMNAS.objetivoVolumen);
     const valueLabel=branchTrendKey===COLUMNAS.cumplimiento
-      ? 'Cumplimiento: '+formatMetric(branchTrendKey,v)+'\nVolumen real: '+num(volumeReal,0)+'\nVolumen objetivo: '+num(volumeObjective,0)
+      ? 'Volumen real: '+num(volumeReal,0)+'\nVolumen objetivo: '+num(volumeObjective,0)+'\nCumplimiento volumen: '+formatMetric(branchTrendKey,v)
       : formatMetric(branchTrendKey,v);
     return [valueLabel,delta,(v==null||prev==null)?null:(v-prev)];
   });
