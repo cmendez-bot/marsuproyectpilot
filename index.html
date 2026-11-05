@@ -1452,6 +1452,11 @@ function loadRows(rows){
     // Reconoce el encabezado de antigüedad aunque tenga espacios extra, acentos o diferencias de mayúsculas.
     const tenureHeader=Object.keys(o).find(k=>normalizeHeader(k)===normalizeHeader(COLUMNAS.antiguedad));
     if(tenureHeader && tenureHeader!==COLUMNAS.antiguedad) o[COLUMNAS.antiguedad]=o[tenureHeader];
+    // Resolver encabezados de desempeño aunque la hoja use diferencias de acentos, mayúsculas o espacios.
+    [COLUMNAS.desempenoCCV,COLUMNAS.desempenoVolumen].forEach(column=>{
+      const matchedHeader=Object.keys(o).find(k=>normalizeHeader(k)===normalizeHeader(column));
+      if(matchedHeader && matchedHeader!==column) o[column]=o[matchedHeader];
+    });
     // Convertir las métricas numéricas para que los promedios y las gráficas funcionen.
     [
       COLUMNAS.ccv, COLUMNAS.ds, COLUMNAS.comisionCCV, COLUMNAS.cobroVolumen,
