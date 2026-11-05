@@ -907,7 +907,7 @@ function update(){
  if(performanceCategories.length){
    const performanceTotal=performanceCategories.reduce((sum,item)=>sum+item.count,0);
    const performancePalette=['#063B75','#145A9E','#287FC0','#58A0D5','#91C2E8','#C1DDF3'];
-   plot('performanceDistribution',[{type:'pie',labels:performanceCategories.map(item=>item.name),values:performanceCategories.map(item=>item.count),sort:false,direction:'clockwise',textinfo:'label+percent',textposition:'inside',insidetextorientation:'auto',textfont:{color:'#ffffff',size:10},marker:{colors:performanceCategories.map((item,index)=>performancePalette[Math.min(index,performancePalette.length-1)]),line:{color:'#1c1c1c',width:2}},hovertemplate:'%{label}<br>%{percent} (%{value} registros)<extra></extra>'}],execLayout({height:245,margin:{l:8,r:8,t:8,b:42},showlegend:true,legend:{orientation:'h',x:0.5,xanchor:'center',y:-0.12,font:{size:9,color:'#c9c1c4'}},showlabel:true}));
+   plot('performanceDistribution',[{type:'pie',labels:performanceCategories.map(item=>item.name),values:performanceCategories.map(item=>item.count),sort:false,direction:'clockwise',textinfo:'label+percent',textposition:'inside',insidetextorientation:'auto',textfont:{color:'#ffffff',size:10},marker:{colors:performanceCategories.map((item,index)=>performancePalette[Math.min(index,performancePalette.length-1)]),line:{color:'#1c1c1c',width:2}},hovertemplate:'%{label}<br>%{percent} (%{value} registros)<extra></extra>'}],execLayout({height:245,margin:{l:8,r:8,t:8,b:42},showlegend:true,legend:{orientation:'h',x:0.5,xanchor:'center',y:-0.12,font:{size:9,color:'#c9c1c4'}}}));
  }else{
    $('performanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño para los filtros actuales.</div>';
  }
