@@ -1403,6 +1403,26 @@ function exportChartToExcel(chartId){
    a.href=url;a.download='Desempeno_'+categoryLabel.toLowerCase()+'_'+new Date().toISOString().slice(0,10)+'.csv';
    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);return;
  }
+ if(chartId==='branchTrend'){
+   const chart=$('branchTrend');
+   const trace=chart&&chart.data&&chart.data[0];
+   if(!trace||!Array.isArray(trace.x)||!Array.isArray(trace.y)){alert('No hay datos de cumplimiento para exportar con los filtros actuales.');return;}
+   const rows=[['Periodo','Cumplimiento (%)','Volumen real','Volumen objetivo']];
+   trace.x.forEach((period,i)=>{
+     const value=trace.y[i];
+     if(value===null||value===undefined||!Number.isFinite(Number(value)))return;
+     const label=String(trace.customdata?.[i]?.[0]??'');
+     const realMatch=label.match(/Volumen real:\\s*([\\d,.-]+)/i);
+     const objectiveMatch=label.match(/Volumen objetivo:\\s*([\\d,.-]+)/i);
+     const parseLabelNumber=match=>match?Number(match[1].replace(/,/g,'')):'';
+     rows.push([period,Number(value)*100,parseLabelNumber(realMatch),parseLabelNumber(objectiveMatch)]);
+   });
+   if(rows.length===1){alert('No hay puntos válidos de cumplimiento para exportar.');return;}
+   const csv='\\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');
+   a.href=url;a.download='Cumplimiento_volumen_tendencia_'+new Date().toISOString().slice(0,10)+'.csv';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);return;
+ }
  if(chartId==='scatter'){
    if(!scatterExportRows.length){alert('No hay puntos de antigüedad para exportar con los filtros actuales.');return;}
    const detailRows=[['Nombre del preventa','Semanas de antigüedad','DS Promedio','Sucursal','Ruta'],...scatterExportRows.map(row=>[row.preventista,row.antiguedad,row.dsPromedio,row.sucursal,row.ruta])];
