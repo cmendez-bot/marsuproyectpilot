@@ -1391,7 +1391,7 @@ function update(){
  const barColorScale=(values)=>{
    const nums=values.map(v=>Number(v)).filter(v=>Number.isFinite(v));
    const min=nums.length?Math.min(...nums):0,max=nums.length?Math.max(...nums):1;
-   const low=[217,240,236],high=[8,127,115];
+   const low=[217,240,236],high=[28,105,150];
    return values.map(value=>{
      const n=Number(value);
      if(value===null||value===undefined||!Number.isFinite(n))return '#cbd5e1';
