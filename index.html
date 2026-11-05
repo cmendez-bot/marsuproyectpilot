@@ -831,6 +831,37 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   :is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel > .chartExport{right:8px!important;bottom:8px!important;}
 }
 
+
+/* Comisión total: Semanal/Mensual inmediatamente a la izquierda de Exportar a Excel. */
+#analisis-desempeno > .panel:has(> #branches) {
+  position:relative!important;
+}
+#analisis-desempeno > .panel:has(> #branches) > .viewToggle {
+  position:absolute!important;
+  top:auto!important;
+  left:auto!important;
+  right:145px!important;
+  bottom:10px!important;
+  height:30px!important;
+  z-index:5!important;
+}
+#analisis-desempeno > .panel:has(> #branches) > .chartExport {
+  position:absolute!important;
+  top:auto!important;
+  left:auto!important;
+  right:10px!important;
+  bottom:10px!important;
+  height:30px!important;
+  min-height:30px!important;
+  margin:0!important;
+  padding:6px 9px!important;
+  white-space:nowrap!important;
+  z-index:5!important;
+}
+#analisis-desempeno > .panel:has(> #branches) > #branches {
+  margin-bottom:38px!important;
+}
+
 </style>
 <script>
 (function(){
