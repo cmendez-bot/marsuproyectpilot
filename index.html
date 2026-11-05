@@ -1949,8 +1949,20 @@ setInterval(cargarDatos, 3600000);
         </div>
         <div class="criteria-note"><span>✦</span> Los niveles se determinan según el porcentaje de cumplimiento de volumen.</div>
       </section>
-      <section class="criteria-pane criteria-pending" id="criteriaPane-weeks" role="tabpanel" hidden>
-        <div class="criteria-pending-card"><strong>Criterios de semanas con comisión</strong><span>La pestaña está preparada. Falta incorporar la tabla de rangos de este indicador.</span></div>
+      <section class="criteria-pane" id="criteriaPane-weeks" role="tabpanel" hidden>
+        <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
+        <div class="criteria-table-wrap">
+          <table class="criteria-table">
+            <thead><tr><th>Desempeño semanas con comisión</th><th>% Semanas comisionadas</th></tr></thead>
+            <tbody>
+              <tr><td><span class="criteria-value critical">Crítico</span></td><td>0% - 50%</td></tr>
+              <tr><td><span class="criteria-value development">En Desarrollo</span></td><td>50% - 70%</td></tr>
+              <tr><td><span class="criteria-value acceptable">Aceptable</span></td><td>70% - 80%</td></tr>
+              <tr><td><span class="criteria-value outstanding">Sobresaliente</span></td><td>+80%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="criteria-note"><span>✦</span> Los niveles se determinan según el porcentaje de semanas comisionadas.</div>
       </section>
     </div>
   </section>
