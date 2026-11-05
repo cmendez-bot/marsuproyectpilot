@@ -102,51 +102,6 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 @media(max-width:650px){.criteria-modal{padding:8px;}.criteria-dialog{width:100%;max-height:92vh;border-radius:14px;}.criteria-head{padding:16px;gap:10px;}.criteria-head h2{font-size:16px;}.criteria-head p{font-size:10px;}.criteria-head-icon{flex-basis:36px;height:36px;font-size:21px;}.criteria-content{padding:13px;gap:10px;}.criteria-table{font-size:10px;}.criteria-table th,.criteria-table td{padding:8px 7px;}.criteria-table-wrap{overflow:auto;}.criteria-search-wrap{max-width:none;}.criteria-count{font-size:9px;}}
 
 
-/* Ajuste exclusivo de posición de controles: no modifica estructura ni lógica de gráficas. */
-:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria,#graficas-categoria2) .panel > .chartExport {
-  top: 10px !important;
-  right: 10px !important;
-}
-:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria,#graficas-categoria2) .panel > .viewToggle {
-  top: 10px !important;
-}
-:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) .panel > .chartMetric {
-  top: 46px !important;
-  right: 10px !important;
-  left: auto !important;
-}
-:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) .panel > label[for] {
-  position: absolute;
-  top: 51px;
-  right: 130px;
-  margin: 0 !important;
-}
-#analisis-familia .familyTrendPanel > div:has(> select[id^="family"]) {
-  position: absolute;
-  top: 45px;
-  right: 10px;
-  display: flex !important;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px !important;
-  margin: 0 !important;
-}
-#analisis-familia .familyTrendPanel > div:has(> select[id^="family"]) .chartExport {
-  order: -1;
-}
-#graficas-categoria2 .familyBarControls {
-  position: absolute;
-  top: 45px;
-  right: 10px;
-  display: flex !important;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px !important;
-}
-#graficas-categoria2 .familyBarControls .chartExport {
-  order: -1;
-}
-
 </style>
 <script>
 (function(){
@@ -717,6 +672,160 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .distribution-summary{margin-top:10px;padding:9px 11px;background:color-mix(in srgb,var(--distribution-summary-accent,#2878b9) 10%,#fff);border:1px solid color-mix(in srgb,var(--distribution-summary-accent,#2878b9) 24%,#fff);border-left:4px solid var(--distribution-summary-accent,#2878b9);border-radius:9px;color:#34536e;font-size:11px;line-height:1.45;}
 .distribution-footnote{font-size:9px;color:#9aa6b2;margin:7px 1px 0;}
 @media(max-width:650px){#analisis-distribucion>.panel{min-height:0!important}.distribution-main{grid-template-columns:minmax(0,1fr);gap:4px}.distribution-donut{height:205px}.distribution-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}}
+
+
+/* Posición solicitada para los controles existentes: filtro | periodo | exportar. */
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria,#graficas-categoria2,#analisis-familia) > .panel {
+  position: relative !important;
+}
+
+/* Gráficas con selector de métrica: filtro a la izquierda y exportación a la derecha. */
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > h2 {
+  margin-bottom: 48px !important;
+  padding-right: 0 !important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > label[for] {
+  position: absolute !important;
+  top: 28px !important;
+  left: 10px !important;
+  right: auto !important;
+  margin: 0 !important;
+  font-size: 9px !important;
+  white-space: nowrap !important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .chartMetric {
+  position: absolute !important;
+  top: 45px !important;
+  left: 10px !important;
+  right: auto !important;
+  width: 120px !important;
+  max-width: 120px !important;
+  height: 30px !important;
+  margin: 0 !important;
+  z-index: 5 !important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .viewToggle {
+  top: 45px !important;
+  left: 140px !important;
+  right: auto !important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartExport {
+  top: 45px !important;
+  right: 10px !important;
+  left: auto !important;
+}
+
+/* Líneas sin filtro: semanal/mensual inmediatamente a la izquierda de exportar. */
+:is(#analisis-regional,#analisis-sucursales,#analisis-familia) > .panel:not(:has(> .chartMetric)) > .viewToggle {
+  top: 10px !important;
+  right: 122px !important;
+  left: auto !important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-familia) > .panel:not(:has(> .chartMetric)) > .chartExport {
+  top: 10px !important;
+  right: 10px !important;
+  left: auto !important;
+}
+
+/* Gráficas por familia con filtro propio: filtro | semanal/mensual | exportar. */
+#analisis-familia .familyTrendPanel {
+  padding-top: 12px !important;
+}
+#analisis-familia .familyTrendPanel > h2 {
+  margin-bottom: 48px !important;
+}
+#analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter),
+#analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter) {
+  position: absolute !important;
+  top: 45px !important;
+  left: 10px !important;
+  right: 10px !important;
+  height: 30px !important;
+  display: block !important;
+  margin: 0 !important;
+}
+#analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter) label,
+#analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter) label {
+  position: absolute !important;
+  top: -17px !important;
+  left: 0 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+#analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter) select,
+#analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter) select {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 120px !important;
+  min-width: 120px !important;
+  height: 30px !important;
+  margin: 0 !important;
+}
+#analisis-familia .familyTrendPanel > .viewToggle {
+  top: 45px !important;
+  left: 140px !important;
+  right: auto !important;
+}
+#analisis-familia .familyTrendPanel .chartExport {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  margin: 0 !important;
+  height: 30px !important;
+}
+
+/* Gráficas de barras por familia: filtro a la izquierda y exportar a la derecha. */
+#graficas-categoria2 > .panel .familyBarControls {
+  position: absolute !important;
+  top: 45px !important;
+  left: 10px !important;
+  right: 10px !important;
+  height: 30px !important;
+  display: block !important;
+  margin: 0 !important;
+}
+#graficas-categoria2 > .panel .familyBarControls label {
+  position: absolute !important;
+  top: -17px !important;
+  left: 0 !important;
+  margin: 0 !important;
+}
+#graficas-categoria2 > .panel .familyBarControls select {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 120px !important;
+  min-width: 120px !important;
+  height: 30px !important;
+  margin: 0 !important;
+}
+#graficas-categoria2 > .panel .familyBarControls .chartExport {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  margin: 0 !important;
+}
+
+/* En pantallas angostas se conserva el orden y se reducen los controles para evitar cruces. */
+@media (max-width: 700px) {
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .chartMetric,
+  #analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter) select,
+  #analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter) select,
+  #graficas-categoria2 > .panel .familyBarControls select {
+    width: 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+  }
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .viewToggle,
+  #analisis-familia .familyTrendPanel > .viewToggle {
+    left: 112px !important;
+  }
+  .viewToggle button { padding: 0 6px !important; font-size: 10px !important; }
+  .chartExport { padding: 5px 6px !important; font-size: 10px !important; }
+}
 
 </style>
 </head>
