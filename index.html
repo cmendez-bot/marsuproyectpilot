@@ -82,6 +82,13 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .criteria-search-wrap input{width:100%;height:36px;border:0;outline:0;background:transparent;color:#203b54;font:12px Inter,Segoe UI,Arial,sans-serif;}
 .criteria-count{font-size:10px;font-weight:700;color:#6b7f91;white-space:nowrap;}
 .criteria-table-wrap{min-height:0;overflow:auto;border:1px solid #dce5ed;border-radius:12px;background:#fff;}
+/* Tablas de criterios individuales: ancho compacto y centrado */
+.criteria-table-wrap.criteria-compact{width:max-content;max-width:100%;margin:0 auto;}
+.criteria-table.criteria-compact-table{width:100%;min-width:0;}
+.criteria-table-wrap.criteria-compact.ccv{width:min(390px,100%);}
+.criteria-table-wrap.criteria-compact.volume{width:min(500px,100%);}
+.criteria-table-wrap.criteria-compact.weeks{width:min(540px,100%);}
+
 .criteria-table{width:100%;border-collapse:separate;border-spacing:0;color:#30465a;font-size:11px;text-align:center;}
 .criteria-table th{position:sticky;top:0;z-index:2;padding:12px 10px;background:#eaf1f7;color:#244b6c;font-size:10px;font-weight:800;letter-spacing:.2px;border-bottom:1px solid #d7e2ec;white-space:nowrap;text-align:center;}
 .criteria-table td{padding:8px 9px;border-bottom:1px solid #edf1f5;white-space:nowrap;}
@@ -1921,8 +1928,8 @@ setInterval(cargarDatos, 3600000);
       </section>
       <section class="criteria-pane" id="criteriaPane-ccv" role="tabpanel" hidden>
         <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
-        <div class="criteria-table-wrap">
-          <table class="criteria-table">
+        <div class="criteria-table-wrap criteria-compact ccv">
+          <table class="criteria-table criteria-compact-table">
             <thead><tr><th>Desempeño CCV</th><th>Rango</th></tr></thead>
             <tbody>
               <tr><td><span class="criteria-value critical">Crítico</span></td><td>Rango 0</td></tr>
@@ -1936,8 +1943,8 @@ setInterval(cargarDatos, 3600000);
       </section>
       <section class="criteria-pane" id="criteriaPane-volume" role="tabpanel" hidden>
         <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
-        <div class="criteria-table-wrap">
-          <table class="criteria-table">
+        <div class="criteria-table-wrap criteria-compact volume">
+          <table class="criteria-table criteria-compact-table">
             <thead><tr><th>Desempeño Volúmen</th><th>% Cumplimiento Volúmen</th></tr></thead>
             <tbody>
               <tr><td><span class="criteria-value critical">Crítico</span></td><td>0% - 80%</td></tr>
@@ -1951,8 +1958,8 @@ setInterval(cargarDatos, 3600000);
       </section>
       <section class="criteria-pane" id="criteriaPane-weeks" role="tabpanel" hidden>
         <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
-        <div class="criteria-table-wrap">
-          <table class="criteria-table">
+        <div class="criteria-table-wrap criteria-compact weeks">
+          <table class="criteria-table criteria-compact-table">
             <thead><tr><th>Desempeño semanas con comisión</th><th>% Semanas comisionadas</th></tr></thead>
             <tbody>
               <tr><td><span class="criteria-value critical">Crítico</span></td><td>0% - 50%</td></tr>
