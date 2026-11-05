@@ -880,7 +880,8 @@ function update(){
    });
  };
  const copy1Key=$('branchesCopy1Metric').value || COLUMNAS.ccv;
- const copy1Vals=branches.map(k=>avgMetric(byB[k],copy1Key));
+ const copy1Branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],copy1Key)-avgMetric(byB[a],copy1Key)).slice(0,10);
+ const copy1Vals=copy1Branches.map(k=>avgMetric(byB[k],copy1Key));
  const performanceColors=barColorScale(branchVals);
  plot('branches',[{
    x:branchVals,
@@ -903,12 +904,12 @@ function update(){
  // La gráfica CCV tiene su propio selector, limitado a CCV Real y DS Promedio ponderado.
  const copy1Colors=barColorScale(copy1Vals);
  plot('branchesCopy1',[{
-   x:copy1Vals,y:branches,type:'bar',orientation:'h',
+   x:copy1Vals,y:copy1Branches,type:'bar',orientation:'h',
    marker:{color:copy1Colors,cornerradius:8,line:{color:'#075e59',width:0}},
    text:copy1Vals.map(v=>formatMetric(copy1Key,v)),textposition:'outside',
    textfont:{color:'#34465b',size:10},cliponaxis:false,hoverinfo:'none'
  }],execLayout({
-   margin:{l:Math.min(220,Math.max(115,Math.max(0,...branches.map(label=>String(label).length))*6.5+24)),r:72,t:12,b:38},
+   margin:{l:Math.min(220,Math.max(115,Math.max(0,...copy1Branches.map(label=>String(label).length))*6.5+24)),r:72,t:12,b:38},
    bargap:0.38,
    yaxis:execY({autorange:'reversed',showgrid:false,tickfont:{color:'#34465b',size:10}}),
    xaxis:execX({title:{text:metricLabel(copy1Key),font:{size:10,color:'#34465b'},standoff:8}})
