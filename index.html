@@ -797,6 +797,40 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   font-size:11px!important;
 }
 
+
+/* Ajuste solicitado: controles de periodo y exportación en la esquina inferior derecha. */
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel{
+  position:relative!important;
+}
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel > .chartExport{
+  position:absolute!important;
+  top:auto!important;
+  right:10px!important;
+  bottom:10px!important;
+  margin:0!important;
+  height:30px!important;
+  min-height:30px!important;
+  padding:6px 9px!important;
+  white-space:nowrap!important;
+  z-index:3;
+}
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel > .viewToggle{
+  position:absolute!important;
+  top:auto!important;
+  right:145px!important;
+  bottom:10px!important;
+  height:30px!important;
+  z-index:3;
+}
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel:has(> .viewToggle) > .chart,
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel:has(> .chartExport) > .chart{
+  margin-bottom:38px!important;
+}
+@media(max-width:700px){
+  :is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel > .viewToggle{right:145px!important;bottom:8px!important;}
+  :is(#analisis-regional,#analisis-familia,#analisis-sucursales,#graficas-categoria,#graficas-categoria2) .panel > .chartExport{right:8px!important;bottom:8px!important;}
+}
+
 </style>
 <script>
 (function(){
