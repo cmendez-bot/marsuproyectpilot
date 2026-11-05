@@ -1109,6 +1109,20 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 }
 /* === CONTROLES UNIFICADOS DE GRÁFICAS: fin === */
 
+
+/* Comisión total: colocar el filtro debajo de Exportar a Excel, alineado a la derecha. */
+#analisis-regional > .panel:has(> #branchTrend3) > #branchTrendMetric3 {
+  position:absolute!important;
+  top:48px!important;
+  right:10px!important;
+  left:auto!important;
+  width:112px!important;
+  max-width:none!important;
+  height:30px!important;
+  margin:0!important;
+  padding:6px 7px!important;
+  z-index:7!important;
+}
 </style>
 <script>
 (function(){
