@@ -583,6 +583,27 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   #analisis-desempeno { grid-template-columns:minmax(0,1fr) !important; }
   #analisis-desempeno > .panel { height:350px !important; min-height:350px !important; }
 }
+
+/* Tarjetas ejecutivas de distribución: dona amplia, leyenda con progreso y resumen */
+#analisis-distribucion>.panel{background:#fff!important;border:1px solid #e7edf4!important;border-radius:14px!important;box-shadow:0 5px 18px rgba(18,45,75,.08)!important;padding:16px!important;color:#16324f!important;height:auto!important;min-height:370px!important;}
+#analisis-distribucion>.panel h2{color:#123b63!important;font-weight:750!important;margin:0 0 4px!important;}
+.distribution-subtitle{font-size:11px;color:#8795a5;margin:0 0 12px;}
+.distribution-main{display:grid;grid-template-columns:minmax(150px,.9fr) minmax(190px,1.1fr);gap:12px;align-items:center;min-height:205px;}
+.distribution-donut{width:100%;height:220px;min-width:0;}
+.distribution-legend{display:flex;flex-direction:column;gap:9px;min-width:0;}
+.distribution-item{padding:5px 7px;border-radius:8px;transition:background .15s,transform .15s;cursor:pointer;}
+.distribution-item.active{background:#f0f6fc;transform:translateX(2px);}
+.distribution-item-head{display:flex;align-items:center;gap:7px;}
+.distribution-swatch{width:9px;height:9px;border-radius:3px;flex:0 0 9px;}
+.distribution-name{font-size:11px;font-weight:700;color:#173b5e;overflow-wrap:anywhere;}
+.distribution-pct{margin-left:auto;font-size:14px;font-weight:800;color:#123b63;font-variant-numeric:tabular-nums;}
+.distribution-count{font-size:10px;color:#8795a5;margin:2px 0 5px 16px;}
+.distribution-track{height:5px;background:#edf1f5;border-radius:99px;overflow:hidden;margin-left:16px;}
+.distribution-fill{height:100%;border-radius:99px;transition:width .2s;}
+.distribution-summary{margin-top:10px;padding:9px 11px;background:#eef6fd;border-left:3px solid #2878b9;border-radius:7px;color:#34536e;font-size:11px;line-height:1.45;}
+.distribution-footnote{font-size:9px;color:#9aa6b2;margin:7px 1px 0;}
+@media(max-width:650px){#analisis-distribucion>.panel{min-height:0!important}.distribution-main{grid-template-columns:minmax(0,1fr);gap:4px}.distribution-donut{height:205px}.distribution-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}}
+
 </style>
 </head>
 <body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="resumen" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Análisis regional</button><button class="navitem" data-target="analisis-sucursales" type="button">▤ &nbsp; Sucursales</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button><div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
@@ -744,6 +765,47 @@ function refreshDependentFilters(){
 }
 function filtered(){return DATA.filter(r=>matchesFilters(r));}
 function group(arr,key){return arr.reduce((o,r)=>{const k=r[key]===null||r[key]===undefined?'Sin dato':String(r[key]);(o[k]??=[]).push(r);return o},{})}
+
+function renderExecutiveDistribution(id,categories,palette,subtitle){
+ const chart=$(id); if(!chart)return;
+ const total=categories.reduce((sum,item)=>sum+item.count,0);
+ if(!categories.length||!total){chart.innerHTML='<div class="emptyState">Sin datos para los filtros actuales.</div>';return;}
+ const colors=categories.map((item,index)=>palette[Math.min(index,palette.length-1)]);
+ const panel=chart.parentElement;
+ panel.classList.add('distribution-panel');
+ let subtitleNode=panel.querySelector('.distribution-subtitle');
+ if(!subtitleNode){subtitleNode=document.createElement('p');subtitleNode.className='distribution-subtitle';panel.insertBefore(subtitleNode,chart);}
+ subtitleNode.textContent=subtitle;
+ let main=panel.querySelector('.distribution-main');
+ if(!main){
+   main=document.createElement('div');main.className='distribution-main';
+   const legend=document.createElement('div');legend.className='distribution-legend';
+   chart.parentNode.insertBefore(main,chart);main.appendChild(chart);main.appendChild(legend);
+   chart.classList.add('distribution-donut');
+   const summary=document.createElement('div');summary.className='distribution-summary';summary.dataset.summary=id;panel.appendChild(summary);
+   const foot=document.createElement('div');foot.className='distribution-footnote';foot.textContent='Pasa el cursor sobre una categoría para consultar su participación y registros.';panel.appendChild(foot);
+ }
+ const legend=main.querySelector('.distribution-legend');
+ legend.innerHTML=categories.map((item,index)=>'<div class="distribution-item" data-point="'+index+'"><div class="distribution-item-head"><span class="distribution-swatch" style="background:'+colors[index]+'"></span><span class="distribution-name">'+escapeHtml(String(item.name))+'</span><span class="distribution-pct">'+(item.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</span></div><div class="distribution-count">'+item.count.toLocaleString('es-MX')+' registros</div><div class="distribution-track"><div class="distribution-fill" style="width:'+(item.count/total*100)+'%;background:'+colors[index]+'"></div></div></div>').join('');
+ const summary=panel.querySelector('[data-summary="'+id+'"]');
+ const first=categories[0],second=categories[1];
+ if(second){
+   const combined=first.count+second.count;
+   summary.innerHTML='<b>'+escapeHtml(String(first.name))+'</b> concentra el <b>'+ (first.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b> de los registros; junto con <b>'+escapeHtml(String(second.name))+'</b> suman el <b>'+(combined/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b>.';
+ }else{
+   summary.innerHTML='<b>'+escapeHtml(String(first.name))+'</b> concentra el <b>100%</b> de los registros.';
+ }
+ const trace={type:'pie',labels:categories.map(item=>item.name),values:categories.map(item=>item.count),hole:.58,sort:false,direction:'clockwise',rotation:270,textinfo:'percent',textposition:'inside',insidetextorientation:'horizontal',textfont:{color:'#fff',size:11,family:'Inter, Segoe UI, Arial, sans-serif'},marker:{colors,line:{color:'#fff',width:3}},hovertemplate:'<b>%{label}</b><br>%{percent} del total<br>%{value:,} registros<extra></extra>'};
+ const layout={height:220,autosize:true,paper_bgcolor:'#fff',plot_bgcolor:'#fff',margin:{l:2,r:2,t:2,b:2},showlegend:false,hoverlabel:{bgcolor:'#fff',bordercolor:'#d9e4ef',font:{color:'#173b5e',size:11}},annotations:[{text:'<b>'+total.toLocaleString('es-MX')+'</b><br><span style="font-size:9px;color:#8795a5">TOTAL REGISTROS</span>',x:.5,y:.5,xref:'paper',yref:'paper',showarrow:false,font:{size:18,color:'#123b63',family:'Inter, Segoe UI, Arial, sans-serif'}}]};
+ Plotly.newPlot(chart,[trace],layout,{responsive:true,displayModeBar:false});
+ const items=[...legend.querySelectorAll('.distribution-item')];
+ const activate=index=>{items.forEach((el,i)=>el.classList.toggle('active',i===index));Plotly.restyle(chart,{ 'marker.opacity':categories.map((_,i)=>i===index?1:.28)});};
+ const clear=()=>{items.forEach(el=>el.classList.remove('active'));Plotly.restyle(chart,{'marker.opacity':1});};
+ items.forEach((el,index)=>{el.addEventListener('mouseenter',()=>{activate(index);if(Plotly.Fx&&Plotly.Fx.hover)Plotly.Fx.hover(chart,[{curveNumber:0,pointNumber:index}]);});el.addEventListener('mouseleave',clear);});
+ chart.on('plotly_hover',event=>{if(event.points&&event.points[0]){const index=event.points[0].pointNumber;items.forEach((el,i)=>el.classList.toggle('active',i===index));}});
+ chart.on('plotly_unhover',clear);
+}
+
 function plot(id,data,layout={}){
  if(!window.Plotly)return;
  const isBarChart=Array.isArray(data)&&data.some(trace=>trace&&trace.type==='bar');
@@ -908,7 +970,7 @@ function update(){
  if(performanceCategories.length){
    const performanceTotal=performanceCategories.reduce((sum,item)=>sum+item.count,0);
    const performancePalette=['#063B75','#145A9E','#287FC0','#58A0D5','#91C2E8','#C1DDF3'];
-   plot('performanceDistribution',[{type:'pie',labels:performanceCategories.map(item=>item.name),values:performanceCategories.map(item=>item.count),hole:0.62,sort:false,direction:'clockwise',rotation:270,textinfo:'percent',textposition:'inside',insidetextorientation:'horizontal',textfont:{color:'#ffffff',size:12,family:'Inter, Segoe UI, Arial, sans-serif'},marker:{colors:performanceCategories.map((item,index)=>performancePalette[Math.min(index,performancePalette.length-1)]),line:{color:'#ffffff',width:2}},hovertemplate:'<b>%{label}</b><br>%{percent} del total<br>%{value} registros<extra></extra>'}],execLayout({height:280,margin:{l:8,r:112,t:4,b:4},showlegend:true,legend:{orientation:'v',x:1.02,xanchor:'left',y:0.5,yanchor:'middle',font:{size:10,color:'#111827'}},annotations:[{text:'<b>'+performanceTotal.toLocaleString('es-MX')+'</b><br><span style="font-size:9px">REGISTROS</span>',x:0.5,y:0.53,xref:'paper',yref:'paper',showarrow:false,font:{size:15,color:'#111827',family:'Inter, Segoe UI, Arial, sans-serif'}}]}));
+   renderExecutiveDistribution('performanceDistribution',performanceCategories,performancePalette,'Distribución de registros por categoría de desempeño CCV');
  }else{
    $('performanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño para los filtros actuales.</div>';
  }
@@ -918,7 +980,7 @@ function update(){
  if(volumePerformanceCategories.length){
    const volumePerformancePalette=['#064E3B','#087F68','#159B7D','#45B99A','#83D2B8','#C5EBDD'];
    const volumePerformanceTotal=volumePerformanceCategories.reduce((sum,item)=>sum+item.count,0);
-   plot('volumePerformanceDistribution',[{type:'pie',labels:volumePerformanceCategories.map(item=>item.name),values:volumePerformanceCategories.map(item=>item.count),hole:0.62,sort:false,direction:'clockwise',rotation:270,textinfo:'percent',textposition:'inside',insidetextorientation:'horizontal',textfont:{color:'#ffffff',size:12,family:'Inter, Segoe UI, Arial, sans-serif'},marker:{colors:volumePerformanceCategories.map((item,index)=>volumePerformancePalette[Math.min(index,volumePerformancePalette.length-1)]),line:{color:'#ffffff',width:2}},hovertemplate:'<b>%{label}</b><br>%{percent} del total<br>%{value} registros<extra></extra>'}],execLayout({height:280,margin:{l:8,r:112,t:4,b:4},showlegend:true,legend:{orientation:'v',x:1.02,xanchor:'left',y:0.5,yanchor:'middle',font:{size:10,color:'#111827'}},annotations:[{text:'<b>'+volumePerformanceTotal.toLocaleString('es-MX')+'</b><br><span style="font-size:9px">REGISTROS</span>',x:0.5,y:0.53,xref:'paper',yref:'paper',showarrow:false,font:{size:15,color:'#111827',family:'Inter, Segoe UI, Arial, sans-serif'}}]}));
+   renderExecutiveDistribution('volumePerformanceDistribution',volumePerformanceCategories,volumePerformancePalette,'Distribución de registros por categoría de cumplimiento de volumen');
  }else{
    $('volumePerformanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño de volumen para los filtros actuales.</div>';
  }
