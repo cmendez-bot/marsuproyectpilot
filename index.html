@@ -61,6 +61,16 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .criteria-close{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid #ffffff55;border-radius:10px;background:#ffffff12;color:#fff;font-size:24px;line-height:1;cursor:pointer;}
 .criteria-close:hover{background:#ffffff2b;}
 .criteria-content{display:flex;flex-direction:column;gap:13px;min-height:0;padding:19px 22px 17px;}
+.criteria-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #dce5ed;padding-bottom:10px;}
+.criteria-tab{padding:9px 13px;border:1px solid transparent;border-radius:9px;background:transparent;color:#60778b;font:700 11px Inter,Segoe UI,Arial,sans-serif;cursor:pointer;transition:all .15s ease;}
+.criteria-tab:hover{background:#edf3f8;color:#244b6c;}
+.criteria-tab.active{background:#e5eff8;border-color:#c8d9e8;color:#174d78;box-shadow:inset 0 -2px 0 #2d79aa;}
+.criteria-pane{display:flex;flex-direction:column;gap:13px;min-height:0;}
+.criteria-pane[hidden]{display:none!important;}
+.criteria-pending{min-height:220px;justify-content:center;align-items:center;}
+.criteria-pending-card{display:flex;flex-direction:column;gap:7px;max-width:480px;padding:22px;border:1px dashed #cbd8e3;border-radius:12px;background:#fff;text-align:center;color:#244b6c;}
+.criteria-pending-card span{color:#718397;font-size:11px;line-height:1.5;}
+
 .criteria-legend{display:flex;gap:8px;flex-wrap:wrap;}
 .criteria-chip{display:inline-flex;align-items:center;padding:6px 10px;border:1px solid transparent;border-radius:30px;font-size:10px;font-weight:750;white-space:nowrap;}
 .criteria-chip.critical,.criteria-value.critical{background:#fff0f0;border-color:#f4caca;color:#b83232;}
@@ -1884,31 +1894,52 @@ setInterval(cargarDatos, 3600000);
       <button class="criteria-close" id="closeCriteria" type="button" aria-label="Cerrar ventana">×</button>
     </header>
     <div class="criteria-content">
-      <div class="criteria-legend" aria-label="Leyenda de clasificaciones">
-        <span class="criteria-chip critical">Crítico</span>
-        <span class="criteria-chip development">En Desarrollo</span>
-        <span class="criteria-chip acceptable">Aceptable</span>
-        <span class="criteria-chip outstanding">Sobresaliente</span>
-      </div>
-      <div class="criteria-toolbar">
-        <div class="criteria-search-wrap">
-          <span>⌕</span>
-          <input id="criteriaSearch" type="search" placeholder="Buscar clasificación o combinación..." autocomplete="off">
+      <nav class="criteria-tabs" role="tablist" aria-label="Tipos de criterios">
+        <button class="criteria-tab active" type="button" role="tab" aria-selected="true" data-tab="general">General</button>
+        <button class="criteria-tab" type="button" role="tab" aria-selected="false" data-tab="ccv">Desempeño CCV</button>
+        <button class="criteria-tab" type="button" role="tab" aria-selected="false" data-tab="volume">Desempeño volumen</button>
+        <button class="criteria-tab" type="button" role="tab" aria-selected="false" data-tab="weeks">Semanas con comisión</button>
+      </nav>
+      <section class="criteria-pane active" id="criteriaPane-general" role="tabpanel">
+        <div class="criteria-legend" aria-label="Leyenda de clasificaciones">
+          <span class="criteria-chip critical">Crítico</span>
+          <span class="criteria-chip development">En Desarrollo</span>
+          <span class="criteria-chip acceptable">Aceptable</span>
+          <span class="criteria-chip outstanding">Sobresaliente</span>
         </div>
-        <span class="criteria-count" id="criteriaCount">64 combinaciones</span>
-      </div>
-      <div class="criteria-table-wrap">
-        <table class="criteria-table">
-          <thead><tr>
-            <th>Clasificación general</th>
-            <th>Desempeño CCV</th>
-            <th>Desempeño volumen</th>
-            <th>Semanas con comisión</th>
-          </tr></thead>
-          <tbody id="criteriaRows"></tbody>
-        </table>
-      </div>
-      <div class="criteria-note"><span>✦</span> La clasificación general corresponde a la combinación de los tres criterios mostrados.</div>
+        <div class="criteria-toolbar">
+          <div class="criteria-search-wrap"><span>⌕</span><input id="criteriaSearch" type="search" placeholder="Buscar clasificación o combinación..." autocomplete="off"></div>
+          <span class="criteria-count" id="criteriaCount">64 combinaciones</span>
+        </div>
+        <div class="criteria-table-wrap">
+          <table class="criteria-table">
+            <thead><tr><th>Clasificación general</th><th>Desempeño CCV</th><th>Desempeño volumen</th><th>Semanas con comisión</th></tr></thead>
+            <tbody id="criteriaRows"></tbody>
+          </table>
+        </div>
+        <div class="criteria-note"><span>✦</span> La clasificación general corresponde a la combinación de los tres criterios mostrados.</div>
+      </section>
+      <section class="criteria-pane" id="criteriaPane-ccv" role="tabpanel" hidden>
+        <div class="criteria-legend"><span class="criteria-chip critical">Crítico</span><span class="criteria-chip development">En Desarrollo</span><span class="criteria-chip acceptable">Aceptable</span><span class="criteria-chip outstanding">Sobresaliente</span></div>
+        <div class="criteria-table-wrap">
+          <table class="criteria-table">
+            <thead><tr><th>Desempeño CCV</th><th>Rango</th></tr></thead>
+            <tbody>
+              <tr><td><span class="criteria-value critical">Crítico</span></td><td>Rango 0</td></tr>
+              <tr><td><span class="criteria-value development">En Desarrollo</span></td><td>Rango 1</td></tr>
+              <tr><td><span class="criteria-value acceptable">Aceptable</span></td><td>Rango 2</td></tr>
+              <tr><td><span class="criteria-value outstanding">Sobresaliente</span></td><td>Rango 3</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="criteria-note"><span>✦</span> Cada nivel de desempeño CCV corresponde al rango indicado.</div>
+      </section>
+      <section class="criteria-pane criteria-pending" id="criteriaPane-volume" role="tabpanel" hidden>
+        <div class="criteria-pending-card"><strong>Criterios de desempeño volumen</strong><span>La pestaña está preparada. Falta incorporar la tabla de rangos de este indicador.</span></div>
+      </section>
+      <section class="criteria-pane criteria-pending" id="criteriaPane-weeks" role="tabpanel" hidden>
+        <div class="criteria-pending-card"><strong>Criterios de semanas con comisión</strong><span>La pestaña está preparada. Falta incorporar la tabla de rangos de este indicador.</span></div>
+      </section>
     </div>
   </section>
 </div>
@@ -1923,6 +1954,8 @@ setInterval(cargarDatos, 3600000);
  const tbody=document.getElementById('criteriaRows');
  const search=document.getElementById('criteriaSearch');
  const count=document.getElementById('criteriaCount');
+ const tabs=[...modal.querySelectorAll('.criteria-tab')];
+ const panes=[...modal.querySelectorAll('.criteria-pane')];
  if(!modal||!openBtn||!closeBtn||!tbody||!search)return;
  const names={C:'Crítico',D:'En Desarrollo',A:'Aceptable',S:'Sobresaliente'};
  const cssNames={C:'critical',D:'development',A:'acceptable',S:'outstanding'};
@@ -1938,7 +1971,12 @@ setInterval(cargarDatos, 3600000);
    count.textContent=filtered.length+' de 64 combinaciones';
    if(!filtered.length)tbody.innerHTML='<tr><td colspan="4" style="padding:24px;color:#8191a0">No se encontraron combinaciones con esa búsqueda.</td></tr>';
  }
- function open(){render(search.value);modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';search.focus();}
+ function activateTab(name){
+   tabs.forEach(tab=>{const active=tab.dataset.tab===name;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));});
+   panes.forEach(pane=>{const active=pane.id==='criteriaPane-'+name;pane.classList.toggle('active',active);pane.hidden=!active;});
+ }
+ tabs.forEach(tab=>tab.addEventListener('click',()=>activateTab(tab.dataset.tab)));
+ function open(){activateTab('general');render(search.value);modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';search.focus();}
  function close(){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';openBtn.focus();}
  openBtn.addEventListener('click',open);
  closeBtn.addEventListener('click',close);
