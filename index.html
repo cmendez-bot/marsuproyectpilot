@@ -772,19 +772,33 @@ function renderExecutiveDistribution(id,categories,palette,subtitle){
  const total=categories.reduce((sum,item)=>sum+item.count,0);
  if(!categories.length||!total){chart.innerHTML='<div class="emptyState">Sin datos para los filtros actuales.</div>';return;}
  const colors=categories.map((item,index)=>palette[Math.min(index,palette.length-1)]);
- const panel=chart.parentElement;
+ const panel=chart.closest('.panel')||chart.parentElement;
  panel.classList.add('distribution-panel');
  let subtitleNode=panel.querySelector('.distribution-subtitle');
  if(!subtitleNode){subtitleNode=document.createElement('p');subtitleNode.className='distribution-subtitle';panel.insertBefore(subtitleNode,chart);}
  subtitleNode.textContent=subtitle;
- let main=panel.querySelector('.distribution-main');
+ let main=panel.querySelector(':scope > .distribution-main');
  if(!main){
    main=document.createElement('div');main.className='distribution-main';
    const legend=document.createElement('div');legend.className='distribution-legend';
-   chart.parentNode.insertBefore(main,chart);main.appendChild(chart);main.appendChild(legend);
+   panel.insertBefore(main,chart);main.appendChild(chart);main.appendChild(legend);
    chart.classList.add('distribution-donut');
    const summary=document.createElement('div');summary.className='distribution-summary';summary.dataset.summary=id;panel.appendChild(summary);
    const foot=document.createElement('div');foot.className='distribution-footnote';foot.textContent='Pasa el cursor sobre una categoría para consultar su participación y registros.';panel.appendChild(foot);
+ }else{
+   // Mantener una sola dona y una sola leyenda aunque el render se ejecute repetidamente.
+   const extraMains=[...panel.querySelectorAll('.distribution-main')].filter(node=>node!==main);
+   extraMains.forEach(node=>node.remove());
+   if(chart.parentElement!==main)main.prepend(chart);
+   const legends=main.querySelectorAll('.distribution-legend');
+   legends.forEach((node,index)=>{if(index>0)node.remove();});
+   if(!main.querySelector('.distribution-legend')){
+     const legendNode=document.createElement('div');legendNode.className='distribution-legend';main.appendChild(legendNode);
+   }
+   const summaries=panel.querySelectorAll('[data-summary="'+id+'"]');
+   summaries.forEach((node,index)=>{if(index>0)node.remove();});
+   const footnotes=panel.querySelectorAll('.distribution-footnote');
+   footnotes.forEach((node,index)=>{if(index>0)node.remove();});
  }
  const legend=main.querySelector('.distribution-legend');
  legend.innerHTML=categories.map((item,index)=>'<div class="distribution-item" data-point="'+index+'"><div class="distribution-item-head"><span class="distribution-swatch" style="background:'+colors[index]+'"></span><span class="distribution-name">'+safeText(String(item.name))+'</span><span class="distribution-pct">'+(item.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</span></div><div class="distribution-count">'+item.count.toLocaleString('es-MX')+' registros</div><div class="distribution-track"><div class="distribution-fill" style="width:'+(item.count/total*100)+'%;background:'+colors[index]+'"></div></div></div>').join('');
