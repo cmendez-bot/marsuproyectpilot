@@ -938,7 +938,7 @@ function update(){
    text:copy2Vals.map((v,i)=>'Cumpl.: '+formatMetric(copy2Key,v)+'<br>Real: '+num(copy2Real[i],0)+' · Objetivo: '+num(copy2Objective[i],0)),textposition:'outside',
    textfont:{color:'#34465b',size:10},cliponaxis:false,customdata:copy2Branches.map((name,i)=>[copy2Real[i],copy2Objective[i]]),hoverinfo:'none'
  }],copy2Layout);
- if(window.bindSimpleTooltip)window.bindSimpleTooltip($('branchesCopy2'),'bar',p=>({head:String(p.y)+' · Cumplimiento volúmen',value:'Cumplimiento: '+formatMetric(copy2Key,p.x)+'\\nVolumen real: '+num(p.customdata[0],0)+'\\nVolumen objetivo: '+num(p.customdata[1],0)})));
+ if(window.bindSimpleTooltip)window.bindSimpleTooltip($('branchesCopy2'),'bar',p=>({head:String(p.y)+' · Cumplimiento volúmen',value:'Cumplimiento: '+formatMetric(copy2Key,p.x)+'\nVolumen real: '+num(p.customdata[0],0)+'\nVolumen objetivo: '+num(p.customdata[1],0)}));
  bindChartClick('branchesCopy2',ev=>{
    if(!ev.points||!ev.points.length)return;
    const name=ev.points[0].y;
@@ -1526,16 +1526,3 @@ setInterval(cargarDatos, 3600000);
 </script>
 
 </body></html>
-
-
-
-
-
-
-
-
-
-
-
-
-
