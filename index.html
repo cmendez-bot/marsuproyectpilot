@@ -862,6 +862,37 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   margin-bottom:38px!important;
 }
 
+
+/* Corrección: controles de la gráfica de líneas Comisión total (#branchTrend3). */
+#analisis-regional > .panel:has(> #branchTrend3) {
+  position:relative!important;
+}
+#analisis-regional > .panel:has(> #branchTrend3) > .viewToggle {
+  position:absolute!important;
+  top:auto!important;
+  left:auto!important;
+  right:145px!important;
+  bottom:10px!important;
+  height:30px!important;
+  z-index:6!important;
+}
+#analisis-regional > .panel:has(> #branchTrend3) > .chartExport {
+  position:absolute!important;
+  top:auto!important;
+  left:auto!important;
+  right:10px!important;
+  bottom:10px!important;
+  height:30px!important;
+  min-height:30px!important;
+  margin:0!important;
+  padding:6px 9px!important;
+  white-space:nowrap!important;
+  z-index:6!important;
+}
+#analisis-regional > .panel:has(> #branchTrend3) > #branchTrend3 {
+  margin-bottom:38px!important;
+}
+
 </style>
 <script>
 (function(){
