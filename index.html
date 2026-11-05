@@ -43,6 +43,47 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 #analisis-distribucion-copy>.panel>.chart{width:100%!important;height:245px!important;min-height:245px!important;max-height:245px!important;}
 @media(max-width:900px){#analisis-distribucion-copy{grid-template-columns:minmax(0,1fr)!important;}}
 @media(max-width:650px){#analisis-distribucion-copy>.panel{min-height:0!important;}}
+
+/* Matriz informativa de criterios de desempeño */
+.criteria-open{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin:0 0 13px;padding:10px 11px;border:1px solid #3d79aa;border-radius:10px;background:linear-gradient(135deg,#173f67,#205b8b);color:#f4f9ff;font:600 11px Inter,Segoe UI,Arial,sans-serif;letter-spacing:.2px;cursor:pointer;box-shadow:0 5px 14px #071b302e;transition:transform .16s,background .16s,border-color .16s;}
+.criteria-open:hover{background:linear-gradient(135deg,#20527e,#2874a9);border-color:#82b7df;transform:translateY(-1px);}
+.criteria-open-icon{display:grid;place-items:center;width:20px;height:20px;border:1px solid #8ab8d8;border-radius:50%;font-size:14px;font-weight:800;line-height:1;color:#d8edff;}
+.criteria-modal{position:fixed;inset:0;z-index:10020;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(4,17,32,.68);backdrop-filter:blur(5px);}
+.criteria-modal.is-open{display:flex;}
+.criteria-dialog{display:flex;flex-direction:column;width:min(1040px,96vw);max-height:min(86vh,850px);overflow:hidden;border:1px solid #dce6ef;border-radius:19px;background:#f7f9fc;box-shadow:0 24px 80px #0005;animation:criteriaIn .18s ease-out;}
+@keyframes criteriaIn{from{opacity:0;transform:translateY(9px) scale(.99)}to{opacity:1;transform:none}}
+.criteria-head{display:flex;align-items:center;gap:15px;padding:22px 25px;background:linear-gradient(115deg,#102d4d,#1e5c8c);color:#fff;}
+.criteria-head-icon{display:grid;place-items:center;flex:0 0 43px;height:43px;border:1px solid #8bb6d5;border-radius:13px;background:#ffffff14;color:#e3f3ff;font-size:25px;font-weight:700;}
+.criteria-head-copy{min-width:0;flex:1;}
+.criteria-eyebrow{font-size:9px;font-weight:800;letter-spacing:1.5px;color:#b9d8ef;}
+.criteria-head h2{margin:4px 0 3px;font-size:20px;line-height:1.2;color:#fff;}
+.criteria-head p{margin:0;color:#d4e4f1;font-size:11px;line-height:1.45;}
+.criteria-close{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid #ffffff55;border-radius:10px;background:#ffffff12;color:#fff;font-size:24px;line-height:1;cursor:pointer;}
+.criteria-close:hover{background:#ffffff2b;}
+.criteria-content{display:flex;flex-direction:column;gap:13px;min-height:0;padding:19px 22px 17px;}
+.criteria-legend{display:flex;gap:8px;flex-wrap:wrap;}
+.criteria-chip{display:inline-flex;align-items:center;padding:6px 10px;border:1px solid transparent;border-radius:30px;font-size:10px;font-weight:750;white-space:nowrap;}
+.criteria-chip.critical,.criteria-value.critical{background:#fff0f0;border-color:#f4caca;color:#b83232;}
+.criteria-chip.development,.criteria-value.development{background:#fff6e8;border-color:#f1d8aa;color:#9b6414;}
+.criteria-chip.acceptable,.criteria-value.acceptable{background:#eaf7ef;border-color:#c3e5cf;color:#267346;}
+.criteria-chip.outstanding,.criteria-value.outstanding{background:#edf2ff;border-color:#cbd7fb;color:#405da8;}
+.criteria-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.criteria-search-wrap{display:flex;align-items:center;gap:8px;flex:1;max-width:460px;padding:0 11px;border:1px solid #dbe4ed;border-radius:10px;background:#fff;color:#678096;}
+.criteria-search-wrap input{width:100%;height:36px;border:0;outline:0;background:transparent;color:#203b54;font:12px Inter,Segoe UI,Arial,sans-serif;}
+.criteria-count{font-size:10px;font-weight:700;color:#6b7f91;white-space:nowrap;}
+.criteria-table-wrap{min-height:0;overflow:auto;border:1px solid #dce5ed;border-radius:12px;background:#fff;}
+.criteria-table{width:100%;border-collapse:separate;border-spacing:0;color:#30465a;font-size:11px;text-align:center;}
+.criteria-table th{position:sticky;top:0;z-index:2;padding:12px 10px;background:#eaf1f7;color:#244b6c;font-size:10px;font-weight:800;letter-spacing:.2px;border-bottom:1px solid #d7e2ec;white-space:nowrap;}
+.criteria-table td{padding:8px 9px;border-bottom:1px solid #edf1f5;white-space:nowrap;}
+.criteria-table tbody tr:nth-child(even){background:#f8fafc;}
+.criteria-table tbody tr:hover{background:#eef6fc;}
+.criteria-table tbody tr:last-child td{border-bottom:0;}
+.criteria-value{display:inline-flex;justify-content:center;min-width:86px;padding:5px 8px;border:1px solid transparent;border-radius:7px;font-size:10px;font-weight:750;}
+.criteria-table td:first-child .criteria-value{min-width:105px;font-weight:800;}
+.criteria-note{display:flex;align-items:center;gap:7px;color:#6f8192;font-size:10px;line-height:1.4;}
+.criteria-note span{color:#2a79a9;font-size:14px;}
+@media(max-width:650px){.criteria-modal{padding:8px;}.criteria-dialog{width:100%;max-height:92vh;border-radius:14px;}.criteria-head{padding:16px;gap:10px;}.criteria-head h2{font-size:16px;}.criteria-head p{font-size:10px;}.criteria-head-icon{flex-basis:36px;height:36px;font-size:21px;}.criteria-content{padding:13px;gap:10px;}.criteria-table{font-size:10px;}.criteria-table th,.criteria-table td{padding:8px 7px;}.criteria-table-wrap{overflow:auto;}.criteria-search-wrap{max-width:none;}.criteria-count{font-size:9px;}}
+
 </style>
 <script>
 (function(){
@@ -616,7 +657,13 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 
 </style>
 </head>
-<body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="resumen" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Análisis regional</button><button class="navitem" data-target="analisis-sucursales" type="button">▤ &nbsp; Sucursales</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button><div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
+<body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="resumen" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Análisis regional</button><button class="navitem" data-target="analisis-sucursales" type="button">▤ &nbsp; Sucursales</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button>
+<!-- Acceso a la matriz de clasificación -->
+<button class="criteria-open" id="openCriteria" type="button" aria-haspopup="dialog" aria-controls="criteriaModal">
+  <span class="criteria-open-icon">ⓘ</span>
+  <span>Criterios de desempeño</span>
+</button>
+<div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
 <button class="side-toggle" id="sideToggle" type="button" aria-label="Ocultar barra lateral" title="Ocultar o mostrar menú" aria-expanded="true">‹</button>
 <main id="resumen"><div class="top"><div><h1>Desempeño y pago variable</h1></div></div>
 <div class="uploadbox"><div><strong>Información conectada a Google Sheets</strong><small>Fuente: BD Preventas · Último corte semanal cerrado.</small></div><button class="btn" id="refreshNow" type="button">Actualizar ahora</button><span class="status" id="status">Conectando con Google Sheets…</span></div>
@@ -1823,4 +1870,79 @@ cargarDatos();
 setInterval(cargarDatos, 3600000);
 </script>
 
+
+<!-- Ventana informativa: matriz de criterios de desempeño -->
+<div class="criteria-modal" id="criteriaModal" aria-hidden="true">
+  <section class="criteria-dialog" role="dialog" aria-modal="true" aria-labelledby="criteriaTitle">
+    <header class="criteria-head">
+      <div class="criteria-head-icon">ⓘ</div>
+      <div class="criteria-head-copy">
+        <span class="criteria-eyebrow">GUÍA DE CONSULTA</span>
+        <h2 id="criteriaTitle">Matriz de criterios de desempeño</h2>
+        <p>Consulta cómo se determina la clasificación general a partir de los tres indicadores.</p>
+      </div>
+      <button class="criteria-close" id="closeCriteria" type="button" aria-label="Cerrar ventana">×</button>
+    </header>
+    <div class="criteria-content">
+      <div class="criteria-legend" aria-label="Leyenda de clasificaciones">
+        <span class="criteria-chip critical">Crítico</span>
+        <span class="criteria-chip development">En Desarrollo</span>
+        <span class="criteria-chip acceptable">Aceptable</span>
+        <span class="criteria-chip outstanding">Sobresaliente</span>
+      </div>
+      <div class="criteria-toolbar">
+        <div class="criteria-search-wrap">
+          <span>⌕</span>
+          <input id="criteriaSearch" type="search" placeholder="Buscar clasificación o combinación..." autocomplete="off">
+        </div>
+        <span class="criteria-count" id="criteriaCount">64 combinaciones</span>
+      </div>
+      <div class="criteria-table-wrap">
+        <table class="criteria-table">
+          <thead><tr>
+            <th>Clasificación general</th>
+            <th>Desempeño CCV</th>
+            <th>Desempeño volumen</th>
+            <th>Semanas con comisión</th>
+          </tr></thead>
+          <tbody id="criteriaRows"></tbody>
+        </table>
+      </div>
+      <div class="criteria-note"><span>✦</span> La clasificación general corresponde a la combinación de los tres criterios mostrados.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+
+/* Interacción de la matriz informativa de desempeño */
+(function initCriteriaModal(){
+ const modal=document.getElementById('criteriaModal');
+ const openBtn=document.getElementById('openCriteria');
+ const closeBtn=document.getElementById('closeCriteria');
+ const tbody=document.getElementById('criteriaRows');
+ const search=document.getElementById('criteriaSearch');
+ const count=document.getElementById('criteriaCount');
+ if(!modal||!openBtn||!closeBtn||!tbody||!search)return;
+ const names={C:'Crítico',D:'En Desarrollo',A:'Aceptable',S:'Sobresaliente'};
+ const cssNames={C:'critical',D:'development',A:'acceptable',S:'outstanding'};
+ const matrix="C|C|C|C\nC|C|C|D\nC|C|C|A\nD|C|C|S\nC|C|D|C\nC|C|D|D\nD|C|D|A\nD|C|D|S\nC|C|A|C\nD|C|A|D\nD|C|A|A\nA|C|A|S\nD|C|S|C\nD|C|S|D\nA|C|S|A\nA|C|S|S\nC|D|C|C\nC|D|C|D\nD|D|C|A\nD|D|C|S\nC|D|D|C\nD|D|D|D\nD|D|D|A\nA|D|D|S\nD|D|A|C\nD|D|A|D\nA|D|A|A\nA|D|A|S\nD|D|S|C\nA|D|S|D\nA|D|S|A\nA|D|S|S\nC|A|C|C\nD|A|C|D\nD|A|C|A\nA|A|C|S\nD|A|D|C\nD|A|D|D\nA|A|D|A\nA|A|D|S\nD|A|A|C\nA|A|A|D\nA|A|A|A\nA|A|A|S\nA|A|S|C\nA|A|S|D\nA|A|S|A\nS|A|S|S\nD|S|C|C\nD|S|C|D\nA|S|C|A\nA|S|C|S\nD|S|D|C\nA|S|D|D\nA|S|D|A\nA|S|D|S\nA|S|A|C\nA|S|A|D\nA|S|A|A\nS|S|A|S\nA|S|S|C\nA|S|S|D\nS|S|S|A\nS|S|S|S".split('\n').map(line=>line.split('|'));
+ function render(query=''){
+   const q=query.trim().toLocaleLowerCase('es');
+   const filtered=matrix.filter(row=>row.map(v=>names[v]).join(' ').toLocaleLowerCase('es').includes(q));
+   tbody.innerHTML=filtered.map(row=>'<tr>'+row.map(v=>'<td><span class="criteria-value '+cssNames[v]+'">'+names[v]+'</span></td>').join('')+'</tr>').join('');
+   count.textContent=filtered.length+' de 64 combinaciones';
+   if(!filtered.length)tbody.innerHTML='<tr><td colspan="4" style="padding:24px;color:#8191a0">No se encontraron combinaciones con esa búsqueda.</td></tr>';
+ }
+ function open(){render(search.value);modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';search.focus();}
+ function close(){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';openBtn.focus();}
+ openBtn.addEventListener('click',open);
+ closeBtn.addEventListener('click',close);
+ search.addEventListener('input',()=>render(search.value));
+ modal.addEventListener('click',ev=>{if(ev.target===modal)close();});
+ document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&modal.classList.contains('is-open'))close();});
+ render();
+})();
+
+</script>
 </body></html>
