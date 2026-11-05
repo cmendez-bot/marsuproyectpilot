@@ -102,27 +102,49 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 @media(max-width:650px){.criteria-modal{padding:8px;}.criteria-dialog{width:100%;max-height:92vh;border-radius:14px;}.criteria-head{padding:16px;gap:10px;}.criteria-head h2{font-size:16px;}.criteria-head p{font-size:10px;}.criteria-head-icon{flex-basis:36px;height:36px;font-size:21px;}.criteria-content{padding:13px;gap:10px;}.criteria-table{font-size:10px;}.criteria-table th,.criteria-table td{padding:8px 7px;}.criteria-table-wrap{overflow:auto;}.criteria-search-wrap{max-width:none;}.criteria-count{font-size:9px;}}
 
 
-/* Controles unificados para todas las gráficas de líneas y barras. */
-.panel .chartControls{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:100%;min-width:0;margin:0 0 5px;position:relative;z-index:2;}
-.panel .chartControlsTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;width:100%;min-width:0;}
-.panel .chartControlsTop:has(.viewToggle){justify-content:space-between;}
-.panel .chartControlsTop:not(:has(.viewToggle)){justify-content:flex-end;}
-.panel .chartControlsFilters{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-height:28px;width:100%;min-width:0;margin:0;}
-.panel .chartControlsFilters:empty{display:none;}
-.panel .chartControlsFilters label{display:inline-flex;align-items:center;margin:0!important;white-space:nowrap;font-size:10px!important;color:#52677d;}
-.panel .chartControlsFilters select{width:auto!important;min-width:90px;max-width:180px;height:28px!important;margin:0!important;padding:4px 8px!important;font-size:11px!important;}
-.panel .chartControls .chartExport{position:static!important;flex:0 0 auto;margin:0!important;height:30px;white-space:nowrap;padding:6px 10px!important;font-size:11px!important;}
-.panel .chartControls .viewToggle{position:static!important;inset:auto!important;flex:0 0 auto;height:30px;margin:0 auto 0 0;}
-.panel .chartControls .viewToggle button{height:28px;}
-.panel .chartControls + .chart{margin-top:5px!important;}
-@media(max-width:600px){
- .panel .chartControls{gap:5px;}
- .panel .chartControlsTop{min-height:29px;}
- .panel .chartControls .chartExport{height:29px;padding:5px 8px!important;font-size:10px!important;}
- .panel .chartControls .viewToggle{height:29px;}
- .panel .chartControls .viewToggle button{padding:0 7px;font-size:10px;}
- .panel .chartControlsFilters{gap:5px;}
- .panel .chartControlsFilters select{min-width:78px;max-width:135px;}
+/* Ajuste exclusivo de posición de controles: no modifica estructura ni lógica de gráficas. */
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria,#graficas-categoria2) .panel > .chartExport {
+  top: 10px !important;
+  right: 10px !important;
+}
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria,#graficas-categoria2) .panel > .viewToggle {
+  top: 10px !important;
+}
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) .panel > .chartMetric {
+  top: 46px !important;
+  right: 10px !important;
+  left: auto !important;
+}
+:is(#analisis-regional,#analisis-familia,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) .panel > label[for] {
+  position: absolute;
+  top: 51px;
+  right: 130px;
+  margin: 0 !important;
+}
+#analisis-familia .familyTrendPanel > div:has(> select[id^="family"]) {
+  position: absolute;
+  top: 45px;
+  right: 10px;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px !important;
+  margin: 0 !important;
+}
+#analisis-familia .familyTrendPanel > div:has(> select[id^="family"]) .chartExport {
+  order: -1;
+}
+#graficas-categoria2 .familyBarControls {
+  position: absolute;
+  top: 45px;
+  right: 10px;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px !important;
+}
+#graficas-categoria2 .familyBarControls .chartExport {
+  order: -1;
 }
 
 </style>
@@ -1880,52 +1902,7 @@ document.querySelectorAll('.navitem').forEach(btn=>btn.addEventListener('click',
    panel.appendChild(box);
  });
 })();
- // ---- Distribución unificada: periodo/exportación arriba y filtros debajo ----
- (function(){
-   document.querySelectorAll('.panel').forEach(panel=>{
-     const chart=panel.querySelector(':scope > .chart');
-     const exportBtn=panel.querySelector('.chartExport[data-export]');
-     if(!chart||!exportBtn)return;
-     const controls=document.createElement('div');
-     controls.className='chartControls';
-     const top=document.createElement('div');
-     top.className='chartControlsTop';
-     const filters=document.createElement('div');
-     filters.className='chartControlsFilters';
-     controls.appendChild(top);
-     controls.appendChild(filters);
-     panel.insertBefore(controls,chart);
-
-     // El selector Semanal/Mensual solo existe en las seis gráficas de líneas.
-     const period=panel.querySelector(':scope > .viewToggle');
-     if(period)top.appendChild(period);
-     top.appendChild(exportBtn);
-
-     // Conserva y reubica los selectores de métrica que ya tenía cada gráfica.
-     const metric=panel.querySelector(':scope > .chartMetric');
-     if(metric){
-       const metricLabel=metric.previousElementSibling;
-       if(metricLabel&&metricLabel.tagName==='LABEL')filters.appendChild(metricLabel);
-       filters.appendChild(metric);
-     }
-
-     // Conserva los filtros de familia, tanto en líneas como en barras.
-     const familySelect=panel.querySelector('#familyVolumeFilter, #familyChargeFilter, #branchesFamilyVolumeFilter, #branchesFamilyChargeFilter');
-     if(familySelect){
-       const familyLabel=panel.querySelector('label[for="'+familySelect.id+'"]');
-       if(familyLabel)filters.appendChild(familyLabel);
-       filters.appendChild(familySelect);
-     }
-
-     // Elimina únicamente los contenedores originales que quedaron vacíos.
-     panel.querySelectorAll(':scope > div').forEach(wrapper=>{
-       if(wrapper!==controls && !wrapper.classList.contains('drilldown') &&
-          !wrapper.querySelector('.chart') && wrapper.children.length===0) wrapper.remove();
-     });
-     if(!filters.children.length)filters.remove();
-   });
- })();
- // ---- Ajuste automático de ancho: cada gráfica se redimensiona al tamaño real de su cuadro ----
+// ---- Ajuste automático de ancho: cada gráfica se redimensiona al tamaño real de su cuadro ----
 (function(){
  const origUpdate=update;
  let cooldown=false;
