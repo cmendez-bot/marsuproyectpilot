@@ -924,6 +924,8 @@ function update(){
  const copy2Key=COLUMNAS.cumplimiento;
  const copy2Branches=Object.keys(byB).sort((a,b)=>cumplimientoVolumen(byB[b])-cumplimientoVolumen(byB[a])).slice(0,10);
  const copy2Vals=copy2Branches.map(k=>cumplimientoVolumen(byB[k]));
+ const copy2Real=copy2Branches.map(k=>sumFieldSafe(byB[k],COLUMNAS.realVolumen));
+ const copy2Objective=copy2Branches.map(k=>sumFieldSafe(byB[k],COLUMNAS.objetivoVolumen));
  const copy2Colors=barColorScale(copy2Vals);
  const copy2Layout=execLayout({
    margin:{l:Math.min(220,Math.max(115,Math.max(0,...copy2Branches.map(label=>String(label).length))*6.5+24)),r:72,t:12,b:38},
@@ -934,10 +936,10 @@ function update(){
  plot('branchesCopy2',[{
    x:copy2Vals,y:copy2Branches,type:'bar',orientation:'h',
    marker:{color:copy2Colors,cornerradius:8,line:{color:'#075e59',width:0}},
-   text:copy2Vals.map(v=>formatMetric(copy2Key,v)),textposition:'outside',
-   textfont:{color:'#34465b',size:10},cliponaxis:false,hoverinfo:'none'
+   text:copy2Vals.map((v,i)=>'Cumpl.: '+formatMetric(copy2Key,v)+'<br>Real: '+num(copy2Real[i],0)+' · Objetivo: '+num(copy2Objective[i],0)),textposition:'outside',
+   textfont:{color:'#34465b',size:10},cliponaxis:false,customdata:copy2Branches.map((name,i)=>[copy2Real[i],copy2Objective[i]]),hoverinfo:'none'
  }],copy2Layout);
- if(window.bindSimpleTooltip)window.bindSimpleTooltip($('branchesCopy2'),'bar',p=>({head:String(p.y)+' · Cumplimiento volúmen',value:formatMetric(copy2Key,p.x)}));
+ if(window.bindSimpleTooltip)window.bindSimpleTooltip($('branchesCopy2'),'bar',p=>({head:String(p.y)+' · Cumplimiento volúmen',value:'Cumplimiento: '+formatMetric(copy2Key,p.x)+'\\nVolumen real: '+num(p.customdata[0],0)+'\\nVolumen objetivo: '+num(p.customdata[1],0)})));
  bindChartClick('branchesCopy2',ev=>{
    if(!ev.points||!ev.points.length)return;
    const name=ev.points[0].y;
