@@ -774,6 +774,12 @@ function refreshDependentFilters(){
 }
 function filtered(){return DATA.filter(r=>matchesFilters(r));}
 function group(arr,key){return arr.reduce((o,r)=>{const k=r[key]===null||r[key]===undefined?'Sin dato':String(r[key]);(o[k]??=[]).push(r);return o},{})}
+// Construye distribuciones usando solo registros con un valor informado en el indicador.
+function buildDistributionCategories(rows,column){
+ const validRows=rows.filter(row=>String(row[column]??'').trim()!=='');
+ const groups=group(validRows.map(row=>({...row,__distributionCategory:String(row[column]).trim()})),'__distributionCategory');
+ return Object.keys(groups).map(name=>({name,count:groups[name].length})).sort((a,b)=>b.count-a.count);
+}
 
 function renderExecutiveDistribution(id,categories,palette,subtitle){
  const safeText=value=>String(value).replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
@@ -988,35 +994,31 @@ function pickTicks(arr,width,px,minT,maxT){const n=arr.length;if(!n)return [];co
 function update(){
  if(!DATA.length)return;
  const d=filtered();
- // Distribución del desempeño CCV: porcentaje de registros por categoría, respetando todos los filtros activos.
- const performanceGroups=group(d.map(r=>({...r,__performanceCategory:String(r[COLUMNAS.desempenoCCV]??'').trim()||'Sin dato'})),'__performanceCategory');
- const performanceCategories=Object.keys(performanceGroups).map(name=>({name,count:performanceGroups[name].length})).sort((a,b)=>b.count-a.count);
+ // Las cuatro distribuciones excluyen los registros vacíos de su propio indicador.
+ // Cada porcentaje se calcula sobre el total de registros válidos de esa gráfica.
+ const performanceCategories=buildDistributionCategories(d,COLUMNAS.desempenoCCV);
  if(performanceCategories.length){
-   const performanceTotal=performanceCategories.reduce((sum,item)=>sum+item.count,0);
-   const performancePalette=['#063B75','#145A9E','#287FC0','#58A0D5','#91C2E8','#C1DDF3'];
-   renderExecutiveDistribution('performanceDistribution',performanceCategories,performancePalette,'Distribución de registros por categoría de desempeño CCV');
+   renderExecutiveDistribution('performanceDistribution',performanceCategories,['#063B75','#145A9E','#287FC0','#58A0D5','#91C2E8','#C1DDF3'],'Distribución de registros por categoría de desempeño CCV');
  }else{
-   $('performanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño para los filtros actuales.</div>';
+   $('performanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño CCV para los filtros actuales.</div>';
  }
- // Desempeño General: utiliza la columna específica de BD Preventas y respeta los filtros activos.
- const generalPerformanceGroups=group(d.map(r=>({...r,__generalPerformanceCategory:String(r[COLUMNAS.desempenoGeneral]??'').trim()||'Sin dato'})),'__generalPerformanceCategory');
- const generalPerformanceCategories=Object.keys(generalPerformanceGroups).map(name=>({name,count:generalPerformanceGroups[name].length})).sort((a,b)=>b.count-a.count);
+ const generalPerformanceCategories=buildDistributionCategories(d,COLUMNAS.desempenoGeneral);
  if(generalPerformanceCategories.length){
    renderExecutiveDistribution('performanceDistributionCopy',generalPerformanceCategories,['#4A148C','#6A1B9A','#8E24AA','#AB47BC','#CE93D8','#E1BEE7'],'Distribución de registros por categoría de desempeño general');
  }else{
    $('performanceDistributionCopy').innerHTML='<div class="emptyState">Sin datos de desempeño general para los filtros actuales.</div>';
  }
- // Distribución del desempeño de cumplimiento de volumen.
- const volumePerformanceGroups=group(d.map(r=>({...r,__volumePerformanceCategory:String(r[COLUMNAS.desempenoSemanas]??'').trim()||'Sin dato'})),'__volumePerformanceCategory');
- const volumePerformanceCategories=Object.keys(volumePerformanceGroups).map(name=>({name,count:volumePerformanceGroups[name].length})).sort((a,b)=>b.count-a.count);
+ const volumePerformanceCategories=buildDistributionCategories(d,COLUMNAS.desempenoVolumen);
  if(volumePerformanceCategories.length){
-   const volumePerformancePalette=['#064E3B','#087F68','#159B7D','#45B99A','#83D2B8','#C5EBDD'];
-   const volumePerformanceTotal=volumePerformanceCategories.reduce((sum,item)=>sum+item.count,0);
-   renderExecutiveDistribution('volumePerformanceDistribution',volumePerformanceCategories,volumePerformancePalette,'Distribución de registros por categoría de cumplimiento de volumen');
-   renderExecutiveDistribution('volumePerformanceDistributionCopy',volumePerformanceCategories,['#7F0000','#B71C1C','#D32F2F','#E57373','#EF9A9A','#FFCDD2'],'Distribución de registros por categoría de cumplimiento de volumen');
+   renderExecutiveDistribution('volumePerformanceDistribution',volumePerformanceCategories,['#064E3B','#087F68','#159B7D','#45B99A','#83D2B8','#C5EBDD'],'Distribución de registros por categoría de desempeño de volumen');
  }else{
    $('volumePerformanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño de volumen para los filtros actuales.</div>';
-   $('volumePerformanceDistributionCopy').innerHTML='<div class="emptyState">Sin datos de desempeño de volumen para los filtros actuales.</div>';
+ }
+ const weeksPerformanceCategories=buildDistributionCategories(d,COLUMNAS.desempenoSemanas);
+ if(weeksPerformanceCategories.length){
+   renderExecutiveDistribution('volumePerformanceDistributionCopy',weeksPerformanceCategories,['#7F0000','#B71C1C','#D32F2F','#E57373','#EF9A9A','#FFCDD2'],'Distribución de registros por categoría de desempeño por semanas comisionadas');
+ }else{
+   $('volumePerformanceDistributionCopy').innerHTML='<div class="emptyState">Sin datos de desempeño por semanas comisionadas para los filtros actuales.</div>';
  }
  // Semanas evaluadas usan la misma llave año-semana que las semanas con comisión y las tendencias.
  const evaluatedPeriods=weekValues(d);
