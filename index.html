@@ -993,7 +993,7 @@ function update(){
    const performanceTotal=performanceCategories.reduce((sum,item)=>sum+item.count,0);
    const performancePalette=['#063B75','#145A9E','#287FC0','#58A0D5','#91C2E8','#C1DDF3'];
    renderExecutiveDistribution('performanceDistribution',performanceCategories,performancePalette,'Distribución de registros por categoría de desempeño CCV');
-   renderExecutiveDistribution('performanceDistributionCopy',performanceCategories,performancePalette,'Distribución de registros por categoría de desempeño CCV');
+   renderExecutiveDistribution('performanceDistributionCopy',performanceCategories,['#4A148C','#6A1B9A','#8E24AA','#AB47BC','#CE93D8','#E1BEE7'],'Distribución de registros por categoría de desempeño CCV');
  }else{
    $('performanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño para los filtros actuales.</div>';
    $('performanceDistributionCopy').innerHTML='<div class="emptyState">Sin datos de desempeño para los filtros actuales.</div>';
