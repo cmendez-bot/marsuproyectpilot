@@ -863,25 +863,26 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 }
 
 
-/* Corrección: controles de la gráfica de líneas Comisión total (#branchTrend3). */
+/* Controles de Comisión total: esquina superior derecha, en una sola línea. */
 #analisis-regional > .panel:has(> #branchTrend3) {
   position:relative!important;
+  padding-top:48px!important;
 }
 #analisis-regional > .panel:has(> #branchTrend3) > .viewToggle {
   position:absolute!important;
-  top:auto!important;
+  top:12px!important;
   left:auto!important;
   right:145px!important;
-  bottom:10px!important;
+  bottom:auto!important;
   height:30px!important;
   z-index:6!important;
 }
 #analisis-regional > .panel:has(> #branchTrend3) > .chartExport {
   position:absolute!important;
-  top:auto!important;
+  top:12px!important;
   left:auto!important;
   right:10px!important;
-  bottom:10px!important;
+  bottom:auto!important;
   height:30px!important;
   min-height:30px!important;
   margin:0!important;
@@ -890,7 +891,7 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   z-index:6!important;
 }
 #analisis-regional > .panel:has(> #branchTrend3) > #branchTrend3 {
-  margin-bottom:38px!important;
+  margin-bottom:0!important;
 }
 
 </style>
