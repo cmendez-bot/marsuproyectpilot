@@ -861,7 +861,7 @@ function update(){
  const trendLabel=selectedBranches.length===1?selectedBranches[0]:(selectedRegions.length?selectedRegions[0]:'General');
  const comparisonField=selectedBranches.length?COLUMNAS.preventista:(selectedRegions.length?COLUMNAS.sucursal:COLUMNAS.region);
  const comparisonLabel=selectedBranches.length?'preventista':(selectedRegions.length?'sucursal':'región');
- $('branchesTitle').textContent='Desempeño';
+ $('branchesTitle').textContent='Comisión total';
  $('branchesDesc').textContent='Comparativo por '+comparisonLabel+' según la métrica seleccionada.';
  const branchKey=$('branchesMetric').value || COLUMNAS.ccv;
  const byB=group(d,comparisonField),branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],branchKey)-avgMetric(byB[a],branchKey)).slice(0,10);
