@@ -19,6 +19,13 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 #graficas-categoria2 .panel>h2{min-height:30px;display:flex;align-items:center;white-space:nowrap;margin:0 0 8px!important;padding-right:125px;}
 #graficas-categoria2 .panel>.chartExport{position:absolute;top:10px;right:10px;margin:0!important;height:30px;white-space:nowrap;padding:6px 9px!important;}
 @media(max-width:1100px){#graficas-categoria2{grid-template-columns:1fr!important;}}
+
+/* Desplazamiento vertical para consultar todos los elementos de las gráficas de barras. */
+.chart-scroll-viewport{display:block!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#64748b #252525;}
+.chart-scroll-viewport::-webkit-scrollbar{width:9px;}
+.chart-scroll-viewport::-webkit-scrollbar-track{background:#252525;border-radius:8px;}
+.chart-scroll-viewport::-webkit-scrollbar-thumb{background:#64748b;border-radius:8px;border:2px solid #252525;}
+.chart-scroll-viewport>.chart-inner{display:block!important;width:100%!important;max-width:100%!important;}
 </style>
 <script>
 (function(){
@@ -712,6 +719,38 @@ function filtered(){return DATA.filter(r=>matchesFilters(r));}
 function group(arr,key){return arr.reduce((o,r)=>{const k=r[key]===null||r[key]===undefined?'Sin dato':String(r[key]);(o[k]??=[]).push(r);return o},{})}
 function plot(id,data,layout={}){
  if(!window.Plotly)return;
+ const isBarChart=Array.isArray(data)&&data.some(trace=>trace&&trace.type==='bar');
+ let chartNode=$(id);
+ let scrollViewport=null;
+ let plotHeight=null;
+ if(isBarChart&&chartNode){
+   scrollViewport=chartNode.parentElement&&chartNode.parentElement.classList.contains('chart-scroll-viewport')?chartNode.parentElement:null;
+   if(!scrollViewport){
+     const rect=chartNode.getBoundingClientRect();
+     const computed=window.getComputedStyle(chartNode);
+     const visibleHeight=Math.round(rect.height||parseFloat(computed.height)||245);
+     scrollViewport=document.createElement('div');
+     scrollViewport.className='chart chart-scroll-viewport';
+     scrollViewport.style.height=visibleHeight+'px';
+     scrollViewport.style.minHeight=visibleHeight+'px';
+     scrollViewport.style.maxHeight=visibleHeight+'px';
+     chartNode.classList.remove('chart');
+     chartNode.classList.add('chart-inner');
+     chartNode.parentNode.insertBefore(scrollViewport,chartNode);
+     scrollViewport.appendChild(chartNode);
+   }
+   const categoryValues=new Set();
+   data.filter(trace=>trace&&trace.type==='bar').forEach(trace=>{
+     const values=trace.orientation==='h'?trace.y:trace.x;
+     (values||[]).forEach(value=>categoryValues.add(String(value)));
+   });
+   const visibleHeight=Math.round(scrollViewport.getBoundingClientRect().height||245);
+   const margins=layout.margin||{};
+   const requiredHeight=Math.max(visibleHeight,categoryValues.size*34+(margins.t||24)+(margins.b||52)+20);
+   plotHeight=requiredHeight;
+   chartNode.style.height=requiredHeight+'px';
+   chartNode.style.minHeight=requiredHeight+'px';
+ }
  const base={
    margin:{l:62,r:28,t:24,b:72},
    paper_bgcolor:'#1c1c1c',plot_bgcolor:'#1c1c1c',
@@ -751,6 +790,7 @@ function plot(id,data,layout={}){
  else if(merged.xaxis.title) merged.xaxis.title={standoff:18,...merged.xaxis.title};
  if(typeof merged.yaxis.title==='string') merged.yaxis.title={text:merged.yaxis.title,standoff:18};
  else if(merged.yaxis.title) merged.yaxis.title={standoff:18,...merged.yaxis.title};
+ if(isBarChart&&plotHeight){merged.height=plotHeight;merged.autosize=true;}
  Plotly.react(id,data,merged,{responsive:true,displayModeBar:false});
 }
 function esc(s){return String(s??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -872,7 +912,7 @@ function update(){
  $('branchesTitle').textContent='Comisión total';
  $('branchesDesc').textContent='Comparativo por '+comparisonLabel+' según la métrica seleccionada.';
  const branchKey=$('branchesMetric').value || COLUMNAS.ccv;
- const byB=group(d,comparisonField),branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],branchKey)-avgMetric(byB[a],branchKey)).slice(0,10);
+ const byB=group(d,comparisonField),branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],branchKey)-avgMetric(byB[a],branchKey));
  const branchVals=branches.map(k=>avgMetric(byB[k],branchKey));
  const barColorScale=(values)=>{
    const nums=values.map(v=>Number(v)).filter(v=>Number.isFinite(v));
@@ -887,7 +927,7 @@ function update(){
    });
  };
  const copy1Key=$('branchesCopy1Metric').value || COLUMNAS.ccv;
- const copy1Branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],copy1Key)-avgMetric(byB[a],copy1Key)).slice(0,10);
+ const copy1Branches=Object.keys(byB).sort((a,b)=>avgMetric(byB[b],copy1Key)-avgMetric(byB[a],copy1Key));
  const copy1Vals=copy1Branches.map(k=>avgMetric(byB[k],copy1Key));
  const performanceColors=barColorScale(branchVals);
  plot('branches',[{
@@ -970,7 +1010,7 @@ function update(){
 
  // Cumplimiento volúmen: indicador fijo, sin selector de métricas.
  const copy2Key=COLUMNAS.cumplimiento;
- const copy2Branches=Object.keys(byB).sort((a,b)=>cumplimientoVolumen(byB[b])-cumplimientoVolumen(byB[a])).slice(0,10);
+ const copy2Branches=Object.keys(byB).sort((a,b)=>cumplimientoVolumen(byB[b])-cumplimientoVolumen(byB[a]));
  const copy2Vals=copy2Branches.map(k=>cumplimientoVolumen(byB[k]));
  const copy2Real=copy2Branches.map(k=>sumFieldSafe(byB[k],COLUMNAS.realVolumen));
  const copy2Objective=copy2Branches.map(k=>sumFieldSafe(byB[k],COLUMNAS.objetivoVolumen));
@@ -1030,7 +1070,7 @@ function update(){
    const commission=sumFieldSafe(rows,COLUMNAS.pagoTotal);
    const target=sumFieldSafe(rows,COLUMNAS.target);
    return {name,commission,target,pct:target>0?commission/target*100:null};
- }).sort((a,b)=>(b.pct??-Infinity)-(a.pct??-Infinity)).slice(0,10);
+ }).sort((a,b)=>(b.pct??-Infinity)-(a.pct??-Infinity));
  // La tarjeta conserva siempre el tamaño fijo definido por el CSS del tablero.
  // El límite de 10 categorías mantiene las barras legibles dentro del espacio disponible.
  const targetLabels=targetCategories.map(item=>item.name);
