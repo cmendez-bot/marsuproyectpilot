@@ -1005,7 +1005,7 @@ function update(){
    const volumePerformancePalette=['#064E3B','#087F68','#159B7D','#45B99A','#83D2B8','#C5EBDD'];
    const volumePerformanceTotal=volumePerformanceCategories.reduce((sum,item)=>sum+item.count,0);
    renderExecutiveDistribution('volumePerformanceDistribution',volumePerformanceCategories,volumePerformancePalette,'Distribución de registros por categoría de cumplimiento de volumen');
-   renderExecutiveDistribution('volumePerformanceDistributionCopy',volumePerformanceCategories,volumePerformancePalette,'Distribución de registros por categoría de cumplimiento de volumen');
+   renderExecutiveDistribution('volumePerformanceDistributionCopy',volumePerformanceCategories,['#7F0000','#B71C1C','#D32F2F','#E57373','#EF9A9A','#FFCDD2'],'Distribución de registros por categoría de cumplimiento de volumen');
  }else{
    $('volumePerformanceDistribution').innerHTML='<div class="emptyState">Sin datos de desempeño de volumen para los filtros actuales.</div>';
    $('volumePerformanceDistributionCopy').innerHTML='<div class="emptyState">Sin datos de desempeño de volumen para los filtros actuales.</div>';
