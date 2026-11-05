@@ -1207,8 +1207,8 @@ function plot(id,data,layout={}){
    spikedistance:-1,
    hoverlabel:{bgcolor:'#242022',bordercolor:'#c7d7e7',font:{family:'Inter, Segoe UI, Arial',size:11,color:'#f2eeee'},align:'left',namelength:-1},
    font:{family:'Inter, Segoe UI, Arial',size:10,color:'#c9c1c4'},
-   xaxis:{gridcolor:'#383234',zerolinecolor:'#cbd8e5',linecolor:'#cbd8e5',automargin:true,title:{standoff:18}},
-   yaxis:{gridcolor:'#383234',zerolinecolor:'#cbd8e5',linecolor:'#cbd8e5',automargin:true,title:{standoff:18}},
+   xaxis:{showgrid:false,showline:false,zeroline:false,automargin:true,title:{standoff:18}},
+   yaxis:{showgrid:false,showline:false,zeroline:false,automargin:true,title:{standoff:18}},
    showlegend:false
  };
  const merged={...base,...layout};
