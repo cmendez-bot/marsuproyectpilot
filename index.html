@@ -657,6 +657,7 @@ const COLUMNAS = {
   target: 'Target',
   desempenoCCV: 'Desempeño CCV',
   desempenoVolumen: 'Desempeño volúmen',
+  desempenoSemanas: 'desempeño semanas comisionadas',
   antiguedad: 'Antigüedad (Semanas)',
   colaboradorPago: 'Tipo de Pago'
 };
@@ -999,7 +1000,7 @@ function update(){
    $('performanceDistributionCopy').innerHTML='<div class="emptyState">Sin datos de desempeño para los filtros actuales.</div>';
  }
  // Distribución del desempeño de cumplimiento de volumen.
- const volumePerformanceGroups=group(d.map(r=>({...r,__volumePerformanceCategory:String(r[COLUMNAS.desempenoVolumen]??'').trim()||'Sin dato'})),'__volumePerformanceCategory');
+ const volumePerformanceGroups=group(d.map(r=>({...r,__volumePerformanceCategory:String(r[COLUMNAS.desempenoSemanas]??'').trim()||'Sin dato'})),'__volumePerformanceCategory');
  const volumePerformanceCategories=Object.keys(volumePerformanceGroups).map(name=>({name,count:volumePerformanceGroups[name].length})).sort((a,b)=>b.count-a.count);
  if(volumePerformanceCategories.length){
    const volumePerformancePalette=['#064E3B','#087F68','#159B7D','#45B99A','#83D2B8','#C5EBDD'];
@@ -1541,7 +1542,7 @@ function loadRows(rows){
     const tenureHeader=Object.keys(o).find(k=>normalizeHeader(k)===normalizeHeader(COLUMNAS.antiguedad));
     if(tenureHeader && tenureHeader!==COLUMNAS.antiguedad) o[COLUMNAS.antiguedad]=o[tenureHeader];
     // Resolver encabezados de desempeño aunque la hoja use diferencias de acentos, mayúsculas o espacios.
-    [COLUMNAS.desempenoCCV,COLUMNAS.desempenoVolumen].forEach(column=>{
+    [COLUMNAS.desempenoCCV,COLUMNAS.desempenoVolumen,COLUMNAS.desempenoSemanas].forEach(column=>{
       const matchedHeader=Object.keys(o).find(k=>normalizeHeader(k)===normalizeHeader(column));
       if(matchedHeader && matchedHeader!==column) o[column]=o[matchedHeader];
     });
