@@ -1233,10 +1233,29 @@ function parseNumericValue(value){
 function normalizeHeader(value){
   return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 }
+function clearDashboardData(){
+  // Elimina las gráficas anteriores sin modificar la estructura ni el estilo de las tarjetas.
+  document.querySelectorAll('.chart').forEach(el=>{
+    if(window.Plotly && el.classList.contains('js-plotly-plot')) Plotly.purge(el);
+    el.innerHTML='<div class="emptyState">Sin datos para mostrar.</div>';
+  });
+  // Restablece los indicadores principales.
+  ['kccv','kds','kpay','kvolCommission','kccvCommission','kcommissionPeople','kvol','kpeople','kweeksEvaluated','kweeksWithCommission']
+    .forEach(id=>{const el=$(id);if(el)el.textContent='—';});
+  // Oculta y limpia los detalles abiertos para no conservar información anterior.
+  document.querySelectorAll('.drilldown').forEach(el=>{el.innerHTML='';el.hidden=true;});
+  // Limpia las tablas conservando sus encabezados.
+  document.querySelectorAll('tbody').forEach(tbody=>{
+    const count=tbody.closest('table')?.querySelectorAll('thead th').length||1;
+    tbody.innerHTML='<tr><td colspan="'+count+'">Sin datos para mostrar.</td></tr>';
+  });
+}
 function loadRows(rows){
   if(!Array.isArray(rows) || !rows.length){
+    DATA=[];
+    clearDashboardData();
     $('status').textContent='La hoja no contiene registros para mostrar.';
-    DATA=[]; update(); return;
+    return;
   }
   DATA=rows.map(r=>{
     const o={};
