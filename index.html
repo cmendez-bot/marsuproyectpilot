@@ -767,6 +767,7 @@ function filtered(){return DATA.filter(r=>matchesFilters(r));}
 function group(arr,key){return arr.reduce((o,r)=>{const k=r[key]===null||r[key]===undefined?'Sin dato':String(r[key]);(o[k]??=[]).push(r);return o},{})}
 
 function renderExecutiveDistribution(id,categories,palette,subtitle){
+ const safeText=value=>String(value).replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
  const chart=$(id); if(!chart)return;
  const total=categories.reduce((sum,item)=>sum+item.count,0);
  if(!categories.length||!total){chart.innerHTML='<div class="emptyState">Sin datos para los filtros actuales.</div>';return;}
@@ -786,14 +787,14 @@ function renderExecutiveDistribution(id,categories,palette,subtitle){
    const foot=document.createElement('div');foot.className='distribution-footnote';foot.textContent='Pasa el cursor sobre una categoría para consultar su participación y registros.';panel.appendChild(foot);
  }
  const legend=main.querySelector('.distribution-legend');
- legend.innerHTML=categories.map((item,index)=>'<div class="distribution-item" data-point="'+index+'"><div class="distribution-item-head"><span class="distribution-swatch" style="background:'+colors[index]+'"></span><span class="distribution-name">'+escapeHtml(String(item.name))+'</span><span class="distribution-pct">'+(item.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</span></div><div class="distribution-count">'+item.count.toLocaleString('es-MX')+' registros</div><div class="distribution-track"><div class="distribution-fill" style="width:'+(item.count/total*100)+'%;background:'+colors[index]+'"></div></div></div>').join('');
+ legend.innerHTML=categories.map((item,index)=>'<div class="distribution-item" data-point="'+index+'"><div class="distribution-item-head"><span class="distribution-swatch" style="background:'+colors[index]+'"></span><span class="distribution-name">'+safeText(String(item.name))+'</span><span class="distribution-pct">'+(item.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</span></div><div class="distribution-count">'+item.count.toLocaleString('es-MX')+' registros</div><div class="distribution-track"><div class="distribution-fill" style="width:'+(item.count/total*100)+'%;background:'+colors[index]+'"></div></div></div>').join('');
  const summary=panel.querySelector('[data-summary="'+id+'"]');
  const first=categories[0],second=categories[1];
  if(second){
    const combined=first.count+second.count;
-   summary.innerHTML='<b>'+escapeHtml(String(first.name))+'</b> concentra el <b>'+ (first.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b> de los registros; junto con <b>'+escapeHtml(String(second.name))+'</b> suman el <b>'+(combined/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b>.';
+   summary.innerHTML='<b>'+safeText(String(first.name))+'</b> concentra el <b>'+ (first.count/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b> de los registros; junto con <b>'+safeText(String(second.name))+'</b> suman el <b>'+(combined/total*100).toLocaleString('es-MX',{maximumFractionDigits:1})+'%</b>.';
  }else{
-   summary.innerHTML='<b>'+escapeHtml(String(first.name))+'</b> concentra el <b>100%</b> de los registros.';
+   summary.innerHTML='<b>'+safeText(String(first.name))+'</b> concentra el <b>100%</b> de los registros.';
  }
  const trace={type:'pie',labels:categories.map(item=>item.name),values:categories.map(item=>item.count),hole:.58,sort:false,direction:'clockwise',rotation:270,textinfo:'percent',textposition:'inside',insidetextorientation:'horizontal',textfont:{color:'#fff',size:11,family:'Inter, Segoe UI, Arial, sans-serif'},marker:{colors,line:{color:'#fff',width:3}},hovertemplate:'<b>%{label}</b><br>%{percent} del total<br>%{value:,} registros<extra></extra>'};
  const layout={height:220,autosize:true,paper_bgcolor:'#fff',plot_bgcolor:'#fff',margin:{l:2,r:2,t:2,b:2},showlegend:false,hoverlabel:{bgcolor:'#fff',bordercolor:'#d9e4ef',font:{color:'#173b5e',size:11}},annotations:[{text:'<b>'+total.toLocaleString('es-MX')+'</b><br><span style="font-size:9px;color:#8795a5">TOTAL REGISTROS</span>',x:.5,y:.5,xref:'paper',yref:'paper',showarrow:false,font:{size:18,color:'#123b63',family:'Inter, Segoe UI, Arial, sans-serif'}}]};
