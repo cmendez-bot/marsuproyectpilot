@@ -790,8 +790,8 @@ function commissionVsTargetBreakdownField(){
   return {field:COLUMNAS.region,label:'región'};
 }
 function activeBreakdownField(){
-  if($('branch').value!=='all') return {field:COLUMNAS.preventista,label:'preventista'};
-  if($('region').value!=='all') return {field:COLUMNAS.sucursal,label:'sucursal'};
+  if(selectedFilterValues('branch').length) return {field:COLUMNAS.preventista,label:'preventista'};
+  if(selectedFilterValues('region').length) return {field:COLUMNAS.sucursal,label:'sucursal'};
   return {field:COLUMNAS.region,label:'región'};
 }
 function renderDrilldown(containerId,title,headers,rows){
