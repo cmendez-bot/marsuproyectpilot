@@ -958,6 +958,65 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > h2 {padding-right:0!important;white-space:normal!important;margin-bottom:42px!important;}
 }
 
+
+
+/* Las dos tendencias por familia tienen el filtro dentro de una fila interna.
+   Se alinean esos controles con la misma guía superior de las demás gráficas. */
+#analisis-familia .familyTrendPanel {
+  position:relative!important;
+}
+#analisis-familia .familyTrendPanel > h2 {
+  padding-right:390px!important;
+}
+#analisis-familia .familyTrendPanel > div:has(> .chartExport) {
+  position:static!important;
+  height:0!important;
+  min-height:0!important;
+  margin:0!important;
+}
+#analisis-familia .familyTrendPanel > div:has(> .chartExport) > label {
+  position:absolute!important;
+  top:20px!important;
+  right:375px!important;
+  margin:0!important;
+  white-space:nowrap!important;
+  z-index:6!important;
+}
+#analisis-familia .familyTrendPanel > div:has(> .chartExport) > select {
+  position:absolute!important;
+  top:12px!important;
+  right:245px!important;
+  width:122px!important;
+  height:30px!important;
+  padding:5px 7px!important;
+  z-index:6!important;
+}
+#analisis-familia .familyTrendPanel > div:has(> .chartExport) > .chartExport {
+  position:absolute!important;
+  top:12px!important;
+  right:10px!important;
+  bottom:auto!important;
+  height:30px!important;
+  min-height:30px!important;
+  margin:0!important;
+  padding:6px 9px!important;
+  white-space:nowrap!important;
+  z-index:6!important;
+}
+#analisis-familia .familyTrendPanel > .viewToggle {
+  top:12px!important;
+  right:125px!important;
+}
+@media(max-width:700px){
+  #analisis-familia .familyTrendPanel > h2 {padding-right:0!important;margin-bottom:42px!important;}
+  #analisis-familia .familyTrendPanel > div:has(> .chartExport) {height:auto!important;margin:0 0 5px!important;}
+  #analisis-familia .familyTrendPanel > div:has(> .chartExport) > label,
+  #analisis-familia .familyTrendPanel > div:has(> .chartExport) > select,
+  #analisis-familia .familyTrendPanel > div:has(> .chartExport) > .chartExport {
+    position:static!important;
+  }
+}
+
 </style>
 <script>
 (function(){
