@@ -927,7 +927,7 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartMetric {
   position:absolute!important;
   top:12px!important;
-  right:245px!important;
+  right:125px!important;
   left:auto!important;
   width:112px!important;
   max-width:none!important;
@@ -935,6 +935,9 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   margin:0!important;
   padding:6px 7px!important;
   z-index:6!important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric):has(> .viewToggle) > .chartMetric {
+  right:245px!important;
 }
 :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .viewToggle) > h2 {
   padding-right:225px!important;
