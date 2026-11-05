@@ -708,6 +708,77 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 }
 
 
+
+
+/* Paso 3: distribución uniforme de exportación arriba y filtro debajo, ambos a la derecha. */
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartExport{
+  top:10px!important;
+  right:10px!important;
+  left:auto!important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartMetric{
+  top:45px!important;
+  right:10px!important;
+  left:auto!important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > label[for]{
+  top:28px!important;
+  right:10px!important;
+  left:auto!important;
+  text-align:right!important;
+}
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .viewToggle{
+  top:45px!important;
+  left:10px!important;
+  right:auto!important;
+}
+
+/* Filtros propios de las gráficas por familia: exportación arriba y filtro debajo. */
+#analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter),
+#analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter){
+  top:45px!important;
+}
+#analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter) label,
+#analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter) label{
+  left:auto!important;
+  right:0!important;
+  text-align:right!important;
+}
+#analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter) select,
+#analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter) select{
+  left:auto!important;
+  right:0!important;
+}
+#analisis-familia .familyTrendPanel .chartExport{
+  top:0!important;
+  right:0!important;
+}
+#analisis-familia .familyTrendPanel > .viewToggle{
+  top:45px!important;
+  left:10px!important;
+  right:auto!important;
+}
+
+/* En barras por familia, el botón queda arriba y el selector en la fila inferior. */
+#graficas-categoria2 > .panel .familyBarControls .chartExport{
+  top:-35px!important;
+  right:0!important;
+}
+#graficas-categoria2 > .panel .familyBarControls label,
+#graficas-categoria2 > .panel .familyBarControls select{
+  left:auto!important;
+  right:0!important;
+  text-align:right!important;
+}
+
+@media(max-width:700px){
+  :is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel:has(> .chartMetric) > .chartMetric{
+    width:96px!important;
+    min-width:96px!important;
+    max-width:96px!important;
+  }
+}
+
 </style>
 <script>
 (function(){
