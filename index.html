@@ -73,7 +73,7 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .criteria-count{font-size:10px;font-weight:700;color:#6b7f91;white-space:nowrap;}
 .criteria-table-wrap{min-height:0;overflow:auto;border:1px solid #dce5ed;border-radius:12px;background:#fff;}
 .criteria-table{width:100%;border-collapse:separate;border-spacing:0;color:#30465a;font-size:11px;text-align:center;}
-.criteria-table th{position:sticky;top:0;z-index:2;padding:12px 10px;background:#eaf1f7;color:#244b6c;font-size:10px;font-weight:800;letter-spacing:.2px;border-bottom:1px solid #d7e2ec;white-space:nowrap;}
+.criteria-table th{position:sticky;top:0;z-index:2;padding:12px 10px;background:#eaf1f7;color:#244b6c;font-size:10px;font-weight:800;letter-spacing:.2px;border-bottom:1px solid #d7e2ec;white-space:nowrap;text-align:center;}
 .criteria-table td{padding:8px 9px;border-bottom:1px solid #edf1f5;white-space:nowrap;}
 .criteria-table tbody tr:nth-child(even){background:#f8fafc;}
 .criteria-table tbody tr:hover{background:#eef6fc;}
@@ -1927,6 +1927,10 @@ setInterval(cargarDatos, 3600000);
  const names={C:'Crítico',D:'En Desarrollo',A:'Aceptable',S:'Sobresaliente'};
  const cssNames={C:'critical',D:'development',A:'acceptable',S:'outstanding'};
  const matrix="C|C|C|C\nC|C|C|D\nC|C|C|A\nD|C|C|S\nC|C|D|C\nC|C|D|D\nD|C|D|A\nD|C|D|S\nC|C|A|C\nD|C|A|D\nD|C|A|A\nA|C|A|S\nD|C|S|C\nD|C|S|D\nA|C|S|A\nA|C|S|S\nC|D|C|C\nC|D|C|D\nD|D|C|A\nD|D|C|S\nC|D|D|C\nD|D|D|D\nD|D|D|A\nA|D|D|S\nD|D|A|C\nD|D|A|D\nA|D|A|A\nA|D|A|S\nD|D|S|C\nA|D|S|D\nA|D|S|A\nA|D|S|S\nC|A|C|C\nD|A|C|D\nD|A|C|A\nA|A|C|S\nD|A|D|C\nD|A|D|D\nA|A|D|A\nA|A|D|S\nD|A|A|C\nA|A|A|D\nA|A|A|A\nA|A|A|S\nA|A|S|C\nA|A|S|D\nA|A|S|A\nS|A|S|S\nD|S|C|C\nD|S|C|D\nA|S|C|A\nA|S|C|S\nD|S|D|C\nA|S|D|D\nA|S|D|A\nA|S|D|S\nA|S|A|C\nA|S|A|D\nA|S|A|A\nS|S|A|S\nA|S|S|C\nA|S|S|D\nS|S|S|A\nS|S|S|S".split('\n').map(line=>line.split('|'));
+ // Orden de prioridad: semanas con comisión, desempeño volumen, desempeño CCV y clasificación general.
+ // En cada columna: Crítico, En Desarrollo, Aceptable y Sobresaliente.
+ const priority={C:0,D:1,A:2,S:3};
+ matrix.sort((a,b)=>[3,2,1,0].reduce((result,index)=>result||priority[a[index]]-priority[b[index]],0));
  function render(query=''){
    const q=query.trim().toLocaleLowerCase('es');
    const filtered=matrix.filter(row=>row.map(v=>names[v]).join(' ').toLocaleLowerCase('es').includes(q));
