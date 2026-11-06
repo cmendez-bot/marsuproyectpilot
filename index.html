@@ -2205,6 +2205,7 @@ function update(){
  // Cuenta semanas distintas en toda la BD, respetando los filtros superiores y omitiendo sucursal.
  const collaboratorWeekCounts=new Map();
  const collaboratorDsRows=new Map();
+ const collaboratorVolumeRows=new Map();
  DATA.filter(row=>{
    if(!matchesFilters(row,'branch',true)) return false;
    const name=String(row[COLUMNAS.preventista]??'').trim();
@@ -2216,6 +2217,16 @@ function update(){
    const period=periodValue(row);
    if(period) collaboratorWeekCounts.get(key).add(period);
    collaboratorDsRows.get(key).push(row);
+ });
+ // Cumplimiento de volumen: respeta el rango de periodo y filtros superiores, omitiendo sucursal.
+ DATA.filter(row=>{
+   if(!matchesFilters(row,'branch')) return false;
+   const name=String(row[COLUMNAS.preventista]??'').trim();
+   return name!=='' && normalizeHeader(name)!=='vacante';
+ }).forEach(row=>{
+   const key=normalizeHeader(row[COLUMNAS.preventista]);
+   if(!collaboratorVolumeRows.has(key)) collaboratorVolumeRows.set(key,[]);
+   collaboratorVolumeRows.get(key).push(row);
  });
  // Clasificación ponderada del desempeño general: Crítico=0, En desarrollo=1, Aceptable=2, Sobresaliente=3.
  const classifyOverallPerformance=(arr,weeks)=>{
@@ -2245,8 +2256,9 @@ function update(){
     return weeksB-weeksA || sortVal(branchA,branchB) || sortVal(regionA,regionB) || sortVal(a.person,b.person);
   }).map(item=>{
    const rows=item.rows;
-   const totalReal=sumField(rows,COLUMNAS.realVolumen), totalObjective=sumField(rows,COLUMNAS.objetivoVolumen);
-   const volumeCompliance=totalObjective!==0?totalReal/totalObjective:0;
+   const filteredVolumeRows=collaboratorVolumeRows.get(normalizeHeader(item.person))||[];
+   const totalReal=sumField(filteredVolumeRows,COLUMNAS.realVolumen), totalObjective=sumField(filteredVolumeRows,COLUMNAS.objetivoVolumen);
+   const volumeCompliance=totalObjective>0?(totalReal/totalObjective)*100:0;
    const weeks=collaboratorWeekCounts.get(normalizeHeader(item.person))?.size||0;
    const filteredMetricRows=collaboratorDsRows.get(normalizeHeader(item.person))||[];
    const totalCommission=sumField(filteredMetricRows,COLUMNAS.pagoTotal), totalTarget=sumField(filteredMetricRows,COLUMNAS.target);
@@ -2254,7 +2266,7 @@ function update(){
    const regionLabel=[...item.regions].sort(sortVal).join(' / ')||'Sin región';
    const branchLabel=[...item.branches].sort(sortVal).join(' / ')||'Sin sucursal';
    const overallPerformance=classifyOverallPerformance(filteredMetricRows,weeks);
-   return `<tr><td>${esc(overallPerformance)}</td><td>${esc(regionLabel)}</td><td>${esc(branchLabel)}</td><td>${esc(item.person)}</td><td class="num">${weeks}</td><td class="num">${weeksWithPositiveTotal(filteredMetricRows)}</td><td class="num">${num(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(collaboratorDsRows.get(normalizeHeader(item.person))||[]))}</td><td class="num">${num(volumeCompliance*100)}%</td><td class="num">${money(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.comisionCCV))}</td><td class="num">${weeksWithPositiveCCV(collaboratorDsRows.get(normalizeHeader(item.person))||[])}</td><td class="num">${money(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.cobroVolumen))}</td><td class="num">${weeksWithPositiveVolume(collaboratorDsRows.get(normalizeHeader(item.person))||[])}</td><td class="num">${money(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.pagoTotal))}</td><td class="num">${commissionVsTarget===null?'—':num(commissionVsTarget)+'%'}</td></tr>`;
+   return `<tr><td>${esc(overallPerformance)}</td><td>${esc(regionLabel)}</td><td>${esc(branchLabel)}</td><td>${esc(item.person)}</td><td class="num">${weeks}</td><td class="num">${weeksWithPositiveTotal(filteredMetricRows)}</td><td class="num">${num(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(collaboratorDsRows.get(normalizeHeader(item.person))||[]))}</td><td class="num">${num(volumeCompliance)}%</td><td class="num">${money(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.comisionCCV))}</td><td class="num">${weeksWithPositiveCCV(collaboratorDsRows.get(normalizeHeader(item.person))||[])}</td><td class="num">${money(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.cobroVolumen))}</td><td class="num">${weeksWithPositiveVolume(collaboratorDsRows.get(normalizeHeader(item.person))||[])}</td><td class="num">${money(avg(collaboratorDsRows.get(normalizeHeader(item.person))||[],COLUMNAS.pagoTotal))}</td><td class="num">${commissionVsTarget===null?'—':num(commissionVsTarget)+'%'}</td></tr>`;
  }).join('');
  $('collaboratorSummary').innerHTML=summaryRows || '<tr><td colspan="15">No hay colaboradores en la última semana del último año para el Tipo de pago seleccionado.</td></tr>';
  // Esta fuente conserva los filtros actuales para la tabla de rutas; no altera el resumen por colaborador.
