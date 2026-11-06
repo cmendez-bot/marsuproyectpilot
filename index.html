@@ -2140,7 +2140,7 @@ function update(){
  const collaboratorWeekCounts=new Map();
  const collaboratorDsRows=new Map();
  DATA.filter(row=>{
-   if(!matchesFilters(row,'branch')) return false;
+   if(!matchesFilters(row,'branch',true)) return false;
    const name=String(row[COLUMNAS.preventista]??'').trim();
    return name!=='' && normalizeHeader(name)!=='vacante';
  }).forEach(row=>{
