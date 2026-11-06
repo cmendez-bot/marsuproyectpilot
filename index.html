@@ -2108,13 +2108,13 @@ function update(){
     box.insertBefore(summary,box.querySelector('.tablewrap'));
   });
  $('tbody').innerHTML=[...d].sort((a,b)=>(Number(b[COLUMNAS.pagoTotal])||0)-(Number(a[COLUMNAS.pagoTotal])||0)).slice(0,500).map(r=>`<tr><td>${esc(r[COLUMNAS.desempenoGeneral])}</td><td>${esc(r[COLUMNAS.desempenoCCV])}</td><td>${esc(r[COLUMNAS.desempenoVolumen])}</td><td>${esc(r[COLUMNAS.desempenoSemanas])}</td><td>${esc(r[COLUMNAS.preventista])}</td><td>${esc(r[COLUMNAS.region])}</td><td>${esc(r[COLUMNAS.sucursal])}</td><td>${esc(r[COLUMNAS.anio])}</td><td>${esc(r[COLUMNAS.mes])}</td><td>${esc(r[COLUMNAS.semana])}</td></tr>`).join('');
- // El resumen por colaborador se basa exclusivamente en la última semana del último año disponible.
- // Los filtros generales se ignoran; únicamente se aplica el filtro superior Tipo de pago.
+ // El resumen por colaborador conserva como base la última semana del último año disponible.
+ // También responde a los filtros generales, región y preventista; la sucursal no lo condiciona.
+ // El rango Desde/Hasta no sustituye la regla de última semana, pero sí aplican Año, Mes, Comisión y Tipo de pago.
  const latestPeriod=weekValues(DATA).sort(sortVal).slice(-1)[0]||'';
- const selectedPayType=$('paidColleague').value;
  const collaboratorSourceRows=DATA.filter(row=>{
    if(!latestPeriod || periodValue(row)!==latestPeriod) return false;
-   if(HAS_GUARANTEE_COLUMN && selectedPayType!=='all' && String(row[COLUMNAS.colaboradorPago]??'')!==selectedPayType) return false;
+   if(!matchesFilters(row,'branch',true)) return false;
    const name=String(row[COLUMNAS.preventista]??'').trim();
    return name!=='' && normalizeHeader(name)!=='vacante';
  });
