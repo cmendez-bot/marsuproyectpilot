@@ -2108,30 +2108,45 @@ function update(){
     box.insertBefore(summary,box.querySelector('.tablewrap'));
   });
  $('tbody').innerHTML=[...d].sort((a,b)=>(Number(b[COLUMNAS.pagoTotal])||0)-(Number(a[COLUMNAS.pagoTotal])||0)).slice(0,500).map(r=>`<tr><td>${esc(r[COLUMNAS.desempenoGeneral])}</td><td>${esc(r[COLUMNAS.desempenoCCV])}</td><td>${esc(r[COLUMNAS.desempenoVolumen])}</td><td>${esc(r[COLUMNAS.desempenoSemanas])}</td><td>${esc(r[COLUMNAS.preventista])}</td><td>${esc(r[COLUMNAS.region])}</td><td>${esc(r[COLUMNAS.sucursal])}</td><td>${esc(r[COLUMNAS.anio])}</td><td>${esc(r[COLUMNAS.mes])}</td><td>${esc(r[COLUMNAS.semana])}</td></tr>`).join('');
- // Las dos tablas resumen respetan todos los filtros excepto el rango de periodo.
- const summaryData=DATA.filter(r=>matchesFilters(r,null,true));
- // Agrupa por región y colaborador para conservar la región de cada registro.
+ // El resumen por colaborador se basa exclusivamente en la última semana del último año disponible.
+ // Los filtros generales se ignoran; únicamente se aplica el filtro superior Tipo de pago.
+ const latestPeriod=weekValues(DATA).sort(sortVal).slice(-1)[0]||'';
+ const selectedPayType=$('paidColleague').value;
+ const collaboratorSourceRows=DATA.filter(row=>{
+   if(!latestPeriod || periodValue(row)!==latestPeriod) return false;
+   if(HAS_GUARANTEE_COLUMN && selectedPayType!=='all' && String(row[COLUMNAS.colaboradorPago]??'')!==selectedPayType) return false;
+   const name=String(row[COLUMNAS.preventista]??'').trim();
+   return name!=='' && normalizeHeader(name)!=='vacante';
+ });
+ // Agrupa por nombre normalizado para mostrar una sola fila por colaborador, aunque tenga varios registros.
  const collaboratorGroups=new Map();
- summaryData.forEach(row=>{
-   const regionName=String(row[COLUMNAS.region]??'Sin región').trim()||'Sin región';
-   const branchName=String(row[COLUMNAS.sucursal]??'Sin sucursal').trim()||'Sin sucursal';
-   const personName=String(row[COLUMNAS.preventista]??'Sin colaborador').trim()||'Sin colaborador';
-   const key=JSON.stringify([regionName,branchName,personName]);
-   if(!collaboratorGroups.has(key)) collaboratorGroups.set(key,{region:regionName,branch:branchName,person:personName,rows:[]});
-   collaboratorGroups.get(key).rows.push(row);
+ collaboratorSourceRows.forEach(row=>{
+   const personName=String(row[COLUMNAS.preventista]??'').trim();
+   const personKey=normalizeHeader(personName);
+   if(!collaboratorGroups.has(personKey)) collaboratorGroups.set(personKey,{person:personName,rows:[],regions:new Set(),branches:new Set()});
+   const item=collaboratorGroups.get(personKey);
+   item.rows.push(row);
+   const regionName=String(row[COLUMNAS.region]??'').trim();
+   const branchName=String(row[COLUMNAS.sucursal]??'').trim();
+   if(regionName) item.regions.add(regionName);
+   if(branchName) item.branches.add(branchName);
  });
  const sumField=(arr,key)=>arr.reduce((sum,r)=>sum+(Number(r[key])||0),0);
  const weeksWithPayment=(arr,key)=>new Set(arr.filter(r=>(Number(r[key])||0)>0).map(periodValue).filter(Boolean)).size;
- const summaryRows=[...collaboratorGroups.values()].sort((a,b)=>sortVal(a.region,b.region)||sortVal(a.branch,b.branch)||sortVal(a.person,b.person)).map(item=>{
+ const summaryRows=[...collaboratorGroups.values()].sort((a,b)=>sortVal(a.person,b.person)).map(item=>{
    const rows=item.rows;
    const totalReal=sumField(rows,COLUMNAS.realVolumen), totalObjective=sumField(rows,COLUMNAS.objetivoVolumen);
    const volumeCompliance=totalObjective!==0?totalReal/totalObjective:0;
    const weeks=new Set(rows.map(periodValue).filter(Boolean)).size;
    const totalCommission=sumField(rows,COLUMNAS.pagoTotal), totalTarget=sumField(rows,COLUMNAS.target);
    const commissionVsTarget=totalTarget>0?(totalCommission/totalTarget*100):null;
-   return `<tr><td>${esc(item.region)}</td><td>${esc(item.branch)}</td><td>${esc(item.person)}</td><td class="num">${weeks}</td><td class="num">${num(avg(rows,COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(rows))}</td><td class="num">${num(volumeCompliance*100)}%</td><td class="num">${money(avg(rows,COLUMNAS.comisionCCV))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.comisionCCV)}</td><td class="num">${money(avg(rows,COLUMNAS.cobroVolumen))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.cobroVolumen)}</td><td class="num">${money(avg(rows,COLUMNAS.pagoTotal))}</td><td class="num">${commissionVsTarget===null?'—':num(commissionVsTarget)+'%'}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.pagoTotal)}</td></tr>`;
+   const regionLabel=[...item.regions].sort(sortVal).join(' / ')||'Sin región';
+   const branchLabel=[...item.branches].sort(sortVal).join(' / ')||'Sin sucursal';
+   return `<tr><td>${esc(regionLabel)}</td><td>${esc(branchLabel)}</td><td>${esc(item.person)}</td><td class="num">${weeks}</td><td class="num">${num(avg(rows,COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(rows))}</td><td class="num">${num(volumeCompliance*100)}%</td><td class="num">${money(avg(rows,COLUMNAS.comisionCCV))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.comisionCCV)}</td><td class="num">${money(avg(rows,COLUMNAS.cobroVolumen))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.cobroVolumen)}</td><td class="num">${money(avg(rows,COLUMNAS.pagoTotal))}</td><td class="num">${commissionVsTarget===null?'—':num(commissionVsTarget)+'%'}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.pagoTotal)}</td></tr>`;
  }).join('');
- $('collaboratorSummary').innerHTML=summaryRows || '<tr><td colspan="14">No hay colaboradores para los filtros seleccionados.</td></tr>';
+ $('collaboratorSummary').innerHTML=summaryRows || '<tr><td colspan="14">No hay colaboradores en la última semana del último año para el Tipo de pago seleccionado.</td></tr>';
+ // Esta fuente conserva los filtros actuales para la tabla de rutas; no altera el resumen por colaborador.
+ const summaryData=DATA.filter(r=>matchesFilters(r,null,true));
  // Resumen por región, sucursal y ruta; ignora únicamente el rango de periodo.
  const routeGroups = new Map();
  summaryData.forEach(row => {
