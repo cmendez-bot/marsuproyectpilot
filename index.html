@@ -2133,11 +2133,23 @@ function update(){
  });
  const sumField=(arr,key)=>arr.reduce((sum,r)=>sum+(Number(r[key])||0),0);
  const weeksWithPayment=(arr,key)=>new Set(arr.filter(r=>(Number(r[key])||0)>0).map(periodValue).filter(Boolean)).size;
+ // Cuenta semanas distintas en toda la BD, respetando los filtros superiores y omitiendo sucursal.
+ const collaboratorWeekCounts=new Map();
+ DATA.filter(row=>{
+   if(!matchesFilters(row,'branch')) return false;
+   const name=String(row[COLUMNAS.preventista]??'').trim();
+   return name!=='' && normalizeHeader(name)!=='vacante';
+ }).forEach(row=>{
+   const key=normalizeHeader(row[COLUMNAS.preventista]);
+   if(!collaboratorWeekCounts.has(key)) collaboratorWeekCounts.set(key,new Set());
+   const period=periodValue(row);
+   if(period) collaboratorWeekCounts.get(key).add(period);
+ });
  const summaryRows=[...collaboratorGroups.values()].sort((a,b)=>sortVal(a.person,b.person)).map(item=>{
    const rows=item.rows;
    const totalReal=sumField(rows,COLUMNAS.realVolumen), totalObjective=sumField(rows,COLUMNAS.objetivoVolumen);
    const volumeCompliance=totalObjective!==0?totalReal/totalObjective:0;
-   const weeks=new Set(rows.map(periodValue).filter(Boolean)).size;
+   const weeks=collaboratorWeekCounts.get(normalizeHeader(item.person))?.size||0;
    const totalCommission=sumField(rows,COLUMNAS.pagoTotal), totalTarget=sumField(rows,COLUMNAS.target);
    const commissionVsTarget=totalTarget>0?(totalCommission/totalTarget*100):null;
    const regionLabel=[...item.regions].sort(sortVal).join(' / ')||'Sin región';
