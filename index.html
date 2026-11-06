@@ -2517,7 +2517,7 @@ function exportPreventistasToExcel(){
   ['Total pago variable',COLUMNAS.pagoTotal]
  ];
  const csvRows=[columns.map(column=>column[0]),...rows.map(row=>columns.map(column=>row[column[1]]??''))];
- const csv='\\ufeff'+csvRows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+ const csv='\ufeff'+csvRows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
  const url=URL.createObjectURL(blob);const a=document.createElement('a');
  a.href=url;a.download='Detalle_de_preventistas_'+new Date().toISOString().slice(0,10)+'.csv';
