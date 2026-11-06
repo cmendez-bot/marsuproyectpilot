@@ -1174,6 +1174,10 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 
 /* Resumen por colaborador: mostrar solo las cinco columnas ejecutivas; las demás permanecen en el DOM para exportación. */
 #resumen-colaboradores table th:nth-child(n+6),#resumen-colaboradores table td:nth-child(n+6){display:none!important;}
+
+/* Al ocultar la barra lateral, el control queda transparente y deja ver el contenido detrás */
+.app.sidebar-hidden .side-toggle{background:transparent!important;border-color:transparent!important;box-shadow:none!important;color:#245b91!important;}
+.app.sidebar-hidden .side-toggle:hover{background:rgba(37,99,166,.08)!important;border-color:transparent!important;}
 </style>
 <script>
 (function(){
