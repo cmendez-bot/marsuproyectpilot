@@ -2155,7 +2155,8 @@ function update(){
    const totalReal=sumField(rows,COLUMNAS.realVolumen), totalObjective=sumField(rows,COLUMNAS.objetivoVolumen);
    const volumeCompliance=totalObjective!==0?totalReal/totalObjective:0;
    const weeks=collaboratorWeekCounts.get(normalizeHeader(item.person))?.size||0;
-   const totalCommission=sumField(rows,COLUMNAS.pagoTotal), totalTarget=sumField(rows,COLUMNAS.target);
+   const filteredMetricRows=collaboratorDsRows.get(normalizeHeader(item.person))||[];
+   const totalCommission=sumField(filteredMetricRows,COLUMNAS.pagoTotal), totalTarget=sumField(filteredMetricRows,COLUMNAS.target);
    const commissionVsTarget=totalTarget>0?(totalCommission/totalTarget*100):null;
    const regionLabel=[...item.regions].sort(sortVal).join(' / ')||'Sin región';
    const branchLabel=[...item.branches].sort(sortVal).join(' / ')||'Sin sucursal';
