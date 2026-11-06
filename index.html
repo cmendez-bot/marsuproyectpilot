@@ -1128,30 +1128,46 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   text-align:left!important;
   z-index:7!important;
 }
-\n/* Tablas ejecutivas en dos columnas: mitad de ancho y desplazamiento horizontal independiente. */\n#tablas-preventistas-resumen{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;align-items:stretch!important;}\n#tablas-preventistas-resumen>.panel{width:100%!important;min-width:0!important;max-width:100%!important;}\n#tablas-preventistas-resumen .tablewrap{width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:auto!important;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#64748b #252525;}\n#tablas-preventistas-resumen .tablewrap::-webkit-scrollbar{height:10px;width:9px;}\n#tablas-preventistas-resumen .tablewrap::-webkit-scrollbar-track{background:#252525;border-radius:8px;}\n#tablas-preventistas-resumen .tablewrap::-webkit-scrollbar-thumb{background:#64748b;border:2px solid #252525;border-radius:8px;}\n#tablas-preventistas-resumen table{width:max-content!important;min-width:100%!important;}\n@media(max-width:1100px){#tablas-preventistas-resumen{grid-template-columns:minmax(0,1fr)!important;}}\n
-/* Simetría estricta: ambas tarjetas ocupan exactamente la mitad del renglón. */
+
+
+/* Tarjetas de tablas: dos columnas exactamente iguales; las tablas permanecen dentro de cada tarjeta. */
 #tablas-preventistas-resumen{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-  gap:10px!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-columns:minmax(0,1fr)!important;
+  gap:12px!important;
   width:100%!important;
+  min-width:0!important;
   align-items:stretch!important;
 }
 #tablas-preventistas-resumen > #analisis-preventistas,
 #tablas-preventistas-resumen > #resumen-colaboradores{
   display:block!important;
+  grid-column:auto!important;
   width:100%!important;
   min-width:0!important;
-  max-width:none!important;
-  grid-column:auto!important;
-  justify-self:stretch!important;
+  max-width:100%!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
 }
-#tablas-preventistas-resumen .tablewrap{
+#tablas-preventistas-resumen > #analisis-preventistas .tablewrap,
+#tablas-preventistas-resumen > #resumen-colaboradores .tablewrap{
   display:block!important;
   width:100%!important;
   min-width:0!important;
   max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:auto!important;
+  box-sizing:border-box!important;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#64748b #252525;
 }
+#tablas-preventistas-resumen .tablewrap::-webkit-scrollbar{height:10px;width:9px;}
+#tablas-preventistas-resumen .tablewrap::-webkit-scrollbar-track{background:#252525;border-radius:8px;}
+#tablas-preventistas-resumen .tablewrap::-webkit-scrollbar-thumb{background:#64748b;border:2px solid #252525;border-radius:8px;}
+#tablas-preventistas-resumen table{width:max-content!important;min-width:100%!important;}
 @media(max-width:1100px){
   #tablas-preventistas-resumen{grid-template-columns:minmax(0,1fr)!important;}
 }
