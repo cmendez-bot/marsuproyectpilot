@@ -98,6 +98,17 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .criteria-table tbody tr:last-child td{border-bottom:0;}
 .criteria-value{display:inline-flex;justify-content:center;min-width:86px;padding:5px 8px;border:1px solid transparent;border-radius:7px;font-size:10px;font-weight:750;}
 .criteria-table td:first-child .criteria-value{min-width:105px;font-weight:800;}
+.criteria-scale-wrap{width:100%;max-width:100%;margin:0 auto;}
+.criteria-scale-table{table-layout:fixed;text-align:center;}
+.criteria-scale-table th,.criteria-scale-table td{text-align:center;white-space:normal;vertical-align:middle;}
+.criteria-scale-table th:first-child,.criteria-scale-table td:first-child{width:19%;text-align:left;}
+.criteria-scale-table th.scale-critical{background:#b83232;color:#fff;}
+.criteria-scale-table th.scale-development{background:#b87920;color:#fff;}
+.criteria-scale-table th.scale-acceptable{background:#267346;color:#fff;}
+.criteria-scale-table th.scale-outstanding{background:#405da8;color:#fff;}
+.criteria-scale-table td:first-child{color:#244b6c;}
+.criteria-scale-table td{line-height:1.4;}
+@media(max-width:760px){.criteria-scale-wrap{overflow-x:auto;}.criteria-scale-table{min-width:700px;}}
 .criteria-note{display:flex;align-items:center;gap:7px;color:#6f8192;font-size:10px;line-height:1.4;}
 .criteria-note span{color:#2a79a9;font-size:14px;}
 @media(max-width:650px){.criteria-modal{padding:8px;}.criteria-dialog{width:100%;max-height:92vh;border-radius:14px;}.criteria-head{padding:16px;gap:10px;}.criteria-head h2{font-size:16px;}.criteria-head p{font-size:10px;}.criteria-head-icon{flex-basis:36px;height:36px;font-size:21px;}.criteria-content{padding:13px;gap:10px;}.criteria-table{font-size:10px;}.criteria-table th,.criteria-table td{padding:8px 7px;}.criteria-table-wrap{overflow:auto;}.criteria-search-wrap{max-width:none;}.criteria-count{font-size:9px;}}
@@ -2668,6 +2679,25 @@ setInterval(cargarDatos, 3600000);
         <button class="criteria-tab" type="button" role="tab" aria-selected="false" data-tab="weeks">Semanas con comisión</button>
       </nav>
       <section class="criteria-pane active" id="criteriaPane-general" role="tabpanel">
+        <div class="criteria-table-wrap criteria-scale-wrap">
+          <table class="criteria-table criteria-scale-table">
+            <thead>
+              <tr>
+                <th>KPI</th>
+                <th class="scale-critical">Crítico</th>
+                <th class="scale-development">En Desarrollo</th>
+                <th class="scale-acceptable">Aceptable</th>
+                <th class="scale-outstanding">Sobresaliente</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Semanas comisionadas</strong></td><td>0 pts (0% - 50%)</td><td>1 pts (50% - 70%)</td><td>2 pts (70% - 80%)</td><td>3 pts (>=80%)</td></tr>
+              <tr><td><strong>CCV</strong></td><td>0 pts (Rango 0)</td><td>1 pts (Rango 1)</td><td>2 pts (Rango 2)</td><td>3 pts (Rango 3)</td></tr>
+              <tr><td><strong>% Cumplimiento volúmen</strong></td><td>0 pts (0% - 80%)</td><td>1 pts (80% - 86%)</td><td>2 pts (86% - 100%)</td><td>3 pts (>=100%)</td></tr>
+              <tr><td><strong>Desempeño general</strong></td><td>0 pts a 2 pts</td><td>3 pts a 4 pts</td><td>5 pts a 7 pts</td><td>8 a 9 pts</td></tr>
+            </tbody>
+          </table>
+        </div>
         <div class="criteria-table-wrap">
           <table class="criteria-table">
             <thead><tr><th>Clasificación general</th><th>Desempeño CCV</th><th>Desempeño volumen</th><th>Semanas con comisión</th></tr></thead>
