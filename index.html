@@ -61,12 +61,12 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .criteria-head p{margin:0;color:#d4e4f1;font-size:11px;line-height:1.45;}
 .criteria-close{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid #ffffff55;border-radius:10px;background:#ffffff12;color:#fff;font-size:24px;line-height:1;cursor:pointer;}
 .criteria-close:hover{background:#ffffff2b;}
-.criteria-content{display:flex;flex-direction:column;gap:13px;min-height:0;padding:19px 22px 17px;}
+.criteria-content{display:flex;flex-direction:column;gap:13px;min-height:0;overflow-y:auto;padding:19px 22px 17px;}
 .criteria-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #dce5ed;padding-bottom:10px;}
 .criteria-tab{padding:9px 13px;border:1px solid transparent;border-radius:9px;background:transparent;color:#60778b;font:700 11px Inter,Segoe UI,Arial,sans-serif;cursor:pointer;transition:all .15s ease;}
 .criteria-tab:hover{background:#edf3f8;color:#244b6c;}
 .criteria-tab.active{background:#e5eff8;border-color:#c8d9e8;color:#174d78;box-shadow:inset 0 -2px 0 #2d79aa;}
-.criteria-pane{display:flex;flex-direction:column;gap:13px;min-height:0;}
+.criteria-pane{display:flex;flex-direction:column;gap:13px;min-height:0;flex:0 0 auto;}
 .criteria-pane[hidden]{display:none!important;}
 .criteria-pending{min-height:220px;justify-content:center;align-items:center;}
 .criteria-pending-card{display:flex;flex-direction:column;gap:7px;max-width:480px;padding:22px;border:1px dashed #cbd8e3;border-radius:12px;background:#fff;text-align:left;color:#244b6c;}
@@ -2691,7 +2691,7 @@ setInterval(cargarDatos, 3600000);
               </tr>
             </thead>
             <tbody>
-              <tr><td><strong>Semanas comisionadas</strong></td><td>0 pts (0% - 50%)</td><td>1 pts (50% - 70%)</td><td>2 pts (70% - 80%)</td><td>3 pts (>=80%)</td></tr>
+              <tr><td><strong>semanas comisionadas</strong></td><td>0 pts (0% - 50%)</td><td>1 pts (50% - 70%)</td><td>2 pts (70% - 80%)</td><td>3 pts (>=80%)</td></tr>
               <tr><td><strong>CCV</strong></td><td>0 pts (Rango 0)</td><td>1 pts (Rango 1)</td><td>2 pts (Rango 2)</td><td>3 pts (Rango 3)</td></tr>
               <tr><td><strong>% Cumplimiento volúmen</strong></td><td>0 pts (0% - 80%)</td><td>1 pts (80% - 86%)</td><td>2 pts (86% - 100%)</td><td>3 pts (>=100%)</td></tr>
               <tr><td><strong>Desempeño general</strong></td><td>0 pts a 2 pts</td><td>3 pts a 4 pts</td><td>5 pts a 7 pts</td><td>8 a 9 pts</td></tr>
