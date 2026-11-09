@@ -1186,6 +1186,27 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 /* Tipografía más compacta únicamente en los filtros de Sucursal y Preventista */
 #branch,#preventista{font-size:10px!important;}
 #branch option,#preventista option{font-size:10px!important;}
+
+/* Tabla superior: criterios de desempeño, centrada y alineada con el estilo ejecutivo */
+#performanceCriteriaTop{width:min(1180px,100%);margin:0 auto 17px;padding:17px 18px 16px;border:1px solid #dce5ed;border-radius:15px;background:linear-gradient(180deg,#fff 0%,#f8fbfe 100%);box-shadow:0 5px 18px rgba(18,45,75,.08);color:#203b54;}
+#performanceCriteriaTop .pct-heading{text-align:center;margin:0 0 3px;color:#123b63;font-size:15px;font-weight:800;letter-spacing:.55px;}
+#performanceCriteriaTop .pct-subtitle{text-align:center;margin:0 0 14px;color:#72869a;font-size:9px;font-weight:700;letter-spacing:1.35px;}
+#performanceCriteriaTop .pct-table-wrap{width:100%;overflow-x:auto;border:1px solid #e0e8ef;border-radius:10px;background:#fff;}
+#performanceCriteriaTop table{width:100%;min-width:760px;border-collapse:separate;border-spacing:0;white-space:normal;font-size:11px;color:#30465a;}
+#performanceCriteriaTop th{padding:11px 10px;text-align:center;font-size:10px;font-weight:800;letter-spacing:.35px;border-bottom:1px solid #dce5ed;}
+#performanceCriteriaTop th:first-child{width:23%;background:#eaf1f7;color:#244b6c;text-align:left;padding-left:15px;}
+#performanceCriteriaTop th:nth-child(2){background:#fff0f0;color:#ad3939;}
+#performanceCriteriaTop th:nth-child(3){background:#fff6e8;color:#986315;}
+#performanceCriteriaTop th:nth-child(4){background:#eaf7ef;color:#267346;}
+#performanceCriteriaTop th:nth-child(5){background:#edf2ff;color:#405da8;}
+#performanceCriteriaTop td{padding:10px 9px;text-align:center;vertical-align:middle;border-bottom:1px solid #edf1f5;line-height:1.4;}
+#performanceCriteriaTop tbody tr:nth-child(even){background:#f8fafc;}
+#performanceCriteriaTop tbody tr:last-child td{border-bottom:0;}
+#performanceCriteriaTop td:first-child{text-align:left;padding-left:15px;color:#173f62;font-weight:800;}
+#performanceCriteriaTop .pct-score{display:block;font-size:11px;font-weight:800;color:#29465f;}
+#performanceCriteriaTop .pct-range{display:block;margin-top:2px;font-size:10px;color:#718397;}
+@media(max-width:700px){#performanceCriteriaTop{padding:13px 11px;margin-bottom:13px;}#performanceCriteriaTop .pct-heading{font-size:13px;}#performanceCriteriaTop .pct-subtitle{margin-bottom:10px;}}
+
 </style>
 <script>
 (function(){
@@ -1333,6 +1354,21 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 <div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
 <button class="side-toggle" id="sideToggle" type="button" aria-label="Ocultar barra lateral" title="Ocultar o mostrar menú" aria-expanded="true">‹</button>
 <main id="resumen"><div class="top"><div><h1>Desempeño y pago variable</h1></div></div>
+<section id="performanceCriteriaTop" aria-labelledby="performanceCriteriaTitle">
+  <h2 class="pct-heading" id="performanceCriteriaTitle">Criterios de desempeño</h2>
+  <p class="pct-subtitle">ESCALA DE EVALUACIÓN POR KPI</p>
+  <div class="pct-table-wrap">
+    <table aria-label="Tabla de criterios de desempeño">
+      <thead><tr><th>KPI</th><th>CRÍTICO</th><th>EN DESARROLLO</th><th>ACEPTABLE</th><th>SOBRESALIENTE</th></tr></thead>
+      <tbody>
+        <tr><td>Semanas comisionadas</td><td><span class="pct-score">0 pts</span><span class="pct-range">0% - 50%</span></td><td><span class="pct-score">1 pt</span><span class="pct-range">50% - 70%</span></td><td><span class="pct-score">2 pts</span><span class="pct-range">70% - 80%</span></td><td><span class="pct-score">3 pts</span><span class="pct-range">≥80%</span></td></tr>
+        <tr><td>CCV</td><td><span class="pct-score">0 pts</span><span class="pct-range">Rango 0</span></td><td><span class="pct-score">1 pt</span><span class="pct-range">Rango 1</span></td><td><span class="pct-score">2 pts</span><span class="pct-range">Rango 2</span></td><td><span class="pct-score">3 pts</span><span class="pct-range">Rango 3</span></td></tr>
+        <tr><td>% Cumplimiento volumen</td><td><span class="pct-score">0 pts</span><span class="pct-range">0% - 80%</span></td><td><span class="pct-score">1 pt</span><span class="pct-range">80% - 86%</span></td><td><span class="pct-score">2 pts</span><span class="pct-range">86% - 100%</span></td><td><span class="pct-score">3 pts</span><span class="pct-range">≥100%</span></td></tr>
+        <tr><td>Desempeño general</td><td><span class="pct-score">0 a 2 pts</span></td><td><span class="pct-score">3 a 4 pts</span></td><td><span class="pct-score">5 a 7 pts</span></td><td><span class="pct-score">8 a 9 pts</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 <div class="uploadbox"><div><strong>Información conectada a Google Sheets</strong><small>Fuente: BD Preventas · Último corte semanal cerrado.</small></div><button class="btn" id="refreshNow" type="button">Actualizar ahora</button><span class="status" id="status">Conectando con Google Sheets…</span></div>
 <div class="filters">
 <div><label>AÑO</label><select id="year"></select></div><div><label>MES</label><select id="month"></select></div><div><label>PERIODO DESDE</label><select id="weekStart"></select></div><div><label>PERIODO HASTA</label><select id="weekEnd"></select></div><div><label>REGIÓN</label><select id="region"></select></div><div><label>SUCURSAL · puedes elegir varias</label><select id="branch" multiple size="4" aria-label="Seleccionar varias sucursales"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varias; sin selección = todas.</small></div><div><label>PREVENTISTA · puedes elegir varios</label><select id="preventista" multiple size="4" aria-label="Seleccionar varios preventistas"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varios; sin selección = todos.</small></div>
