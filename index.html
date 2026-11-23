@@ -2890,6 +2890,44 @@ function cargarDatos(){
     .getDashboardData();
 }
 function exportChartToExcel(chartId){
+  if(chartId==='branchTrend2' && VIEW_MODE.branchTrend2==='week'){
+    // Exportación semanal de CCV: detalle de registros con todos los filtros activos.
+    const detailRows=filtered();
+    if(!detailRows.length){
+      alert('No hay registros de CCV para exportar con los filtros actuales.');
+      return;
+    }
+    const rows=[[
+      'Año',
+      'Mes',
+      'Semana comercial',
+      'Región',
+      'Sucursal',
+      'Nombre del Preventista',
+      'Comisión CCV',
+      'CCV real',
+      'DS Promedio',
+      'Rango Actual - CCV',
+      '¿Cumple lineamientos?'
+    ],...detailRows.map(r=>[
+      r[COLUMNAS.anio]??'',
+      r[COLUMNAS.mes]??'',
+      r[COLUMNAS.semana]??'',
+      r[COLUMNAS.region]??'',
+      r[COLUMNAS.sucursal]??'',
+      r[COLUMNAS.preventista]??'',
+      r[COLUMNAS.comisionCCV]??'',
+      r[COLUMNAS.ccv]??'',
+      r[COLUMNAS.ds]??'',
+      r['Rango Actual - CCV']??'',
+      r[COLUMNAS.lineamientos]??''
+    ])];
+    const csv='\\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');
+    a.href=url;a.download='CCV_semanal_detalle_'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);return;
+  }
   if(chartId==='branchTrend3' && VIEW_MODE.branchTrend3==='week'){
     // Exportación semanal de Comisión total: detalle de registros con todos los filtros activos.
     const detailRows=filtered();
