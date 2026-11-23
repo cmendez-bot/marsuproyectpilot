@@ -1605,7 +1605,6 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   <section class="executive-card">
     <div class="kpi-title">COMISIÓN TOTAL PROMEDIO</div>
     <strong class="kpi-value" id="kpay">—</strong>
-    <div class="kpi-subtitle">De los cuales <strong id="kccvCommissionCaption">—</strong> son comisión CCV</div>
   </section>
 
   <section class="executive-card">
@@ -2644,12 +2643,6 @@ function update(){
  setKpiBar('barMixPollo', readKpiPercent('kmixPollo'));
  setKpiBar('barMixOtros', readKpiPercent('kmixOtros'));
  setKpiBar('barMixResto', readKpiPercent('kmixResto'));
-
- const ccvCommissionValue = $('kccvCommission');
- const ccvCommissionCaption = $('kccvCommissionCaption');
- if (ccvCommissionValue && ccvCommissionCaption) {
-   ccvCommissionCaption.textContent = ccvCommissionValue.textContent;
- }
 
 }
 function parseNumericValue(value){
