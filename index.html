@@ -2924,6 +2924,41 @@ function exportChartToExcel(chartId){
     a.href=url;a.download='Comision_total_semanal_detalle_'+new Date().toISOString().slice(0,10)+'.csv';
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);return;
   }
+  if(chartId==='branchTrend3' && VIEW_MODE.branchTrend3==='month'){
+    // Exportación mensual de Comisión total: ignora Año, Mes y rango de semanas,
+    // pero conserva los demás filtros activos.
+    const detailRows=DATA.filter(r=>matchesFilters(r,['year','month'],true));
+    if(!detailRows.length){
+      alert('No hay registros de Comisión total para exportar con los filtros actuales.');
+      return;
+    }
+    const rows=[[
+      'Año',
+      'Mes',
+      'Semana comercial',
+      'Región',
+      'Sucursal',
+      'Nombre del Preventista',
+      'Comisión CCV',
+      'Cobro volúmen',
+      'Total pago variable'
+    ],...detailRows.map(r=>[
+      r[COLUMNAS.anio]??'',
+      r[COLUMNAS.mes]??'',
+      r[COLUMNAS.semana]??'',
+      r[COLUMNAS.region]??'',
+      r[COLUMNAS.sucursal]??'',
+      r[COLUMNAS.preventista]??'',
+      r[COLUMNAS.comisionCCV]??'',
+      r[COLUMNAS.cobroVolumen]??'',
+      r[COLUMNAS.pagoTotal]??''
+    ])];
+    const csv='\\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');
+    a.href=url;a.download='Comision_total_mensual_detalle_'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);return;
+  }
   if(chartId==='commissionTarget' && VIEW_MODE.commissionTarget==='month'){
     // Exportación mensual a nivel de registro; ignora año, mes y rango de semanas,
     // pero conserva los filtros organizacionales y de tipo de pago activos.
