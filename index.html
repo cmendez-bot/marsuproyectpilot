@@ -1591,6 +1591,56 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 }
 .kpi-subtitle { margin-top: 3px; color: #7b8795; font-size: 10px; line-height: 1.4; }
 .kpi-subtitle strong { color: #245b91; font-weight: 700; }
+
+/* ===== CONTRASTE VISUAL: FONDO, FILTROS Y TARJETAS KPI ===== */
+html, body, main {
+  background: #dfe7f0 !important;
+}
+
+/* Contenedor de filtros */
+#resumen > .dashboard-filters {
+  background: #eef3f8 !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 3px 10px rgba(15, 35, 60, 0.06) !important;
+}
+
+#resumen > .dashboard-filters select {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* Acentos superiores de las cuatro tarjetas KPI de la primera fila */
+#resumen > #indicadores-ejecutivos.executive-kpis > .executive-card:nth-child(1) {
+  border-top: 4px solid #123d70 !important;
+}
+
+#resumen > #indicadores-ejecutivos.executive-kpis > .executive-card:nth-child(2) {
+  border-top: 4px solid #e8a317 !important;
+  border-right: 1px solid #e5eaf0 !important;
+  border-bottom: 1px solid #e5eaf0 !important;
+  border-left: 1px solid #e5eaf0 !important;
+}
+
+/* Si Comisión vs Target tiene estado positivo, el acento cambia a verde */
+#resumen > #indicadores-ejecutivos.executive-kpis > .executive-card:nth-child(2):has(#targetStatus.tag-success) {
+  border-top-color: #16a34a !important;
+}
+
+#resumen > #indicadores-ejecutivos.executive-kpis > .executive-card:nth-child(3) {
+  border-top: 4px solid #475569 !important;
+}
+
+#resumen > #indicadores-ejecutivos.executive-kpis > .executive-card:nth-child(4) {
+  border-top: 4px solid #16834a !important;
+}
+
+/* Las tarjetas grandes de la segunda fila conservan un borde limpio */
+#resumen > #indicadores-ejecutivos.executive-kpis > .performance-card,
+#resumen > #indicadores-ejecutivos.executive-kpis > .mix-card {
+  border: 1px solid #d5dfe9 !important;
+  box-shadow: 0 3px 10px rgba(15, 35, 60, 0.06) !important;
+}
+
 </style>
 
 </head>
