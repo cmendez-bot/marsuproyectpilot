@@ -1350,7 +1350,7 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 }
 #resumen > .dashboard-filters .filter-grid {
   display:grid!important;
-  grid-template-columns:repeat(9,minmax(105px,1fr))!important;
+  grid-template-columns:minmax(85px,.75fr) minmax(85px,.75fr) minmax(105px,1.1fr) minmax(105px,1.1fr) minmax(80px,.75fr) minmax(105px,1fr) minmax(155px,1.55fr) minmax(105px,1fr) minmax(105px,1fr)!important;
   grid-auto-flow:row!important;
   min-width:1050px!important;
   width:100%!important;
@@ -1363,6 +1363,17 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 #resumen > .dashboard-filters .filter-field label {
   white-space:nowrap!important;
   font-size:9px!important;
+}
+#resumen > .dashboard-filters .filter-field:has(#year) label,
+#resumen > .dashboard-filters .filter-field:has(#month) label,
+#resumen > .dashboard-filters .filter-field:has(#region) label {
+  font-size:8px!important;
+}
+#resumen > .dashboard-filters .filter-field:has(#preventista) {
+  min-width:155px!important;
+}
+#resumen > .dashboard-filters .filter-field .multiHint {
+  display:none!important;
 }
 #resumen > .dashboard-filters .filter-field select {
   width:100%!important;
@@ -1542,8 +1553,8 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
     <div class="filter-field"><label for="weekStart">PERIODO DESDE</label><select id="weekStart"></select></div>
     <div class="filter-field"><label for="weekEnd">PERIODO HASTA</label><select id="weekEnd"></select></div>
     <div class="filter-field"><label for="region">REGIÓN</label><select id="region"></select></div>
-    <div class="filter-field"><label for="branch">SUCURSAL</label><select id="branch" multiple size="4" aria-label="Seleccionar varias sucursales"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varias; sin selección = todas.</small></div>
-    <div class="filter-field"><label for="preventista">PREVENTISTA</label><select id="preventista" multiple size="4" aria-label="Seleccionar varios preventistas"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varios; sin selección = todos.</small></div>
+    <div class="filter-field"><label for="branch">SUCURSAL</label><select id="branch" multiple size="4" aria-label="Seleccionar varias sucursales"></select></div>
+    <div class="filter-field"><label for="preventista">PREVENTISTA</label><select id="preventista" multiple size="4" aria-label="Seleccionar varios preventistas"></select></div>
     <div class="filter-field"><label for="people">COMISIÓN</label><select id="people"><option value="all">Todos</option><option value="commission">Con comisión</option><option value="nocommission">Sin comisión</option></select></div>
     <div class="filter-field"><label for="paidColleague">TIPO DE PAGO</label><select id="paidColleague"><option value="all">Todos</option><option value="guarantee">Con garantía</option><option value="noguarantee">Sin garantía</option></select></div>
   </div>
