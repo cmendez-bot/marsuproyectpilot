@@ -2484,7 +2484,7 @@ function update(){
    if (!node) return 0;
    const textValue = node.textContent.trim();
    if (!textValue || textValue === '—') return 0;
-   const normalized = textValue.replace(/[^\\d,.-]/g, '').replace(/\\.(?=.*[,])/g, '').replace(',', '.');
+   const normalized = textValue.replace(/[^\d,.-]/g, '').replace(/\.(?=.*[,])/g, '').replace(',', '.');
    const parsed = Number.parseFloat(normalized);
    return Number.isFinite(parsed) ? parsed : 0;
  };
