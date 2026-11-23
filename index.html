@@ -1295,6 +1295,53 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   .performance-grid,.mix-legend { grid-template-columns:repeat(2,minmax(0,1fr)); row-gap:17px; }
 }
 
+
+/* Ajustes solicitados: recuperar encabezado y alinear filtros en una sola fila. */
+#resumen > .top {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  min-height:54px;
+  margin:0 0 12px!important;
+  padding:12px 18px!important;
+  background:#244d73!important;
+  color:#fff!important;
+  border-radius:12px!important;
+}
+#resumen > .top h1 {
+  margin:0!important;
+  color:#fff!important;
+  font-size:20px!important;
+  font-weight:750!important;
+}
+#resumen > .dashboard-filters .filter-grid {
+  grid-template-columns:repeat(9,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:start!important;
+}
+#resumen > .dashboard-filters .filter-field select[multiple] {
+  height:54px!important;
+  min-height:54px!important;
+  padding:3px 5px!important;
+}
+#resumen > .dashboard-filters .filter-field .multiHint {
+  font-size:8px!important;
+  line-height:1.2!important;
+}
+#resumen > .dashboard-filters .filter-field label {
+  white-space:nowrap;
+  font-size:9px!important;
+}
+@media(max-width:1350px) {
+  #resumen > .dashboard-filters .filter-grid {grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+}
+@media(max-width:900px) {
+  #resumen > .dashboard-filters .filter-grid {grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+}
+@media(max-width:600px) {
+  #resumen > .dashboard-filters .filter-grid {grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+
 </style>
 <script>
 (function(){
@@ -1441,7 +1488,8 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 </button>
 <div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
 <button class="side-toggle" id="sideToggle" type="button" aria-label="Ocultar barra lateral" title="Ocultar o mostrar menú" aria-expanded="true">‹</button>
-<main id="resumen"><div class="dashboard-topbar">
+<main id="resumen"><div class="top"><div><h1>Desempeño y pago variable</h1></div></div>
+<div class="dashboard-topbar">
   <div class="connection-info">
     <span class="connection-dot" aria-hidden="true"></span>
     <strong id="status">Conectando con Google Sheets…</strong>
