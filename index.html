@@ -1228,7 +1228,7 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 .filter-field { display:flex; flex-direction:column; min-width:0; gap:6px; }
 .filter-field label { color:#8491a3!important; font-size:10px!important; font-weight:400!important; letter-spacing:.35px; }
 .filter-field select { width:100%!important; min-width:0!important; height:35px; padding:6px 9px!important; color:#334155!important; background:#fff!important; border:1px solid #dce3eb!important; border-radius:7px!important; font-size:11px!important; box-sizing:border-box; }
-.filter-field select[multiple] { height:76px; padding:4px!important; }
+.filter-field select[multiple] { height:34px!important; min-height:34px!important; max-height:34px!important; padding:4px!important; overflow-y:auto!important; }
 .filter-field .multiHint { color:#94a3b8!important; font-size:9px!important; line-height:1.35; }
 .filter-actions { display:flex; justify-content:flex-start; margin-top:13px; padding-top:11px; border-top:1px solid #f0f2f5; }
 .reset-link { padding:0; border:0; background:transparent; color:#2563a6; font-size:11px; text-decoration:underline; cursor:pointer; }
@@ -1320,9 +1320,11 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   align-items:start!important;
 }
 #resumen > .dashboard-filters .filter-field select[multiple] {
-  height:54px!important;
-  min-height:54px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
   padding:3px 5px!important;
+  overflow-y:auto!important;
 }
 #resumen > .dashboard-filters .filter-field .multiHint {
   font-size:8px!important;
@@ -1382,8 +1384,10 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   box-sizing:border-box!important;
 }
 #resumen > .dashboard-filters .filter-field select[multiple] {
-  height:54px!important;
-  min-height:54px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  overflow-y:auto!important;
 }
 #resumen > .dashboard-filters .filter-field .multiHint {
   font-size:8px!important;
@@ -1416,6 +1420,15 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 }
 #resumen > .dashboard-filters .filter-field:has(#preventista){
   min-width:155px!important;
+}
+
+
+/* Corrección definitiva: los selectores múltiples conservan exactamente 34px. */
+#resumen > .dashboard-filters .filter-field select[multiple] {
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  overflow-y:auto!important;
 }
 
 </style>
