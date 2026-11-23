@@ -1555,6 +1555,30 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 
 
 
+
+<style>
+/* Uniformar la altura de los controles de filtro en todo el dashboard. */
+.dashboard-filters .filter-field select,
+:is(#analisis-regional,#analisis-sucursales,#analisis-desempeno,#graficas-categoria) > .panel > .chartMetric,
+#analisis-familia .familyTrendPanel > div:has(> #familyVolumeFilter) select,
+#analisis-familia .familyTrendPanel > div:has(> #familyChargeFilter) select,
+#graficas-categoria2 > .panel .familyBarControls select {
+  height: 34px !important;
+  min-height: 34px !important;
+  box-sizing: border-box !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+  line-height: 22px !important;
+}
+.dashboard-filters .filter-field select[multiple] {
+  height: 34px !important;
+  min-height: 34px !important;
+  overflow-y: auto !important;
+}
+.kpi-subtitle { margin-top: 3px; color: #7b8795; font-size: 10px; line-height: 1.4; }
+.kpi-subtitle strong { color: #245b91; font-weight: 700; }
+</style>
+
 </head>
 <body><div class="app"><aside class="side"><div class="brand">Análisis de<br>comisiones PV</div><div class="nav">MENÚ PRINCIPAL</div><button class="navitem active" data-target="indicadores-ejecutivos" type="button">▦ &nbsp; Resumen ejecutivo</button><button class="navitem" data-target="analisis-regional" type="button">◫ &nbsp; Tendencia de indicadores</button><button class="navitem" data-target="analisis-desempeno" type="button">▤ &nbsp; Desempeño por zona</button><button class="navitem" data-target="analisis-preventistas" type="button">♙ &nbsp; Preventistas</button>
 <!-- Acceso a la matriz de clasificación -->
@@ -1605,6 +1629,7 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
   <section class="executive-card">
     <div class="kpi-title">COMISIÓN TOTAL PROMEDIO</div>
     <strong class="kpi-value" id="kpay">—</strong>
+    <div class="kpi-subtitle">De los cuales <strong id="kvolCommissionCaption">—</strong> son comisión volumen</div>
   </section>
 
   <section class="executive-card">
@@ -2053,7 +2078,7 @@ function update(){
  $('kweeksEvaluated').textContent=num(evaluatedPeriods.length,0);
  const commissionByWeek=new Map();d.forEach(r=>{const week=periodValue(r);if(!week)return;commissionByWeek.set(week,(commissionByWeek.get(week)||0)+(Number(r[COLUMNAS.pagoTotal])||0));});
  $('kweeksWithCommission').textContent=num([...commissionByWeek.values()].filter(total=>total>0).length,0);
- $('kccv').textContent=num(avg(d,COLUMNAS.ccv),0);$('kds').textContent=money(dsPonderado(d));$('kpay').textContent=money(avg(d,COLUMNAS.pagoTotal));$('kvolCommission').textContent=money(avg(d,COLUMNAS.cobroVolumen));$('kccvCommission').textContent=money(avg(d,COLUMNAS.comisionCCV));$('kvol').textContent=(cumplimientoVolumen(d)*100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';const totalCommission=sumFieldSafe(d,COLUMNAS.pagoTotal);const totalTarget=sumFieldSafe(d,COLUMNAS.target);$('kpeople').textContent=(totalTarget>0?((totalCommission/totalTarget)*100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—');
+ $('kccv').textContent=num(avg(d,COLUMNAS.ccv),0);$('kds').textContent=money(dsPonderado(d));$('kpay').textContent=money(avg(d,COLUMNAS.pagoTotal));$('kvolCommission').textContent=money(avg(d,COLUMNAS.cobroVolumen));$('kvolCommissionCaption').textContent=$('kvolCommission').textContent;$('kccvCommission').textContent=money(avg(d,COLUMNAS.comisionCCV));$('kvol').textContent=(cumplimientoVolumen(d)*100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';const totalCommission=sumFieldSafe(d,COLUMNAS.pagoTotal);const totalTarget=sumFieldSafe(d,COLUMNAS.target);$('kpeople').textContent=(totalTarget>0?((totalCommission/totalTarget)*100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—');
  // Mix por familia: kilos de la familia / volumen real total, usando exclusivamente los registros filtrados (d).
  const totalRealVolume=sumFieldSafe(d,COLUMNAS.realVolumen);
  const familyMix=(familyColumn)=>totalRealVolume>0?(sumFieldSafe(d,familyColumn)/totalRealVolume*100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';
@@ -2679,7 +2704,7 @@ function clearDashboardData(){
     el.innerHTML='<div class="emptyState">Sin datos para mostrar.</div>';
   });
   // Restablece los indicadores principales.
-  ['kccv','kds','kpay','kvolCommission','kccvCommission','kcommissionPeople','kvol','kpeople','kweeksEvaluated','kweeksWithCommission','kmixVA','kmixPollo','kmixOtros','kmixResto']
+  ['kccv','kds','kpay','kvolCommission','kvolCommissionCaption','kccvCommission','kcommissionPeople','kvol','kpeople','kweeksEvaluated','kweeksWithCommission','kmixVA','kmixPollo','kmixOtros','kmixResto']
     .forEach(id=>{const el=$(id);if(el)el.textContent='—';});
   // Oculta y limpia los detalles abiertos para no conservar información anterior.
   document.querySelectorAll('.drilldown').forEach(el=>{el.innerHTML='';el.hidden=true;});
