@@ -1198,6 +1198,103 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 #branch,#preventista{font-size:10px!important;}
 #branch option,#preventista option{font-size:10px!important;}
 
+
+
+/* ===== REDISEÑO SUPERIOR DEL DASHBOARD ===== */
+#resumen > .dashboard-topbar,
+#resumen > .dashboard-filters,
+#resumen > #indicadores-ejecutivos { width:100%; box-sizing:border-box; }
+
+#resumen > .dashboard-topbar {
+  display:flex!important; align-items:center!important; justify-content:space-between!important;
+  gap:16px!important; padding:12px 16px!important; margin:0 0 14px!important;
+  background:#fff!important; color:#172b45!important; border:1px solid #e5eaf0!important;
+  border-radius:12px!important; box-shadow:0 2px 8px rgba(15,35,60,.035)!important;
+}
+.connection-info { display:flex; align-items:center; flex-wrap:wrap; gap:9px; min-width:0; }
+.connection-info > strong { color:#172b45!important; font-size:13px; font-weight:700; white-space:nowrap; }
+.connection-dot { width:8px; height:8px; min-width:8px; border-radius:50%; background:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.12); }
+.connection-summary { color:#94a3b8!important; font-size:11px; line-height:1.5; }
+.refresh-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; flex-shrink:0; padding:8px 14px; background:#fff; color:#334155; border:1px solid #dce3eb; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; }
+.refresh-button:hover { background:#f8fafc; border-color:#aebdce; }
+.refresh-button span { font-size:17px; line-height:1; }
+
+#resumen > .dashboard-filters {
+  display:block!important; padding:16px!important; margin:0 0 14px!important;
+  background:#fff!important; border:1px solid #e5eaf0!important; border-radius:12px!important;
+  box-shadow:0 2px 8px rgba(15,35,60,.035)!important;
+}
+.filter-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:13px 12px; align-items:start; }
+.filter-field { display:flex; flex-direction:column; min-width:0; gap:6px; }
+.filter-field label { color:#8491a3!important; font-size:10px!important; font-weight:400!important; letter-spacing:.35px; }
+.filter-field select { width:100%!important; min-width:0!important; height:35px; padding:6px 9px!important; color:#334155!important; background:#fff!important; border:1px solid #dce3eb!important; border-radius:7px!important; font-size:11px!important; box-sizing:border-box; }
+.filter-field select[multiple] { height:76px; padding:4px!important; }
+.filter-field .multiHint { color:#94a3b8!important; font-size:9px!important; line-height:1.35; }
+.filter-actions { display:flex; justify-content:flex-start; margin-top:13px; padding-top:11px; border-top:1px solid #f0f2f5; }
+.reset-link { padding:0; border:0; background:transparent; color:#2563a6; font-size:11px; text-decoration:underline; cursor:pointer; }
+.reset-link:hover { color:#174675; }
+
+#resumen > #indicadores-ejecutivos.executive-kpis {
+  display:grid!important; grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:12px!important; margin:0 0 16px!important; align-items:stretch!important;
+}
+.executive-kpis > .executive-card {
+  display:flex; flex-direction:column; min-width:0; padding:17px 18px!important;
+  background:#fff!important; border:1px solid #e5eaf0!important; border-radius:12px!important;
+  box-shadow:0 2px 8px rgba(15,35,60,.035)!important; box-sizing:border-box;
+}
+.kpi-title { color:#8491a3!important; font-size:10px!important; font-weight:600; letter-spacing:.45px; line-height:1.4; }
+.kpi-value { display:block; margin:13px 0 14px!important; color:#172b45!important; font-size:clamp(25px,2.2vw,34px)!important; font-weight:750!important; letter-spacing:-1.1px; line-height:1.1; white-space:nowrap; }
+.kpi-heading-row { display:flex; align-items:center; justify-content:space-between; gap:7px; }
+.kpi-tag { display:inline-flex; align-items:center; padding:4px 8px; border-radius:20px; font-size:9px; font-weight:700; white-space:nowrap; }
+.tag-warning { background:#fff3d6; color:#a16207; }
+.tag-success { background:#dcfce7; color:#15803d; }
+.target-card { border-color:#f4d58b!important; }
+.progress-track { width:100%; height:7px; margin-top:auto; overflow:hidden; background:#edf1f5; border-radius:20px; }
+.progress-fill { height:100%; width:0%; border-radius:inherit; transition:width .45s ease; }
+.progress-navy { background:#123d70; }
+.progress-target { background:#e8a317; }
+.progress-target.is-above { background:#16a34a; }
+.progress-volume { background:#16834a; }
+.kpi-subtitle { margin-top:2px; color:#94a3b8; font-size:10px; line-height:1.5; }
+.kpi-subtitle strong { color:#64748b; font-weight:700; }
+
+.performance-card,.mix-card { grid-column:span 2; }
+.group-title { margin:0 0 19px!important; color:#263b53!important; font-size:12px!important; font-weight:750!important; letter-spacing:.65px; }
+.performance-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; flex:1; }
+.performance-metric { display:flex; flex-direction:column; gap:10px; min-width:0; }
+.metric-label { color:#8491a3; font-size:10px; line-height:1.4; min-height:28px; }
+.performance-metric strong { color:#172b45; font-size:clamp(17px,1.6vw,23px); font-weight:750; letter-spacing:-.5px; white-space:nowrap; }
+.performance-footer { margin-top:19px; padding-top:12px; border-top:1px solid #edf1f5; color:#8491a3; font-size:10px; }
+.footer-separator { margin:0 6px; color:#c0cad5; }
+
+.stacked-progress { display:flex; width:100%; height:17px; margin:2px 0 23px; overflow:hidden; background:#edf1f5; border-radius:20px; }
+.mix-segment { flex:0 0 auto; width:0%; height:100%; transition:width .45s ease; }
+.mix-va { background:#123d70; } .mix-pollo { background:#2875ad; }
+.mix-otros { background:#65a6d1; } .mix-resto { background:#a8cce5; }
+.mix-legend { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.mix-item { display:flex; flex-direction:column; gap:9px; min-width:0; }
+.mix-label { display:flex; align-items:center; gap:6px; color:#8491a3; font-size:10px; }
+.mix-dot { width:7px; height:7px; min-width:7px; border-radius:50%; }
+.mix-va-dot { background:#123d70; } .mix-pollo-dot { background:#2875ad; }
+.mix-otros-dot { background:#65a6d1; } .mix-resto-dot { background:#a8cce5; }
+.mix-item strong { color:#172b45; font-size:clamp(17px,1.6vw,23px); font-weight:750; letter-spacing:-.5px; white-space:nowrap; }
+
+@media(max-width:1100px) {
+  .filter-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  #resumen > #indicadores-ejecutivos.executive-kpis { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  .performance-card,.mix-card { grid-column:span 2; }
+}
+@media(max-width:650px) {
+  #resumen > .dashboard-topbar { align-items:flex-start!important; flex-direction:column; }
+  .connection-info { align-items:flex-start; }
+  .connection-summary { flex-basis:100%; margin-left:17px; }
+  .filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #resumen > #indicadores-ejecutivos.executive-kpis { grid-template-columns:minmax(0,1fr)!important; }
+  .performance-card,.mix-card { grid-column:span 1; }
+  .performance-grid,.mix-legend { grid-template-columns:repeat(2,minmax(0,1fr)); row-gap:17px; }
+}
+
 </style>
 <script>
 (function(){
@@ -1344,13 +1441,83 @@ window.execLayout=function(o){return Object.assign({paper_bgcolor:'#ffffff',plot
 </button>
 <div class="sidefoot">Tablero de comisiones PV<br>Compensaciones</div></aside>
 <button class="side-toggle" id="sideToggle" type="button" aria-label="Ocultar barra lateral" title="Ocultar o mostrar menú" aria-expanded="true">‹</button>
-<main id="resumen"><div class="top"><div><h1>Desempeño y pago variable</h1></div></div>
-<div class="uploadbox"><div><strong>Información conectada a Google Sheets</strong><small>Fuente: BD Preventas · Último corte semanal cerrado.</small></div><button class="btn" id="refreshNow" type="button">Actualizar ahora</button><span class="status" id="status">Conectando con Google Sheets…</span></div>
-<div class="filters">
-<div><label>AÑO</label><select id="year"></select></div><div><label>MES</label><select id="month"></select></div><div><label>PERIODO DESDE</label><select id="weekStart"></select></div><div><label>PERIODO HASTA</label><select id="weekEnd"></select></div><div><label>REGIÓN</label><select id="region"></select></div><div><label>SUCURSAL · puedes elegir varias</label><select id="branch" multiple size="4" aria-label="Seleccionar varias sucursales"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varias; sin selección = todas.</small></div><div><label>PREVENTISTA · puedes elegir varios</label><select id="preventista" multiple size="4" aria-label="Seleccionar varios preventistas"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varios; sin selección = todos.</small></div>
-<div><label>COMISIÓN</label><select id="people"><option value="all">Todos</option><option value="commission">Con comisión</option><option value="nocommission">Sin comisión</option></select></div><div><label>TIPO DE PAGO</label><select id="paidColleague"><option value="all">Todos</option><option value="guarantee">Con garantía</option><option value="noguarantee">Sin garantía</option></select></div><div style="display:flex;align-items:end"><button class="btn" id="reset" style="width:100%">Restablecer filtros</button></div>
+<main id="resumen"><div class="dashboard-topbar">
+  <div class="connection-info">
+    <span class="connection-dot" aria-hidden="true"></span>
+    <strong id="status">Conectando con Google Sheets…</strong>
+    <span class="connection-summary" id="topSummary">BD Preventas • Cargando registros • actualizado — • último corte semanal cerrado</span>
+  </div>
+  <button class="refresh-button" id="refreshNow" type="button"><span aria-hidden="true">↻</span> Actualizar</button>
 </div>
-<div class="kpis" id="indicadores-ejecutivos"><div class="kpi"><div class="kpihead">● PERSONAS CON COMISIÓN</div><strong id="kcommissionPeople">—</strong></div><div class="kpi"><div class="kpihead">● COMISIÓN VS TARGET</div><strong id="kpeople">—</strong></div><div class="kpi"><div class="kpihead">● COMISIÓN TOTAL PROMEDIO</div><strong id="kpay">—</strong></div><div class="kpi"><div class="kpihead">● COMISIÓN PROMEDIO CCV</div><strong id="kccvCommission">—</strong></div><div class="kpi"><div class="kpihead">● COBRO VOLUMEN PROMEDIO</div><strong id="kvolCommission">—</strong></div><div class="kpi"><div class="kpihead">● SEMANAS EVALUADAS</div><strong id="kweeksEvaluated">—</strong></div><div class="kpi"><div class="kpihead">● SEMANAS CON COMISIÓN</div><strong id="kweeksWithCommission">—</strong></div><div class="kpi"><div class="kpihead">● CCV REAL PROMEDIO</div><strong id="kccv">—</strong></div><div class="kpi"><div class="kpihead">● DS PROMEDIO</div><strong id="kds">—</strong></div><div class="kpi"><div class="kpihead">● CUMPLIMIENTO VOLUMEN</div><strong id="kvol">—</strong></div><div class="kpi"><div class="kpihead">● MIX DE VA</div><strong id="kmixVA">—</strong></div><div class="kpi"><div class="kpihead">● MIX DE POLLO</div><strong id="kmixPollo">—</strong></div><div class="kpi"><div class="kpihead">● MIX DE OTROS</div><strong id="kmixOtros">—</strong></div><div class="kpi"><div class="kpihead">● MIX DE RESTO</div><strong id="kmixResto">—</strong></div></div>
+
+<div class="filters dashboard-filters">
+  <div class="filter-grid">
+    <div class="filter-field"><label for="year">AÑO</label><select id="year"></select></div>
+    <div class="filter-field"><label for="month">MES</label><select id="month"></select></div>
+    <div class="filter-field"><label for="weekStart">PERIODO DESDE</label><select id="weekStart"></select></div>
+    <div class="filter-field"><label for="weekEnd">PERIODO HASTA</label><select id="weekEnd"></select></div>
+    <div class="filter-field"><label for="region">REGIÓN</label><select id="region"></select></div>
+    <div class="filter-field"><label for="branch">SUCURSAL</label><select id="branch" multiple size="4" aria-label="Seleccionar varias sucursales"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varias; sin selección = todas.</small></div>
+    <div class="filter-field"><label for="preventista">PREVENTISTA</label><select id="preventista" multiple size="4" aria-label="Seleccionar varios preventistas"></select><small class="multiHint">Usa Ctrl (Windows) para elegir varios; sin selección = todos.</small></div>
+    <div class="filter-field"><label for="people">COMISIÓN</label><select id="people"><option value="all">Todos</option><option value="commission">Con comisión</option><option value="nocommission">Sin comisión</option></select></div>
+    <div class="filter-field"><label for="paidColleague">TIPO DE PAGO</label><select id="paidColleague"><option value="all">Todos</option><option value="guarantee">Con garantía</option><option value="noguarantee">Sin garantía</option></select></div>
+  </div>
+  <div class="filter-actions"><button class="reset-link" id="reset" type="button">Restablecer filtros</button></div>
+</div>
+
+<div class="executive-kpis" id="indicadores-ejecutivos">
+  <section class="executive-card">
+    <div class="kpi-title">PERSONAS CON COMISIÓN</div>
+    <strong class="kpi-value" id="kcommissionPeople">—</strong>
+    <div class="progress-track"><div class="progress-fill progress-navy" id="barCommissionPeople"></div></div>
+  </section>
+
+  <section class="executive-card target-card">
+    <div class="kpi-heading-row"><div class="kpi-title">COMISIÓN VS TARGET</div><span class="kpi-tag tag-warning" id="targetStatus">Por debajo</span></div>
+    <strong class="kpi-value" id="kpeople">—</strong>
+    <div class="progress-track"><div class="progress-fill progress-target" id="barCommissionTarget"></div></div>
+  </section>
+
+  <section class="executive-card">
+    <div class="kpi-title">COMISIÓN TOTAL PROMEDIO</div>
+    <strong class="kpi-value" id="kpay">—</strong>
+    <div class="kpi-subtitle">De los cuales <strong id="kccvCommissionCaption">—</strong> son comisión CCV</div>
+  </section>
+
+  <section class="executive-card">
+    <div class="kpi-heading-row"><div class="kpi-title">CUMPLIMIENTO DE VOLUMEN</div><span class="kpi-tag tag-warning" id="volumeStatus">Por debajo</span></div>
+    <strong class="kpi-value" id="kvol">—</strong>
+    <div class="progress-track"><div class="progress-fill progress-volume" id="barVolume"></div></div>
+  </section>
+
+  <section class="executive-card performance-card">
+    <h3 class="group-title">DESEMPEÑO</h3>
+    <div class="performance-grid">
+      <div class="performance-metric"><span class="metric-label">CCV real promedio</span><strong id="kccv">—</strong></div>
+      <div class="performance-metric"><span class="metric-label">DS promedio</span><strong id="kds">—</strong></div>
+      <div class="performance-metric"><span class="metric-label">Cobro volumen promedio</span><strong id="kvolCommission">—</strong></div>
+      <div class="performance-metric"><span class="metric-label">Comisión promedio CCV</span><strong id="kccvCommission">—</strong></div>
+    </div>
+    <div class="performance-footer"><span id="kweeksEvaluated">—</span> semanas evaluadas <span class="footer-separator">•</span> <span id="kweeksWithCommission">—</span> con comisión</div>
+  </section>
+
+  <section class="executive-card mix-card">
+    <h3 class="group-title">MIX DE PRODUCTO</h3>
+    <div class="stacked-progress" role="img" aria-label="Distribución porcentual del mix de producto">
+      <div class="mix-segment mix-va" id="barMixVA"></div>
+      <div class="mix-segment mix-pollo" id="barMixPollo"></div>
+      <div class="mix-segment mix-otros" id="barMixOtros"></div>
+      <div class="mix-segment mix-resto" id="barMixResto"></div>
+    </div>
+    <div class="mix-legend">
+      <div class="mix-item"><div class="mix-label"><span class="mix-dot mix-va-dot"></span><span>VA</span></div><strong id="kmixVA">—</strong></div>
+      <div class="mix-item"><div class="mix-label"><span class="mix-dot mix-pollo-dot"></span><span>Pollo</span></div><strong id="kmixPollo">—</strong></div>
+      <div class="mix-item"><div class="mix-label"><span class="mix-dot mix-otros-dot"></span><span>Otros</span></div><strong id="kmixOtros">—</strong></div>
+      <div class="mix-item"><div class="mix-label"><span class="mix-dot mix-resto-dot"></span><span>Resto</span></div><strong id="kmixResto">—</strong></div>
+    </div>
+  </section>
+</div>
+
 <div class="layout" id="analisis-distribucion-copy"><section class="panel"><h2>Desempeño General</h2><div id="performanceDistributionCopy" class="chart"></div></section><section class="panel"><h2>Desempeño por semanas comisionadas</h2><div id="volumePerformanceDistributionCopy" class="chart"></div></section></div><div class="layout" id="analisis-distribucion"><section class="panel"><h2>Desempeño de CCV</h2><div id="performanceDistribution" class="chart"></div></section><section class="panel"><h2>Desempeño cumplimiento volúmen</h2><div id="volumePerformanceDistribution" class="chart"></div></section></div><div class="layout" id="analisis-regional"><section class="panel"><h2>Comisión vs Target</h2><p id="commissionTargetDesc">Comisión total acumulada dividida entre Target acumulado por semana.</p><button class="chartExport" data-export="commissionTarget" type="button">Exportar a Excel</button><div id="commissionTarget" class="chart"></div><div id="commissionTargetDetail" class="drilldown" hidden></div></section><section class="panel"><h2 id="branchTrendTitle3">Comisión total</h2><label for="branchTrendMetric3">Métrica de este gráfico</label><select id="branchTrendMetric3" class="chartMetric"></select><p id="branchTrendDesc3">Compara la evolución semanal de las regiones.</p><button class="chartExport" data-export="branchTrend3" type="button">Exportar a Excel</button><div id="branchTrend3" class="chart"></div><div id="trendDetail3" class="drilldown" hidden></div></section></div><div class="layout" id="analisis-sucursales"><section class="panel"><h2 id="branchTrendTitle2">CCV</h2><label for="branchTrendMetric2">Métrica de este gráfico</label><select id="branchTrendMetric2" class="chartMetric"></select><p id="branchTrendDesc2">Compara la evolución semanal de las regiones.</p><button class="chartExport" data-export="branchTrend2" type="button">Exportar a Excel</button><div id="branchTrend2" class="chart"></div><div id="trendDetail2" class="drilldown" hidden></div></section><section class="panel"><h2 id="branchTrendTitle">Cumplimiento volumen</h2><p id="branchTrendDesc">Compara la evolución semanal de las regiones.</p><button class="chartExport" data-export="branchTrend" type="button">Exportar a Excel</button><div id="branchTrend" class="chart"></div><div id="trendDetail" class="drilldown" hidden></div></section></div><div class="layout" id="analisis-familia"><section class="panel familyTrendPanel"><h2>Volúmen por familia</h2><div style="display:flex;align-items:center;gap:8px;margin:0 0 5px;flex-wrap:wrap;"><select id="familyVolumeFilter" aria-label="Seleccionar familia" style="width:auto;min-width:125px;padding:5px 8px;"><option value="VA">VA</option><option value="Pollo">Pollo</option><option value="Otros">Otros</option><option value="Resto">Resto</option></select><button class="chartExport" data-export="familyTrend" type="button" style="margin:0 0 0 auto;">Exportar a Excel</button></div><div id="familyTrend" class="chart"></div></section><section class="panel familyTrendPanel"><h2>Cobro por familia</h2><div style="display:flex;align-items:center;gap:8px;margin:0 0 5px;flex-wrap:wrap;"><select id="familyChargeFilter" aria-label="Seleccionar familia para cobro" style="width:auto;min-width:125px;padding:5px 8px;"><option value="VA">VA</option><option value="Pollo">Pollo</option><option value="Otros">Otros</option><option value="Resto">Resto</option></select><button class="chartExport" data-export="familyTrendCopy" type="button" style="margin:0 0 0 auto;">Exportar a Excel</button></div><div id="familyTrendCopy" class="chart"></div></section></div><div class="layout" id="analisis-desempeno"><section class="panel"><h2>Comisión vs Target</h2><button class="chartExport" data-export="commissionVsTargetByLevel" type="button">Exportar a Excel</button><div id="commissionVsTargetByLevel" class="chart"></div><div id="commissionVsTargetByLevelDetail" class="drilldown" hidden></div></section><section class="panel"><h2 id="branchesTitle">Comisión total</h2><label for="branchesMetric">Métrica de este gráfico</label><select id="branchesMetric" class="chartMetric"></select><p id="branchesDesc">Haz clic en una región o sucursal para abrir el detalle por preventista.</p><button class="chartExport" data-export="branches" type="button">Exportar a Excel</button><div id="branches" class="chart"></div><div id="branchesDetail" class="drilldown" hidden></div></section></div> <div class="layout" id="graficas-categoria"><section class="panel"><h2>CCV</h2><select id="branchesCopy1Metric" class="chartMetric" aria-label="Métrica de CCV"></select><button class="chartExport" data-export="branchesCopy1" type="button">Exportar a Excel</button><div id="branchesCopy1" class="chart"></div><div id="branchesCopy1Detail" class="drilldown" hidden></div></section><section class="panel"><h2>Cumplimiento volúmen</h2><button class="chartExport" data-export="branchesCopy2" type="button">Exportar a Excel</button><div id="branchesCopy2" class="chart"></div><div id="branchesCopy2Detail" class="drilldown" hidden></div></section></div><div class="layout" id="graficas-categoria2"><section class="panel"><h2>Volúmen por familia</h2><div class="familyBarControls"><select id="branchesFamilyVolumeFilter" aria-label="Seleccionar familia para volumen"><option value="VA">VA</option><option value="Pollo">Pollo</option><option value="Otros">Otros</option><option value="Resto">Resto</option></select><button class="chartExport" data-export="branchesCopy1Duplicate" type="button">Exportar a Excel</button></div><div id="branchesCopy1Duplicate" class="chart"></div><div id="branchesCopy1DuplicateDetail" class="drilldown" hidden></div></section><section class="panel"><h2>Cobro por familia</h2><div class="familyBarControls"><select id="branchesFamilyChargeFilter" aria-label="Seleccionar familia para cobro"><option value="VA">VA</option><option value="Pollo">Pollo</option><option value="Otros">Otros</option><option value="Resto">Resto</option></select><button class="chartExport" data-export="branchesCopy1Third" type="button">Exportar a Excel</button></div><div id="branchesCopy1Third" class="chart"></div><div id="branchesCopy1ThirdDetail" class="drilldown" hidden></div></section></div><div hidden aria-hidden="true"><select id="mixMetric"><option value="both">Comisión CCV y volumen</option></select><div id="mix"></div><div id="mixDetail"></div><div id="volumeMix"></div><div id="volumeDetail"></div><span id="mixTitle"></span><span id="mixDesc"></span></div>
 <div class="layout" id="tablas-preventistas-resumen"><section class="panel" id="analisis-preventistas"><h2>Detalle de preventistas</h2><button class="chartExport" id="exportPreventistas" type="button">Descargar Excel</button><div class="tablewrap"><table><thead><tr><th>Desempeño</th><th>Preventista</th><th>Región</th><th>Sucursal</th><th>Año</th><th>Mes</th><th>Semana</th></tr></thead><tbody id="tbody"></tbody></table></div></section>
 <section class="panel" id="resumen-colaboradores"><h2>Resúmen por colaborador</h2><button class="chartExport" id="exportResumenColaboradores" type="button">Descargar Excel</button><div class="tablewrap" style="max-height:520px"><table><thead><tr><th>Desempeño</th><th>Región</th><th>Sucursal</th><th>Colaborador</th><th>Semanas en BD</th><th>Semanas con cobro total</th><th>Prom. CCV Real</th><th>DS promedio ponderado</th><th>% cumplimiento volumen</th><th>Comisión CCV promedio</th><th>Semanas con cobro CCV</th><th>Comisión volumen promedio</th><th>Semanas con cobro volumen</th><th>Comisión total promedio</th><th>% Comisión vs Target</th></tr></thead><tbody id="collaboratorSummary"></tbody></table></div></section></div>
@@ -2310,6 +2477,56 @@ function update(){
    return `<tr><td>${esc(item.region)}</td><td>${esc(item.sucursal)}</td><td>${esc(item.ruta)}</td><td class="num">${weeks}</td><td class="num">${num(avg(rows,COLUMNAS.ccv))}</td><td class="num">${money(dsPonderado(rows))}</td><td class="num">${num(volumeCompliance*100)}%</td><td class="num">${money(avg(rows,COLUMNAS.comisionCCV))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.comisionCCV)}</td><td class="num">${money(avg(rows,COLUMNAS.cobroVolumen))}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.cobroVolumen)}</td><td class="num">${money(avg(rows,COLUMNAS.pagoTotal))}</td><td class="num">${commissionVsTarget===null?'—':num(commissionVsTarget)+'%'}</td><td class="num">${weeksWithPayment(rows,COLUMNAS.pagoTotal)}</td></tr>`;
  }).join('');
  $('routeSummary').innerHTML=routeSummaryRows || '<tr><td colspan="14">No hay rutas para los filtros seleccionados.</td></tr>';
+
+ // Actualización visual de barras, estados y subtítulo de comisión CCV.
+ const readKpiPercent = (id) => {
+   const node = $(id);
+   if (!node) return 0;
+   const textValue = node.textContent.trim();
+   if (!textValue || textValue === '—') return 0;
+   const normalized = textValue.replace(/[^\\d,.-]/g, '').replace(/\\.(?=.*[,])/g, '').replace(',', '.');
+   const parsed = Number.parseFloat(normalized);
+   return Number.isFinite(parsed) ? parsed : 0;
+ };
+ const setKpiBar = (id, value) => {
+   const node = $(id);
+   if (node) node.style.width = Math.max(0, Math.min(100, value)) + '%';
+ };
+ const peopleCommissionPct = readKpiPercent('kcommissionPeople');
+ const commissionTargetPct = readKpiPercent('kpeople');
+ const volumeCompliancePct = readKpiPercent('kvol');
+
+ setKpiBar('barCommissionPeople', peopleCommissionPct);
+ setKpiBar('barCommissionTarget', commissionTargetPct);
+ setKpiBar('barVolume', volumeCompliancePct);
+
+ const targetTag = $('targetStatus');
+ const targetBar = $('barCommissionTarget');
+ if (targetTag) {
+   const aboveTarget = commissionTargetPct >= 70;
+   targetTag.textContent = aboveTarget ? 'Por encima' : 'Por debajo';
+   targetTag.className = 'kpi-tag ' + (aboveTarget ? 'tag-success' : 'tag-warning');
+   if (targetBar) targetBar.classList.toggle('is-above', aboveTarget);
+ }
+
+ const volumeTag = $('volumeStatus');
+ if (volumeTag) {
+   const meetsVolume = volumeCompliancePct >= 86;
+   volumeTag.textContent = meetsVolume ? 'Cumple' : 'Por debajo';
+   volumeTag.className = 'kpi-tag ' + (meetsVolume ? 'tag-success' : 'tag-warning');
+ }
+
+ setKpiBar('barMixVA', readKpiPercent('kmixVA'));
+ setKpiBar('barMixPollo', readKpiPercent('kmixPollo'));
+ setKpiBar('barMixOtros', readKpiPercent('kmixOtros'));
+ setKpiBar('barMixResto', readKpiPercent('kmixResto'));
+
+ const ccvCommissionValue = $('kccvCommission');
+ const ccvCommissionCaption = $('kccvCommissionCaption');
+ if (ccvCommissionValue && ccvCommissionCaption) {
+   ccvCommissionCaption.textContent = ccvCommissionValue.textContent;
+ }
+
 }
 function parseNumericValue(value){
   if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) return null;
@@ -2392,7 +2609,9 @@ function loadRows(rows){
     $('status').textContent='Conectado, pero revisa encabezados: '+missing.join(', ');
     console.warn('Columnas detectadas',Object.keys(DATA[0]));
   } else {
-    $('status').textContent=`Conexión correcta · ${DATA.length.toLocaleString('es-MX')} registros · actualizado ${new Date().toLocaleTimeString('es-MX')}`;
+    $('status').textContent='Conectado a Google Sheets';
+    const topUpdatedAt=new Date().toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
+    $('topSummary').textContent=`BD Preventas • ${DATA.length.toLocaleString('es-MX')} registros • actualizado ${topUpdatedAt} • último corte semanal cerrado`;
   }
   setupFilters();
   if(!CHART_METRICS_READY){setupChartMetricSelectors();CHART_METRICS_READY=true;}
