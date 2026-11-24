@@ -2734,10 +2734,10 @@ function update(){
    const weeks=routeWeeks.size;
    const ccvRangePoints=rows.reduce((total,row)=>{
      const value=String(row[COLUMNAS.desempenoCCV]??'').trim();
-     const normalized=value.toLocaleLowerCase('es').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
-     const rangeMatch=normalized.match(/rango\\s*([0-3])/i);
+     const normalized=value.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+     const rangeMatch=normalized.match(/rango\s*([0-3])/i);
      if(rangeMatch) return total+Number(rangeMatch[1]);
-     if(/^([0-3])(?:\\.0+)?$/.test(normalized)) return total+Number(normalized);
+     if(/^([0-3])(?:\.0+)?$/.test(normalized)) return total+Number(normalized);
      const levelPoints={'critico':0,'en desarrollo':1,'aceptable':2,'sobresaliente':3};
      return total+(levelPoints[normalized]??0);
    },0)/(rows.length||1);
