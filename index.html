@@ -3619,6 +3619,43 @@ function exportTableToExcel(tableSelector, filename){
  a.href=url;a.download=filename+'_'+new Date().toISOString().slice(0,10)+'.csv';
  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
+function exportRouteSummaryToExcel(){
+ const table=$('#resumen-rutas table');
+ if(!table){alert('No se encontró la tabla para exportar.');return;}
+ // Usa el mismo universo de rutas que la tabla, ignorando Año, Mes y Desde/Hasta.
+ const sourceRows=DATA.filter(row=>matchesFilters(row,['year','month'],true));
+ const groups=new Map();
+ sourceRows.forEach(row=>{
+   const region=String(row[COLUMNAS.region]??'Sin región').trim()||'Sin región';
+   const sucursal=String(row[COLUMNAS.sucursal]??'Sin sucursal').trim()||'Sin sucursal';
+   const ruta=String(row[COLUMNAS.ruta]??'Sin ruta').trim()||'Sin ruta';
+   const key=JSON.stringify([region,sucursal,ruta]);
+   if(!groups.has(key)) groups.set(key,{weeks:new Set(),objetivo:0,real:0});
+   const group=groups.get(key);
+   const week=periodValue(row);
+   if(week) group.weeks.add(week);
+   const objetivo=parseNumericValue(row[COLUMNAS.objetivoVolumen]);
+   const real=parseNumericValue(row[COLUMNAS.realVolumen]);
+   if(objetivo!==null) group.objetivo+=objetivo;
+   if(real!==null) group.real+=real;
+ });
+ const rows=[['Desempeño','Región','Sucursal','Ruta','Semanas en BD','Promedio volumen objetivo','Promedio volumen real']];
+ [...table.querySelectorAll('tbody tr')].forEach(tr=>{
+   const cells=[...tr.querySelectorAll('td')].map(cell=>cell.textContent.trim());
+   if(cells.length<5 || !groups.size) return;
+   const key=JSON.stringify(cells.slice(1,4));
+   const group=groups.get(key);
+   if(!group) return;
+   const weeks=group.weeks.size;
+   rows.push([...cells.slice(0,5),weeks?group.objetivo/weeks:0,weeks?group.real/weeks:0]);
+ });
+ if(rows.length===1){alert('No hay rutas para exportar con los filtros seleccionados.');return;}
+ const csv='\\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob);const a=document.createElement('a');
+ a.href=url;a.download='Resumen_indicadores_por_ruta_'+new Date().toISOString().slice(0,10)+'.csv';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
 function exportPreventistasToExcel(){
  const rows=getPreventistasRows();
  const columns=[
@@ -3649,7 +3686,7 @@ function exportPreventistasToExcel(){
 }
 $('exportPreventistas').addEventListener('click',exportPreventistasToExcel);
 $('exportResumenColaboradores').addEventListener('click',()=>exportTableToExcel('#resumen-colaboradores table','Resumen_indicadores_por_colaborador'));
-$('exportResumenRutas').addEventListener('click',()=>exportTableToExcel('#resumen-rutas table','Resumen_indicadores_por_ruta'));
+$('exportResumenRutas').addEventListener('click',exportRouteSummaryToExcel);
 $('refreshNow').addEventListener('click', cargarDatos);
 ['year','month','weekStart','weekEnd','region','branch','preventista','people','paidColleague'].forEach(id=>$(id).addEventListener('change',()=>{refreshDependentFilters();update()}));
 $('familyVolumeFilter').addEventListener('change',update);
