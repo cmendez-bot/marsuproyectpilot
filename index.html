@@ -3639,7 +3639,7 @@ function exportRouteSummaryToExcel(){
    if(objetivo!==null) group.objetivo+=objetivo;
    if(real!==null) group.real+=real;
  });
- const rows=[['Desempeño','Región','Sucursal','Ruta','Semanas en BD','Promedio volumen objetivo','Promedio volumen real']];
+ const rows=[['Desempeño','Región','Sucursal','Ruta','Semanas en BD','Promedio volumen objetivo','Promedio volumen real','% Cumplimiento volumen']];
  [...table.querySelectorAll('tbody tr')].forEach(tr=>{
    const cells=[...tr.querySelectorAll('td')].map(cell=>cell.textContent.trim());
    if(cells.length<5 || !groups.size) return;
@@ -3647,7 +3647,10 @@ function exportRouteSummaryToExcel(){
    const group=groups.get(key);
    if(!group) return;
    const weeks=group.weeks.size;
-   rows.push([...cells.slice(0,5),weeks?group.objetivo/weeks:0,weeks?group.real/weeks:0]);
+   const averageObjective=weeks?group.objetivo/weeks:0;
+   const averageReal=weeks?group.real/weeks:0;
+   const volumeCompliance=averageObjective>0?(averageReal/averageObjective)*100:0;
+   rows.push([...cells.slice(0,5),averageObjective,averageReal,volumeCompliance.toFixed(2)+'%']);
  });
  if(rows.length===1){alert('No hay rutas para exportar con los filtros seleccionados.');return;}
  const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
