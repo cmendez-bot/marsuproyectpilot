@@ -3620,7 +3620,7 @@ function exportTableToExcel(tableSelector, filename){
  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
 function exportRouteSummaryToExcel(){
- const table=$('#resumen-rutas table');
+ const table=document.querySelector('#resumen-rutas table');
  if(!table){alert('No se encontró la tabla para exportar.');return;}
  // Usa el mismo universo de rutas que la tabla, ignorando Año, Mes y Desde/Hasta.
  const sourceRows=DATA.filter(row=>matchesFilters(row,['year','month'],true));
