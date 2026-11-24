@@ -2844,8 +2844,8 @@ function update(){
  }).join('');
  $('collaboratorSummary').innerHTML=summaryRows || '<tr><td colspan="15">No hay colaboradores en la última semana del último año para el Tipo de pago seleccionado.</td></tr>';
  // Esta fuente conserva los filtros actuales para la tabla de rutas; no altera el resumen por colaborador.
- const summaryData=DATA.filter(r=>matchesFilters(r,null,true));
- // Resumen por región, sucursal y ruta; ignora únicamente el rango de periodo.
+ const summaryData=DATA.filter(r=>matchesFilters(r,['year','month'],true));
+ // Resumen por región, sucursal y ruta; ignora Año, Mes y el rango Desde/Hasta.
  const routeGroups = new Map();
  summaryData.forEach(row => {
    const regionName = String(row[COLUMNAS.region] ?? 'Sin región').trim() || 'Sin región';
