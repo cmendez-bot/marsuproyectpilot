@@ -2763,7 +2763,8 @@ function update(){
    const volumeCompliance=totalObjective>0?totalReal/totalObjective:0;
    const volumePoints=volumeCompliance<0.8?0:volumeCompliance<0.86?1:volumeCompliance<1?2:3;
    const performance=ccvRangePoints+commissionPoints+volumePoints;
-   return `<tr><td class="num">${num(performance)}</td><td>${esc(item.region)}</td><td>${esc(item.sucursal)}</td><td>${esc(item.ruta)}</td><td class="num">${weeks}</td></tr>`;
+   const performanceLevel=performance<=3?{label:"Crítico",css:"critical"}:performance<=5?{label:"En desarrollo",css:"development"}:performance<8?{label:"Aceptable",css:"acceptable"}:{label:"Sobresaliente",css:"outstanding"};
+   return `<tr><td><span class="criteria-value ${performanceLevel.css}">${performanceLevel.label}</span></td><td>${esc(item.region)}</td><td>${esc(item.sucursal)}</td><td>${esc(item.ruta)}</td><td class="num">${weeks}</td></tr>`;
  }).join('');
  $('routeSummary').innerHTML=routeSummaryRows || '<tr><td colspan="5">No hay rutas para los filtros seleccionados.</td></tr>';
 
